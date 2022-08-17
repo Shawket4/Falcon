@@ -1,0 +1,320 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <style>
+    td, tr {
+      text-align: center;
+    }
+  </style>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title>Falcon | All Service Events</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Favicon -->
+  <link rel="shortcut icon" type="image/x-icon" href="https://snap.hopto.org/LTR/favicon.png">
+  <!-- Normalize CSS -->
+  <link rel="stylesheet" href="https://snap.hopto.org/LTR/css/normalize.css">
+  <!-- Main CSS -->
+  <link rel="stylesheet" href="https://snap.hopto.org/LTR/css/main.css">
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://snap.hopto.org/LTR/css/bootstrap.min.css">
+  <!-- Fontawesome CSS -->
+  <link rel="stylesheet" href="https://snap.hopto.org/LTR/css/all.min.css">
+  <!-- Flaticon CSS -->
+  <link rel="stylesheet" href="https://snap.hopto.org/LTR/fonts/flaticon.css">
+  <!-- Animate CSS -->
+  <link rel="stylesheet" href="https://snap.hopto.org/LTR/css/animate.min.css">
+  <!-- Data Table CSS -->
+  <link rel="stylesheet" href="https://snap.hopto.org/LTR/css/jquery.dataTables.min.css">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="https://snap.hopto.org/LTR/style.css">
+  <!-- Modernize js -->
+  <script src="https://snap.hopto.org/LTR/js/modernizr-3.6.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+</head>
+
+<body>
+<!-- Preloader Start Here -->
+<div id="preloader"></div>
+<!-- Preloader End Here -->
+<div id="wrapper" class="wrapper bg-ash">
+  <!-- Page Area Start Here -->
+  <div class="dashboard-page-one">
+   
+    <div class="dashboard-content-one">
+      <!-- Breadcubs Area Start Here -->
+      <div class="breadcrumbs-area">
+        <h3>All Service Events</h3>
+        <ul>
+          <li>
+            <a href="index.html">Homepage</a>
+          </li>
+          <li>All Service Events</li>
+        </ul>
+      </div>
+      <!-- Breadcubs Area End Here -->
+      <!-- Teacher Table Area Start Here -->
+      <div class="card height-auto">
+        <div class="card-body">
+          <div class="heading-layout1">
+            <div class="item-title">
+              <h3>Service Events</h3>
+            </div>
+            <div class="dropdown">
+              <a class="dropdown-toggle" href="#" role="button"
+                 data-toggle="dropdown" aria-expanded="false">...</a>
+
+              <div class="dropdown-menu dropdown-menu-right">
+                <a class="dropdown-item" href="#"><i class="fas fa-times text-orange-red" onclick="DeleteRequest(غياب)"></i>Close</a>
+                <a class="dropdown-item" href="#"><i class="fas fa-cogs text-dark-pastel-green"></i>Edit</a>
+                <a class="dropdown-item" href="#"><i class="fas fa-redo-alt text-orange-peel"></i>Refresh</a>
+              </div>
+            </div>
+          </div>
+          <div class="table-responsive" id="dvContents">
+            <table cellspacing="0" cellpadding="0" class="table display text-nowrap">
+              <thead>
+              <tr>
+                <th>Car Plate No</th>
+                <th>Service Type</th>
+                <th>Date</th>
+                <th>Service Center</th>
+                <th>Service Odometer Reading</th>
+                <th>Current Odometer Reading</th>
+                <th>Valid For</th>
+                <th>Kilometers Left Before Service</th>
+                <th>Options</th>
+              </tr>
+              </thead>
+              <tbody id="all">
+              </tbody>
+            </table>
+            
+          </div>
+          <div>
+            <a href="https://snap.hopto.org/FalconAddServiceEvent" target="_blank">
+            <button type="button" class="btn-fill-md radius-4 text-light-sea-green border-light-sea-green">Add New Item</button>
+            </a>
+            <button type="button" class="btn-fill-md radius-4 text-light bg-light-sea-green" onclick="ExportExcel();" style="margin-top: 10px">Download Excel</button>
+          </div>
+        </div>
+      </div>
+      <!-- Teacher Table Area End Here -->
+      <footer class="footer-wrap-layout1">
+        <div class="copyright">© Copyrights <a href="#">Falcon</a> 2022. All rights reserved. Designed by <a href="#">Shawket Ibrahim </a></div>
+      </footer>
+    </div>
+  </div>
+  <!-- Page Area End Here -->
+</div>
+<script type="text/javascript" src="https://unpkg.com/xlsx@0.15.1/dist/xlsx.full.min.js"></script>
+<script>
+   function ExportExcel(type, fn, dl) {
+       var elt = document.getElementById('dvContents');
+       let ws = XLSX.utils.table_to_sheet(elt);
+       let wb = XLSX.utils.book_new();
+       XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+
+       return dl ?
+           XLSX.write(wb, { bookType: type, bookSST: true, type: 'base64' }):
+           XLSX.writeFile(wb, fn || ('MySheetName.' + (type || 'xlsx')));
+   }
+
+   function DeleteRequest(Id) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "https://snap.hopto.org/Falconapi/removedata", false);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.send(JSON.stringify({
+    Table: "ServiceEvents",
+    ColumnName: "ServiceId",
+    Value: Id
+}));
+  document.location.reload(true)
+  }
+  function EditEvent(id) {
+    var that = document.getElementById(id);
+    var text = document.getElementById(id).innerText;
+    console.log(text)
+    var p = document.createElement('input');
+    console.log(text)
+    p.value = text;
+    p.setAttribute(id,that.getAttribute(id));
+
+  // move all elements in the other container.
+  while(that.firstChild) {
+      p.appendChild(that.firstChild);
+  }
+  that.parentNode.replaceChild(p,that);
+  }
+  $(document).ready(function($) {
+    $(document).on('click', '.btn_edit', function(event) 
+	{
+		event.preventDefault();
+		var tbl_row = $(this).closest('tr');
+		var ServiceId = tbl_row.attr('ServiceId');
+
+		tbl_row.find('.btn_save').show();
+		tbl_row.find('.btn_cancel').show();
+
+		//hide edit button
+		tbl_row.find('.btn_edit').hide(); 
+    tbl_row.find('.btn_delete').hide(); 
+
+		//make the whole row editable
+		tbl_row.find('.row_data')
+		.attr('contenteditable', 'true')
+		.attr('edit_type', 'button')
+
+
+		//--->add the original entry > start
+		tbl_row.find('.row_data').each(function(index, val) 
+		{  
+			//this will help in case user decided to click on cancel button
+			$(this).attr('original_entry', $(this).html());
+		}); 		
+		//--->add the original entry > end
+
+	});
+  $(document).on('click', '.btn_save', function(event) 
+	{
+		event.preventDefault();
+		var tbl_row = $(this).closest('tr');
+
+		var ServiceId = tbl_row.attr('ServiceId');
+
+		
+		//hide save and cacel buttons
+		tbl_row.find('.btn_save').hide();
+		tbl_row.find('.btn_cancel').hide();
+
+		//show edit button
+		tbl_row.find('.btn_edit').show();
+    tbl_row.find('.btn_delete').show(); 
+
+
+		//make the whole row editable
+		tbl_row.find('.row_data')
+    .attr('contenteditable', 'false')
+		.removeAttr('edit_type', 'button')
+		.removeClass('bg-warning')
+		.css('padding','') 
+
+		//--->get row data > start
+		var arr = {}; 
+		tbl_row.find('.row_data').each(function(index, val) 
+		{   
+			var col_name = $(this).attr('col_name');  
+			var col_val  =  $(this).html();
+			arr[col_name] = col_val;
+		});
+		//--->get row data > end
+
+		//use the "arr"	object for your ajax call
+		$.extend(arr, {ServiceId:ServiceId});
+
+		//out put to show
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "https://snap.hopto.org/Falconapi/editdata", false);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.send(JSON.stringify({
+    Table: "ServiceEvents",
+    IdColumn: "ServiceId",
+    NewData: arr,
+}))
+document.location.reload(true)
+	});
+  $(document).on('click', '.btn_cancel', function(event) 
+{
+	event.preventDefault();
+
+	var tbl_row = $(this).closest('tr');
+
+	var row_id = tbl_row.attr('ServiceId');
+
+	//hide save and cacel buttons
+	tbl_row.find('.btn_save').hide();
+	tbl_row.find('.btn_cancel').hide();
+
+	//show edit button
+	tbl_row.find('.btn_edit').show();
+  tbl_row.find('.btn_delete').show(); 
+
+	//make the whole row editable
+	tbl_row.find('.row_data')
+  .attr('contenteditable', 'false')
+	.removeAttr('edit_type', 'button')
+	.removeClass('bg-warning')
+
+	tbl_row.find('.row_data').each(function(index, val) 
+	{   
+		$(this).html( $(this).attr('original_entry') ); 
+	});  
+});
+  });
+  
+</script>
+
+<script>
+  let EventId = "{{.ServiceEventId}}"
+  let EventIdOptions = EventId.replace("[", "").replace("]", "").split(", ");
+  let CarNoPlate = "{{.CarNoPlate}}"
+  var CarNoPlateOptions = CarNoPlate.replace("[", "").replace("]", "").split(", ");
+  let ServiceType = "{{.ServiceType}}"
+  var ServiceTypeOptions = ServiceType.replace("[", "").replace("]", "").split(", ");
+  let DateOfService = "{{.DateOfService}}"
+  var DateOfServiceOptions = DateOfService.replace("[", "").replace("]", "").split(", ");
+  let ServiceCenter = "{{.ServiceCenter}}"
+  var ServiceCenterOptions = ServiceCenter.replace("[", "").replace("]", "").split(", ");
+  let ServiceOdometerReading = "{{.ServiceOdometerReading}}"
+  var ServiceOdometerReadingOptions = ServiceOdometerReading.replace("[", "").replace("]", "").split(", ");
+  let CurrentOdometerReading = "{{.CurrentOdometerReading}}"
+  var CurrentOdometerReadingOptions = CurrentOdometerReading.replace("[", "").replace("]", "").split(", ");
+  let AlertAfter = "{{.AlertAfter}}"
+  var AlertAfterOptions = AlertAfter.replace("[", "").replace("]", "").split(", ");
+
+
+  const table = document.getElementById("all");
+  for(var i = 0; i < CarNoPlateOptions.length; i++) {
+    AlertAfterOptions[i] = parseInt(AlertAfterOptions[i])
+    CurrentOdometerReadingOptions[i] = parseInt(CurrentOdometerReadingOptions[i])
+    ServiceOdometerReadingOptions[i] = parseInt(ServiceOdometerReadingOptions[i])
+    let KmLeft = AlertAfterOptions[i] - (CurrentOdometerReadingOptions[i] - ServiceOdometerReadingOptions[i])
+    table.innerHTML = table.innerHTML + `<tr ServiceId=`+ EventIdOptions[i] +`>
+<td class="row_data" col_name="CarNoPlate">` + CarNoPlateOptions[i] +`</td>
+<td class="row_data" col_name="ServiceType">` + ServiceTypeOptions[i] +`</td>
+<td class="row_data" col_name="DateOfService">` + DateOfServiceOptions[i] +`</td>
+<td class="row_data" col_name="ServiceCenter">` + ServiceCenterOptions[i] +`</td>
+<td class="row_data" col_name="ServiceOdometerReading">` + ServiceOdometerReadingOptions[i] +`</td>
+<td class="row_data" col_name="CurrentOdometerReading">` + CurrentOdometerReadingOptions[i] +`</td>
+<td class="row_data" col_name="AlertAfter">` + AlertAfterOptions[i] +`</td>
+<td>`+ KmLeft +`</td>
+<td>
+<img src="https://snap.hopto.org/LTR/BinIcon.png" onClick=DeleteRequest(`+ EventIdOptions[i] +`) class="btn_delete" DeliveryId=`+ EventIdOptions[i] +` height="28" width="28"/>
+<img ServiceId=`+ EventIdOptions[i] +` class="btn_edit" style="margin-left: 5px;" src="https://snap.hopto.org/LTR/EditIcon.png" width="30" height="30"/>
+<img ServiceId=`+ EventIdOptions[i] +`  class="btn_save" style="display: none;" src="https://snap.hopto.org/LTR/SaveIcon.png" width="32" height="32"/>
+<img ServiceId=`+ EventIdOptions[i] +` class="btn_cancel" style="display: none;" src="https://snap.hopto.org/LTR/CancelIcon.png" width="32" height="32"></img>
+</td>
+</tr>`
+  }
+</script>
+
+<!-- jquery-->
+<script src="https://snap.hopto.org/LTR/js/jquery-3.3.1.min.js"></script>
+<!-- Plugins js -->
+<script src="https://snap.hopto.org/LTR/js/plugins.js"></script>
+<!-- Popper js -->
+<script src="https://snap.hopto.org/LTR/js/popper.min.js"></script>
+<!-- Bootstrap js -->
+<script src="https://snap.hopto.org/LTR/js/bootstrap.min.js"></script>
+<!-- Scroll Up Js -->
+<script src="https://snap.hopto.org/LTR/js/jquery.scrollUp.min.js"></script>
+<!-- Data Table Js -->
+<script src="https://snap.hopto.org/LTR/js/jquery.dataTables.min.js"></script>
+<!-- Custom Js -->
+<script src="https://snap.hopto.org/LTR/js/main.js"></script>
+
+</body>
+
+</html>

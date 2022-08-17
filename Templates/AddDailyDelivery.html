@@ -1,0 +1,155 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Falcon | Add Daily Delivery</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="https://snap.hopto.org/LTR/favicon.png">
+    <!-- Normalize CSS -->
+    <link rel="stylesheet" href="https://snap.hopto.org/LTR/css/normalize.css">
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="https://snap.hopto.org/LTR/css/main.css">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://snap.hopto.org/LTR/css/bootstrap.min.css">
+    <!-- Fontawesome CSS -->
+    <link rel="stylesheet" href="https://snap.hopto.org/LTR/css/all.min.css">
+    <!-- Flaticon CSS -->
+    <link rel="stylesheet" href="https://snap.hopto.org/LTR/fonts/flaticon.css">
+    <!-- Animate CSS -->
+    <link rel="stylesheet" href="https://snap.hopto.org/LTR/css/animate.min.css">
+    <!-- Select 2 CSS -->
+    <link rel="stylesheet" href="https://snap.hopto.org/LTR/css/select2.min.css">
+    <!-- Date Picker CSS -->
+    <link rel="stylesheet" href="https://snap.hopto.org/LTR/css/datepicker.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="https://snap.hopto.org/LTR/style.css">
+    <!-- Modernize js -->
+    <script src="https://snap.hopto.org/LTR/js/modernizr-3.6.0.min.js"></script>
+</head>
+
+<body>
+    <!-- Preloader Start Here -->
+    <div id="preloader"></div>
+    <!-- Preloader End Here -->
+    <div id="wrapper" class="wrapper bg-ash">
+        <!-- Page Area Start Here -->
+  <div class="dashboard-page-one">
+   
+    <div class="dashboard-content-one">
+      <!-- Breadcubs Area Start Here -->
+      <div class="breadcrumbs-area">
+        <h3>All Deliveries</h3>
+        <ul>
+          <li>
+            <a href="index.html">Homepage</a>
+          </li>
+          <li>All Delivery Events</li>
+        </ul>
+      </div>
+      <!-- Breadcubs Area End Here -->
+                <!-- Add New Teacher Area Start Here -->
+                <div class="card height-auto">
+                    <div class="card-body">
+                        <div class="heading-layout1">
+                            <div class="item-title">
+                                <h3>Add Delivery Event</h3>
+                            </div>
+                        </div>
+                        <form class="new-added-form" enctype="multipart/form-data" method="post">
+                            <div class="row">
+                                <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                    <label>Date Of Delivery *</label>
+                                    <input name="Date" id="Date" type="text" placeholder="dd/mm/yyyy" class="form-control air-datepicker"
+                                        data-position='bottom right'/>
+                                    <i class="far fa-calendar-alt"></i>
+                                </div>
+                                <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                    <label>Driver Name *</label>
+                                    <input name="DriverName" id="DriverName" type="text" placeholder="" class="form-control"/>
+                                </div>
+                                
+                                <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                    <label>Amount Delivered *</label>
+                                    <input name="AmountDelivered" id="AmountDelivered" type="text" placeholder="" class="form-control"/>
+                                </div>
+                                
+                                <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                    <label>Car Plate Numbers *</label>
+                                    <input name="CarNoPlate" id="CarNoPlate" type="text" placeholder="" class="form-control"/>
+                                </div>
+
+                                <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                    <label>Trailer Plate Numbers *</label>
+                                    <input name="TrailerNoPlate" id="TrailerNoPlate" type="text" placeholder="" class="form-control"/>
+                                </div>
+
+                                <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                    <label>Pickup Point *</label>
+                                    <input name="PickUpPoint" id="PickUpPoint" type="text" placeholder="" class="form-control"/>
+                                </div>
+                               
+                                <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                    <label>Deposit Point 1 *</label>
+                                    <input name="DepositPoint1" id="DepositPoint1" type="text" placeholder="" class="form-control"/>
+                                </div>
+                                <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                    <label>Deposit Point 2 *</label>
+                                    <input name="DepositPoint2" id="DepositPoint2" type="text" placeholder="" class="form-control"/>
+                                    </div>
+                                <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                    <label>Deposit Point 3 *</label>
+                                    <input name="DepositPoint3" id="DepositPoint3" type="text" placeholder="" class="form-control"/>
+                                </div>
+                                <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                    <label>Distance *</label>
+                                    <input name="Distance" id="Distance" type="text" placeholder="" class="form-control"/>
+                                </div>
+                                <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                    <label>Fees *</label>
+                                    <input name="Fees" id="Fees" type="text" placeholder="" class="form-control"/>
+                                    </div>
+                                <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                    <label>Notes *</label>
+                                    <input name="Notes" id="Notes" type="text" placeholder="" class="form-control"/>
+                                </div>
+                                <div class="col-12 form-group mg-t-8">
+                                    <button type="submit" class="btn-fill-lg btn-gradient-yellow btn-hover-bluedark">Save</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <!-- Add New Teacher Area End Here -->
+                <footer class="footer-wrap-layout1">
+                    <div class="copyright">© Copyrights <a href="#">Falcon</a> 2022. All rights reserved. Designed by <a href="#">Shawket Ibrahim </a></div>
+                  </footer>
+                </div>
+              </div>
+              <!-- Page Area End Here -->
+            </div>
+    <!-- jquery-->
+    <script src="https://snap.hopto.org/LTR/js/jquery-3.3.1.min.js"></script>
+    <!-- Plugins js -->
+    <script src="https://snap.hopto.org/LTR/js/plugins.js"></script>
+    <!-- Popper js -->
+    <script src="https://snap.hopto.org/LTR/js/popper.min.js"></script>
+    <!-- Bootstrap js -->
+    <script src="https://snap.hopto.org/LTR/js/bootstrap.min.js"></script>
+    <!-- Select 2 Js -->
+    <script src="https://snap.hopto.org/LTR/js/select2.min.js"></script>
+    <!-- Date Picker Js -->
+    <script src="https://snap.hopto.org/LTR/js/datepicker.min.js"></script>
+    <!-- Smoothscroll Js -->
+    <script src="https://snap.hopto.org/LTR/js/jquery.smoothscroll.min.js"></script>
+    <!-- Scroll Up Js -->
+    <script src="https://snap.hopto.org/LTR/js/jquery.scrollUp.min.js"></script>
+    <!-- Custom Js -->
+    <script src="https://snap.hopto.org/LTR/js/main.js"></script>
+
+</body>
+
+</html>

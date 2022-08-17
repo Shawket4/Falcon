@@ -1,0 +1,336 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <style>
+    td, tr {
+      text-align: center;
+    }
+  </style>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title>Falcon | All Delivery Events</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Favicon -->
+  <link rel="shortcut icon" type="image/x-icon" href="https://snap.hopto.org/LTR/favicon.png">
+  <!-- Normalize CSS -->
+  <link rel="stylesheet" href="https://snap.hopto.org/LTR/css/normalize.css">
+  <!-- Main CSS -->
+  <link rel="stylesheet" href="https://snap.hopto.org/LTR/css/main.css">
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://snap.hopto.org/LTR/css/bootstrap.min.css">
+  <!-- Fontawesome CSS -->
+  <link rel="stylesheet" href="https://snap.hopto.org/LTR/css/all.min.css">
+  <!-- Flaticon CSS -->
+  <link rel="stylesheet" href="https://snap.hopto.org/LTR/fonts/flaticon.css">
+  <!-- Animate CSS -->
+  <link rel="stylesheet" href="https://snap.hopto.org/LTR/css/animate.min.css">
+  <!-- Data Table CSS -->
+  <link rel="stylesheet" href="https://snap.hopto.org/LTR/css/jquery.dataTables.min.css">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="https://snap.hopto.org/LTR/style.css">
+  <!-- Modernize js -->
+  <script src="https://snap.hopto.org/LTR/js/modernizr-3.6.0.min.js"></script>
+</head>
+
+<body>
+<!-- Preloader Start Here -->
+<div id="preloader"></div>
+<!-- Preloader End Here -->
+<div id="wrapper" class="wrapper bg-ash">
+  <!-- Page Area Start Here -->
+  <div class="dashboard-page-one">
+   
+    <div class="dashboard-content-one">
+      <!-- Breadcubs Area Start Here -->
+      <div class="breadcrumbs-area">
+        <h3>All Delivery Events</h3>
+        <ul>
+          <li>
+            <a href="index.html">Homepage</a>
+          </li>
+          <li>All Delivery Events</li>
+        </ul>
+      </div>
+      <!-- Breadcubs Area End Here -->
+      <!-- Teacher Table Area Start Here -->
+      <div class="card height-auto">
+        <div class="card-body">
+          <div class="heading-layout1">
+            <div class="item-title">
+              <h3>Delivery Events</h3>
+            </div>
+            <div class="dropdown">
+              <a class="dropdown-toggle" href="#" role="button"
+                 data-toggle="dropdown" aria-expanded="false">...</a>
+
+              <div class="dropdown-menu dropdown-menu-right">
+                <a class="dropdown-item" href="#"><i class="fas fa-times text-orange-red" onclick="DeleteRequest(غياب)"></i>Close</a>
+                <a class="dropdown-item" href="#"><i class="fas fa-cogs text-dark-pastel-green"></i>Edit</a>
+                <a class="dropdown-item" href="#"><i class="fas fa-redo-alt text-orange-peel"></i>Refresh</a>
+              </div>
+            </div>
+          </div>
+          <div class="table-responsive" id="dvContents">
+            <table id="myTable" cellspacing="0" cellpadding="0" class="table display text-nowrap">
+              <thead>
+              <tr>
+                <th>Date</th>
+                <th>Driver Name</th>
+                <th>Amount Delivered</th>
+                <th>Car Plate No</th>
+                <th>Trailer Plate No</th>
+                <th>Pickup Point</th>
+                <th>Deposit Point 1</th>
+                <th>Deposit Point 2</th>
+                <th>Deposit Point 3</th>
+                <th>Distance</th>
+                <th>Fees</th>
+                <th>Notes</th>
+                <th>Options</th>
+              </tr>
+              </thead>
+              <tbody id="all">
+              </tbody>
+            </table>
+          </div>
+          <div>
+            <a href="https://snap.hopto.org/FalconAddDailyDelivery" target="_blank">
+            <button type="button" class="btn-fill-md radius-4 text-light-sea-green border-light-sea-green">Add New Item</button>
+            </a>
+            <button type="button" class="btn-fill-md radius-4 text-light bg-light-sea-green" onclick="ExportExcel();" style="margin-top: 10px">Download Excel</button>
+          </div>
+        </div>
+      </div>
+      <!-- Teacher Table Area End Here -->
+      <footer class="footer-wrap-layout1">
+        <div class="copyright">© Copyrights <a href="#">Falcon</a> 2022. All rights reserved. Designed by <a href="#">Shawket Ibrahim </a></div>
+      </footer>
+    </div>
+  </div>
+  <!-- Page Area End Here -->
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+<script src="https://snap.hopto.org/LTR/js/ddtf.js"></script>
+<script type="text/javascript" src="https://unpkg.com/xlsx@0.15.1/dist/xlsx.full.min.js"></script>
+<script>
+   function ExportExcel(type, fn, dl) {
+       var elt = document.getElementById('dvContents');
+       let ws = XLSX.utils.table_to_sheet(elt);
+       let wb = XLSX.utils.book_new();
+       XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+
+       return dl ?
+           XLSX.write(wb, { bookType: type, bookSST: true, type: 'base64' }):
+           XLSX.writeFile(wb, fn || ('MySheetName.' + (type || 'xlsx')));
+   }
+
+   function DeleteRequest(Id) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "https://snap.hopto.org/Falconapi/removedata", false);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.send(JSON.stringify({
+    Table: "DailyDeliverySheet",
+    ColumnName: "DeliveryId",
+    Value: Id
+}));
+  document.location.reload(true)
+  }
+
+  function EditEvent(id) {
+    var that = document.getElementById(id);
+    var text = document.getElementById(id).innerText;
+    console.log(text)
+    var p = document.createElement('input');
+    console.log(text)
+    p.value = text;
+    p.setAttribute(id,that.getAttribute(id));
+
+  // move all elements in the other container.
+  while(that.firstChild) {
+      p.appendChild(that.firstChild);
+  }
+  that.parentNode.replaceChild(p,that);
+  }
+  $(document).ready(function($) {
+    $(document).on('click', '.btn_edit', function(event) 
+	{
+		event.preventDefault();
+		var tbl_row = $(this).closest('tr');
+		var DeliveryId = tbl_row.attr('DeliveryId');
+
+		tbl_row.find('.btn_save').show();
+		tbl_row.find('.btn_cancel').show();
+
+		//hide edit button
+		tbl_row.find('.btn_edit').hide(); 
+    tbl_row.find('.btn_delete').hide(); 
+
+		//make the whole row editable
+		tbl_row.find('.row_data')
+		.attr('contenteditable', 'true')
+		.attr('edit_type', 'button')
+
+
+		//--->add the original entry > start
+		tbl_row.find('.row_data').each(function(index, val) 
+		{  
+			//this will help in case user decided to click on cancel button
+			$(this).attr('original_entry', $(this).html());
+		}); 		
+		//--->add the original entry > end
+
+	});
+  $(document).on('click', '.btn_save', function(event) 
+	{
+		event.preventDefault();
+		var tbl_row = $(this).closest('tr');
+
+		var DeliveryId = tbl_row.attr('DeliveryId');
+
+		
+		//hide save and cacel buttons
+		tbl_row.find('.btn_save').hide();
+		tbl_row.find('.btn_cancel').hide();
+
+		//show edit button
+		tbl_row.find('.btn_edit').show();
+    tbl_row.find('.btn_delete').show(); 
+
+
+		//make the whole row editable
+		tbl_row.find('.row_data')
+    .attr('contenteditable', 'false')
+		.removeAttr('edit_type', 'button')
+		.removeClass('bg-warning')
+		.css('padding','') 
+
+		//--->get row data > start
+		var arr = {}; 
+		tbl_row.find('.row_data').each(function(index, val) 
+		{   
+			var col_name = $(this).attr('col_name');  
+			var col_val  =  $(this).html();
+			arr[col_name] = col_val;
+		});
+		//--->get row data > end
+
+		//use the "arr"	object for your ajax call
+		$.extend(arr, {DeliveryId:DeliveryId});
+
+		//out put to show
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "https://snap.hopto.org/Falconapi/editdata", false);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.send(JSON.stringify({
+    Table: "DailyDeliverySheet",
+    IdColumn: "DeliveryId", 
+    NewData: arr,
+}))
+document.location.reload(true)
+	});
+  $(document).on('click', '.btn_cancel', function(event) 
+{
+	event.preventDefault();
+
+	var tbl_row = $(this).closest('tr');
+
+	var row_id = tbl_row.attr('DeliveryId');
+
+	//hide save and cacel buttons
+	tbl_row.find('.btn_save').hide();
+	tbl_row.find('.btn_cancel').hide();
+
+	//show edit button
+	tbl_row.find('.btn_edit').show();
+  tbl_row.find('.btn_delete').show(); 
+
+	//make the whole row editable
+	tbl_row.find('.row_data')
+  .attr('contenteditable', 'false')
+	.removeAttr('edit_type', 'button')
+	.removeClass('bg-warning')
+
+	tbl_row.find('.row_data').each(function(index, val) 
+	{   
+		$(this).html( $(this).attr('original_entry') ); 
+	});  
+});
+  });
+  
+</script>
+<script>
+   $('#myTable').ddTableFilter();
+</script>
+<script>
+  let EventId = "{{.DeliveryEventId}}"
+  let EventIdOptions = EventId.replace("[", "").replace("]", "").split(", ");
+  let Dates = "{{.Date}}"
+  var DateOptions = Dates.replace("[", "").replace("]", "").split(", ");
+  let DriverName = "{{.DriverName}}"
+  var DriverNameOptions = DriverName.replace("[", "").replace("]", "").split(", ");
+  let AmountDelivered = "{{.AmountDelivered}}"
+  var AmountDeliveredOptions = AmountDelivered.replace("[", "").replace("]", "").split(", ");
+  let CarNoPlate = "{{.CarNoPlate}}"
+  var CarNoPlateOptions = CarNoPlate.replace("[", "").replace("]", "").split(", ");
+  let TrailerNoPlate = "{{.TrailerNoPlate}}"
+  var TrailerNoPlateOptions = TrailerNoPlate.replace("[", "").replace("]", "").split(", ");
+  let PickUpPoint = "{{.PickUpPoint}}"
+  var PickUpPointOptions = PickUpPoint.replace("[", "").replace("]", "").split(", ");
+  let DepositPoint1 = "{{.DepositPoint1}}"
+  var DepositPoint1Options = DepositPoint1.replace("[", "").replace("]", "").split(", ");
+  let DepositPoint2 = "{{.DepositPoint2}}"
+  var DepositPoint2Options = DepositPoint2.replace("[", "").replace("]", "").split(", ");
+  let DepositPoint3 = "{{.DepositPoint3}}"
+  var DepositPoint3Options = DepositPoint3.replace("[", "").replace("]", "").split(", ");
+  let Distance = "{{.Distance}}"
+  var DistanceOptions = Distance.replace("[", "").replace("]", "").split(", ");
+  let Fees = "{{.Fees}}"
+  var FeesOptions = Fees.replace("[", "").replace("]", "").split(", ");
+  let Notes = "{{.Notes}}"
+  var NotesOptions = Notes.replace("[", "").replace("]", "").split(", ");
+
+  const table = document.getElementById("all");
+  for(var i = 0; i < EventIdOptions.length; i++) {
+    table.innerHTML = table.innerHTML + `<tr DeliveryId=`+ EventIdOptions[i] +`>
+<td class="row_data" col_name="Date">` + DateOptions[i] +`</td>
+<td class="row_data" col_name="DriverName">` + DriverNameOptions[i] +`</td>
+<td class="row_data" col_name="AmountDelivered">` + AmountDeliveredOptions[i] +`</td>
+<td class="row_data" col_name="CarNoPlate">` + CarNoPlateOptions[i] +`</td>
+<td class="row_data" col_name="TrailerNoPlate">` + TrailerNoPlateOptions[i] +`</td>
+<td class="row_data" col_name="PickUpPoint">` + PickUpPointOptions[i] +`</td>
+<td class="row_data" col_name="DepositPoint1">` + DepositPoint1Options[i] +`</td>
+<td class="row_data" col_name="DepositPoint2">` + DepositPoint2Options[i] +`</td>
+<td class="row_data" col_name="DepositPoint3">` + DepositPoint3Options[i] +`</td>
+<td class="row_data" col_name="Distance">` + DistanceOptions[i] +`</td>
+<td class="row_data" col_name="Fees">` + FeesOptions[i] +`</td>
+<td class="row_data" col_name="Notes">` + NotesOptions[i] +`</td>
+<td>
+<span><p onClick=DeleteRequest(`+ EventIdOptions[i] +`) class="btn_delete" DeliveryId=`+ EventIdOptions[i] +` height="28" width="28">Delete</p>
+<p DeliveryId=`+ EventIdOptions[i] +` class="btn_edit" style="margin-left: 5px;" width="30" height="30">Edit</p></span>
+<p DeliveryId=`+ EventIdOptions[i] +`  class="btn_save" style="display: none;" width="32" height="32">Save</p>
+<p DeliveryId=`+ EventIdOptions[i] +` class="btn_cancel" style="display: none;" width="32" height="32">Cancel</p>
+</td>
+</tr>`
+  }
+</script>
+
+<!-- jquery-->
+<script src="https://snap.hopto.org/LTR/js/jquery-3.3.1.min.js"></script>
+<!-- Plugins js -->
+<script src="https://snap.hopto.org/LTR/js/plugins.js"></script>
+<!-- Popper js -->
+<script src="https://snap.hopto.org/LTR/js/popper.min.js"></script>
+<!-- Bootstrap js -->
+<script src="https://snap.hopto.org/LTR/js/bootstrap.min.js"></script>
+<!-- Scroll Up Js -->
+<script src="https://snap.hopto.org/LTR/js/jquery.scrollUp.min.js"></script>
+<!-- Data Table Js -->
+<script src="https://snap.hopto.org/LTR/js/jquery.dataTables.min.js"></script>
+<!-- Custom Js -->
+<script src="https://snap.hopto.org/LTR/js/main.js"></script>
+
+</body>
+
+</html>
