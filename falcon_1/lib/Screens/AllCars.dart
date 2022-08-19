@@ -20,6 +20,7 @@ Dio dio = Dio();
 Future<String> get loadData async {
   var res = await dio.post("$SERVER_IP/api/GetCarProfileData").then((response) {
     // Print Json Response  where date is = DateFrom
+    print(response.data);
     for (var i = 0; i < response.data.length; i++) {
       CarList.add(response.data[i]);
     }

@@ -117,14 +117,7 @@ class _NewCarTripScreenState extends State<NewCarTripScreen> {
               title: const Text("انشاء رحلة جديدة"),
             ),
             body: Center(
-              child: FutureBuilder(
-                future: http.read(Uri.parse('$SERVER_IP/api/user'),
-                    // Cookie
-                    headers: {
-                      "Cookie": "jwt=${widget.jwt}",
-                    }),
-                builder: (context, snapshot) => snapshot.hasData
-                    ? SafeArea(
+              child: SafeArea(
                         child: Container(
                           padding: const EdgeInsets.all(30),
                           child: Column(
@@ -467,17 +460,6 @@ class _NewCarTripScreenState extends State<NewCarTripScreen> {
                             // Get Current Date in the format of YYYY-MM-DD
                           ),
                         ),
-                      )
-                    : snapshot.hasError
-                        ? const Text("An error occurred")
-                        : Center(
-                            // Display lottie animation
-                            child: Lottie.asset(
-                              "lottie/SplashScreen.json",
-                              height: 200,
-                              width: 200,
-                            ),
-                          ),
               ),
             ),
           );

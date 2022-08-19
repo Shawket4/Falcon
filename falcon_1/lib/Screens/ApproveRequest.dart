@@ -80,21 +80,6 @@ class _ApproveRequestScreenState extends State<ApproveRequestScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-        future: loadRequest(widget.jwt),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return Scaffold(
-              body: Center(
-                // Display lottie animation
-                child: Lottie.asset(
-                  "lottie/SplashScreen.json",
-                  height: 200,
-                  width: 200,
-                ),
-              ),
-            );
-          }
           return Scaffold(
               appBar: AppBar(
                 centerTitle: true,
@@ -294,7 +279,22 @@ class _ApproveRequestScreenState extends State<ApproveRequestScreen> {
                   ],
                 ),
               ),
-              body: ListView(
+              body: FutureBuilder(
+              future: loadRequest(widget.jwt),
+    builder: (context, snapshot) {
+      if (!snapshot.hasData) {
+        return Scaffold(
+          body: Center(
+            // Display lottie animation
+            child: Lottie.asset(
+              "lottie/SplashScreen.json",
+              height: 200,
+              width: 200,
+            ),
+          ),
+        );
+      }
+             return ListView(
                 physics: const BouncingScrollPhysics(),
                 // shrinkWrap: true,
                 children: [
@@ -453,7 +453,7 @@ class _ApproveRequestScreenState extends State<ApproveRequestScreen> {
                     },
                   ),
                 ],
-              ));
-        });
+    );
+        }));
   }
 }

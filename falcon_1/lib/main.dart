@@ -21,31 +21,19 @@ String permission = "";
 String name = "";
 
 Future<Object> getPermission(String jwt) async {
-    // await http.post(Uri.parse("$SERVER_IP/api/User"), headers: {
-    //   "Content-Type": "application/json",
-    //   "Cookie": "jwt=$jwt",
-    // }).then((response) {
-    //   var str = response.body;
-    //   permission =
-    //       jsonDecode(utf8.decode(str.codeUnits))["permission"].toString();
-    //   name = jsonDecode(utf8.decode(str.codeUnits))["name"].toString();
-    // });
   Dio dio = Dio();
   dio.options.headers["Cookie"] = "jwt=$jwt";
   dio.options.headers["Content-Type"] = "application/json";
   var res = await dio.post("$SERVER_IP/api/user").then((response) {
     var str = response.data;
+    print(response.statusCode);
     permission = str["permission"].toString();
     name = str["name"];
-      // permission =
-      //     jsonDecode(utf8.decode(str.codeUnits))["permission"].toString();
-      // name = jsonDecode(utf8.decode(str.codeUnits))["name"].toString();
   });
   return {
     "permission": permission,
     "name": name,
   };
-  // Parse Json Response
 }
 Future<String> get jwtOrEmpty async {
   var jwt = await storage.read(key: "jwt");
@@ -54,23 +42,18 @@ Future<String> get jwtOrEmpty async {
     return "";
   }
   var jwt2 = jsonDecode((jwt))["jwt"].toString();
-
-  // print(jsonDecode((jwt))["jwt"].toString());
   Dio dio = Dio();
   dio.options.headers["Cookie"] = "jwt=$jwt2";
   dio.options.headers["Content-Type"] = "application/json";
-  var res = await dio.post("$SERVER_IP/api/user").then((response) {
+  var res = await dio.post("$SERVER_IP/api/user").then((response) async {
     var str = response.data;
+    print(response.statusCode);
+    if (response.statusCode == 401) {
+    await storage.delete(key: "jwt");
+    }
     permission = str["permission"].toString();
     name = str["name"];
   });
-  // var res = await dio.post("$SERVER_IP/user").then((value) {
-  //
-  //   if (value.statusCode == 401) {
-  //     storage.delete(key: "jwt");
-  //     return "";
-  //   }
-  // });
   return jwt;
 }
 
