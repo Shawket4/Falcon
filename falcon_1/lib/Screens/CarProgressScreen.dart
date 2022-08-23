@@ -4,9 +4,11 @@ import 'dart:convert';
 
 import 'package:falcon_1/DetailScreens/CarProgressDetail.dart';
 import 'package:falcon_1/Forms/AddCar.dart';
+import 'package:falcon_1/Forms/AddTransporter.dart';
 import 'package:falcon_1/Forms/AddTrip.dart';
 import 'package:falcon_1/Screens/AllCars.dart';
 import 'package:falcon_1/Screens/AllDrivers.dart';
+import 'package:falcon_1/Screens/AllTransporters.dart';
 import 'package:falcon_1/Screens/ApproveRequest.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -125,7 +127,7 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        backgroundColor: const Color.fromRGBO(50, 75, 205, 1),
+        backgroundColor: Theme.of(context).primaryColor,
         // Hamburger Menu
         leading: InkWell(
           // onTap: _onTapped,
@@ -193,7 +195,7 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
         ),
       ),
       drawer: Drawer(
-        backgroundColor: const Color.fromRGBO(50, 75, 205, 1),
+        backgroundColor: Theme.of(context).primaryColor,
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
@@ -285,12 +287,38 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => AddCar(jwt: widget.jwt.toString()),
+                      builder: (_) =>
+                          AddCar(jwt: widget.jwt.toString()),
                     ),
                   );
                 }),
+            int.parse(permission) > 1 ?
             buildDrawerItem(
-              title: "All Cars",
+              title: "Add Transporter",
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => AddTransporter(jwt: widget.jwt,),
+                  ),
+                );
+              },
+            ) : Container(),
+            int.parse(permission) > 1 ?
+            buildDrawerItem(
+              title: "Add Trip",
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        NewCarTripScreen(widget.jwt.toString()),
+                  ),
+                );
+              },
+            ) : Container(),
+            buildDrawerItem(
+              title: int.parse(permission) > 1 ? "All Cars" : "My Cars",
               onTap: () {
                 Navigator.push(
                   context,
@@ -301,40 +329,43 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
               },
             ),
             buildDrawerItem(
-              title: "All Drivers",
+              title: int.parse(permission) > 1 ? "All Drivers" : "My Drivers",
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => AllDrivers(jwt: widget.jwt.toString()),
+                    builder: (_) =>
+                        AllDrivers(jwt: widget.jwt.toString()),
                   ),
                 );
               },
             ),
+            int.parse(permission) > 1 ?
             buildDrawerItem(
-              title: "Add Trip",
+              title: "All Transporters",
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => NewCarTripScreen(widget.jwt.toString()),
+                    builder: (_) =>
+                        AllTransporters(jwt: widget.jwt.toString()),
                   ),
                 );
               },
-            ),
+            ) : Container(),
             int.parse(permission) > 3
                 ? buildDrawerItem(
-                    title: "Permissions",
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              PermissionScreen(jwt: widget.jwt.toString()),
-                        ),
-                      );
-                    },
-                  )
+              title: "Permissions",
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => PermissionScreen(
+                        jwt: widget.jwt.toString()),
+                  ),
+                );
+              },
+            )
                 : Container(),
           ],
         ),

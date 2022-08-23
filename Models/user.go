@@ -10,5 +10,6 @@ type User struct {
 	SafetyLicenseExpirationDate string `json:"SafetyLicenseExpirationDate"`
 	DrugTestExpirationDate      string `json:"DrugTestExpirationDate"`
 	MobileNumber                string `json:"mobile_number"`
+	Transporter                 string `gorm:"column:Transporter" json:"Transporter"`
 	IsApproved                  int    `gorm:"column:IsApproved" json:"IsApproved"`
 }

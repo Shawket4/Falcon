@@ -9,7 +9,7 @@ import 'package:lottie/lottie.dart';
 import 'Screens/Login.dart';
 
 const String SERVER_IP = 'http://92.205.60.182:3001';
-// const String SERVER_IP = 'http://localhost:3001';
+// const String SERVER_IP = 'http://192.168.1.9:3001';
 // const SERVER_IP = 'http://localhost:3001/api';
 // const SERVER_IP = 'http://92.205.60.182:3001/api';
 
@@ -67,6 +67,7 @@ class MainWidget extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        primaryColor: const Color.fromRGBO(24, 59, 160, 1),
       ),
       home: FutureBuilder(
           future: jwtOrEmpty,

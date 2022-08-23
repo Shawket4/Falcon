@@ -47,7 +47,7 @@ class _PermissionScreenState extends State<PermissionScreen> {
             ),
           ),
         ),
-        backgroundColor: const Color.fromRGBO(50, 75, 205, 1),
+        backgroundColor: Theme.of(context).primaryColor,
         // Hamburger Menu
       ),
       body: FutureBuilder(

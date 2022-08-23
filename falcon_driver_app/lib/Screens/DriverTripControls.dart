@@ -164,7 +164,8 @@ class _DriverTripControlsState extends State<DriverTripControls> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromRGBO(50, 75, 205, 1),
+        centerTitle: true,
+        backgroundColor: Theme.of(context).primaryColor,
         actions: [
           // Logout Button
           IconButton(

@@ -113,7 +113,7 @@ class _NewCarTripScreenState extends State<NewCarTripScreen> {
           return Scaffold(
             appBar: AppBar(
               centerTitle: true,
-              backgroundColor: const Color.fromRGBO(50, 75, 205, 1),
+              backgroundColor: Theme.of(context).primaryColor,
               title: const Text("انشاء رحلة جديدة"),
             ),
             body: Center(
@@ -414,7 +414,7 @@ class _NewCarTripScreenState extends State<NewCarTripScreen> {
                                             _dropOffPointControllers[i].clear();
                                           }
                                           _pickUpPointController.clear();
-                                          Navigator.of(context).pop();
+                                          Navigator.pop(dialogContext);
                                           Navigator.pushReplacement(
                                             context,
                                             MaterialPageRoute(
@@ -439,7 +439,7 @@ class _NewCarTripScreenState extends State<NewCarTripScreen> {
                                   child: Container(
                                     decoration: BoxDecoration(
                                       color:
-                                          const Color.fromRGBO(50, 75, 205, 1),
+                                          Theme.of(context).primaryColor,
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     width: 200,

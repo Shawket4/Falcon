@@ -64,7 +64,7 @@ class _EditCarScreenState extends State<EditCarScreen> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        backgroundColor: const Color.fromRGBO(50, 75, 205, 1),
+        backgroundColor: Theme.of(context).primaryColor,
         title: Text(
           'تعديل بيانات السيارة ${widget.car["CarNoPlate"]}',
           style: GoogleFonts.josefinSans(
@@ -324,7 +324,7 @@ class _EditCarScreenState extends State<EditCarScreen> {
                           _licenseExpiryDateController.clear();
                           _calibrationExpiryDateController.clear();
 
-                          Navigator.of(context).pop();
+                          Navigator.pop(dialogContext);
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
@@ -338,7 +338,7 @@ class _EditCarScreenState extends State<EditCarScreen> {
                   },
                   child: Container(
                     decoration: BoxDecoration(
-                      color: const Color.fromRGBO(50, 75, 205, 1),
+                      color: Theme.of(context).primaryColor,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     width: 200,

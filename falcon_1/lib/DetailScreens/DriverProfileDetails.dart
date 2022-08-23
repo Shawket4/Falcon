@@ -151,14 +151,14 @@ class _DriverProfileDetailsState extends State<DriverProfileDetails> {
                       ),
                     );
                   });
-              var res = await dio.post("$SERVER_IP/api/DeleteDriver", data: {
+              var res = await dio.post("$SERVER_IP/api/DeleteDriver", data:
                 jsonEncode(
                   {
                     "Name": widget.driver["Name"],
                   },
                 ),
-              }).then((value) {
-                Navigator.of(context).pop();
+              ).then((value) {
+                Navigator.pop(dialogContext);
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
@@ -176,7 +176,7 @@ class _DriverProfileDetailsState extends State<DriverProfileDetails> {
             ),
           )
         ],
-        backgroundColor: const Color.fromRGBO(50, 75, 205, 1),
+        backgroundColor: Theme.of(context).primaryColor,
         title: Center(
           child: Text(
             'تفاصيل السائق: ${widget.driver["Name"]}',
@@ -252,13 +252,13 @@ class _DriverProfileDetailsState extends State<DriverProfileDetails> {
                                 ),
                               );
                             });
-                        var res = await dio.post("$SERVER_IP/api/RejectRequest", data: {
+                        var res = await dio.post("$SERVER_IP/api/RejectRequest", data:
                           jsonEncode({
                             "TableName": "users",
                             "ColumnIdName": "id",
                             "Id": widget.driver["DriverId"],
                           }),
-                        });
+                        );
                         setState(() {
                           Navigator.pop(dialogContext);
                           // Rebuild Whole Page
@@ -315,13 +315,13 @@ class _DriverProfileDetailsState extends State<DriverProfileDetails> {
                                 ),
                               );
                             });
-                        var res = await dio.post("$SERVER_IP/api/ApproveRequest", data: {
+                        var res = await dio.post("$SERVER_IP/api/ApproveRequest", data:
                           jsonEncode({
                             "TableName": "users",
                             "ColumnIdName": "id",
                             "Id": widget.driver["DriverId"],
                           }),
-                        });
+                        );
                         setState(() {
                           Navigator.pop(dialogContext);
                           // Rebuild Whole Page

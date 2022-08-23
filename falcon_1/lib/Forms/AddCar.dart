@@ -31,6 +31,7 @@ Dio dio = Dio();
 late BuildContext dialogContext;
 List<String> _transporterList = [];
 String? selectedTransporter;
+
 Future<Object> get loadData async {
   if (selectedTransporter == null) {
     var res = await dio.post("$SERVER_IP/api/GetTransporters").then((response) {
@@ -39,7 +40,6 @@ Future<Object> get loadData async {
         _transporterList.add(transporter);
       }
       selectedTransporter = _transporterList[0];
-      print(str.toString());
     });
 
     return {
@@ -64,7 +64,7 @@ class _AddCarState extends State<AddCar> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        backgroundColor: const Color.fromRGBO(50, 75, 205, 1),
+        backgroundColor: Theme.of(context).primaryColor,
         title: Text(
           'إضافة سيارة',
           style: GoogleFonts.josefinSans(
@@ -93,6 +93,7 @@ class _AddCarState extends State<AddCar> {
                 child: ListView(
                   physics: const BouncingScrollPhysics(),
                   children: <Widget>[
+                    int.parse(permission) > 1 ?
                       Row(
                         textDirection: TextDirection.rtl,
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -122,7 +123,7 @@ class _AddCarState extends State<AddCar> {
                             }),
                               ),
                         ],
-                      ),
+                      ) : Container(),
                     Directionality(
                       textDirection: TextDirection.rtl,
                       child: CupertinoFormSection(
@@ -373,7 +374,7 @@ class _AddCarState extends State<AddCar> {
                                 _licenseExpiryDateController.clear();
                                 _calibrationExpiryDateController.clear();
 
-                                Navigator.of(context).pop();
+                                Navigator.pop(dialogContext);
                                 Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
@@ -388,7 +389,7 @@ class _AddCarState extends State<AddCar> {
                         },
                         child: Container(
                           decoration: BoxDecoration(
-                            color: const Color.fromRGBO(50, 75, 205, 1),
+                            color: Theme.of(context).primaryColor,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           width: 200,

@@ -1,6 +1,7 @@
 package Controllers
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"strconv"
@@ -23,10 +24,13 @@ func RegisterUser(c *fiber.Ctx) error {
 			return c.Status(fiber.StatusForbidden).SendString("You do not have permission to access this page")
 		} else {
 			var data map[string]string
-
-			if err := c.BodyParser(&data); err != nil {
-				return err
+			formData := c.FormValue("request")
+			// format formData into data map
+			err := json.Unmarshal([]byte(formData), &data)
+			if err != nil {
+				log.Println(err)
 			}
+			// fmt.Println("saving user")
 			Database.Connect()
 			password, _ := bcrypt.GenerateFromPassword([]byte(data["password"]), 14)
 			permissionlevel, err := strconv.Atoi(data["permission"])
@@ -57,11 +61,74 @@ func RegisterUser(c *fiber.Ctx) error {
 				user.SafetyLicenseExpirationDate = data["SafetyLicenseExpirationDate"]
 				user.DrugTestExpirationDate = data["DrugTestExpirationDate"]
 				user.MobileNumber = data["mobile_number"]
+
+				if data["Transporter"] == "" {
+					user.Transporter = CurrentUser.Name
+				} else {
+					user.Transporter = data["Transporter"]
+				}
 				if CurrentUser.Permission >= 3 {
 					user.IsApproved = 1
 				} else {
 					user.IsApproved = 0
 				}
+				driverLicense, err := c.FormFile("DriverLicense")
+				if err != nil {
+					log.Println(err.Error())
+					return c.JSON(fiber.Map{
+						"message": err.Error(),
+						"file":    "save",
+					})
+				}
+				// Save file to disk
+				// Allow multipart form
+				err = c.SaveFile(driverLicense, fmt.Sprintf("./DriverLicenses/%s", driverLicense.Filename))
+				if err != nil {
+					log.Println(err.Error())
+					return c.JSON(fiber.Map{
+						"message": err.Error(),
+						"file":    "save",
+					})
+				}
+				safetyLicense, err := c.FormFile("SafetyLicense")
+				if err != nil {
+					log.Println(err.Error())
+					return c.JSON(fiber.Map{
+						"message": err.Error(),
+						"file":    "save",
+					})
+				}
+				// Save file to disk
+				// Allow multipart form
+				err = c.SaveFile(safetyLicense, fmt.Sprintf("./SafetyLicenses/%s", safetyLicense.Filename))
+				if err != nil {
+					log.Println(err.Error())
+					return c.JSON(fiber.Map{
+						"message": err.Error(),
+						"file":    "save",
+					})
+				}
+				drugTest, err := c.FormFile("DrugTest")
+				if err != nil {
+					log.Println(err.Error())
+					return c.JSON(fiber.Map{
+						"message": err.Error(),
+						"file":    "save",
+					})
+				}
+				// Save file to disk
+				// Allow multipart form
+				err = c.SaveFile(drugTest, fmt.Sprintf("./DrugTests/%s", drugTest.Filename))
+				if err != nil {
+					log.Println(err.Error())
+					return c.JSON(fiber.Map{
+						"message": err.Error(),
+						"file":    "save",
+					})
+				}
+				// user.Image = file.Filename
+
+				Database.DB.Create(&user)
 			} else {
 				// user := Models.User{
 				// 	Name:         data["name"],
@@ -91,6 +158,20 @@ func RegisterUser(c *fiber.Ctx) error {
 			"message": "Not Logged In.",
 		})
 	}
+}
+
+func Upload(c *fiber.Ctx) error {
+	file, err := c.FormFile("file")
+	if err != nil {
+		return c.Status(422).JSON(fiber.Map{"errors": [1]string{"We were not able upload your attachment"}})
+	}
+	err = c.SaveFile(file, fmt.Sprintf("./uploads/%s", file.Filename))
+	if err != nil {
+		return c.Status(422).JSON(fiber.Map{"errors": [1]string{"We were not able upload your attachment"}})
+	}
+	return c.JSON(fiber.Map{
+		"message": "File uploaded successfully",
+	})
 }
 
 // func Register(c *fiber.Ctx) error {

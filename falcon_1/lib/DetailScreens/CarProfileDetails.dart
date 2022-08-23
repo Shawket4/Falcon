@@ -159,7 +159,7 @@ class _CarProfileDetailsState extends State<CarProfileDetails> {
                   },
                 ),
               ).then((value) {
-                Navigator.of(context).pop();
+                Navigator.pop(dialogContext);
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
@@ -177,7 +177,7 @@ class _CarProfileDetailsState extends State<CarProfileDetails> {
             ),
           ),
         ],
-        backgroundColor: const Color.fromRGBO(50, 75, 205, 1),
+        backgroundColor: Theme.of(context).primaryColor,
         title: Text(
           'تفاصيل السيارة ${widget.car["CarNoPlate"]}',
           textDirection: TextDirection.ltr,

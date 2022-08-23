@@ -33,6 +33,7 @@ type Driver struct {
 	SafetyExpirationDate   string `json:"SafetyExpirationDate"`
 	DrugTestExpirationDate string `json:"DrugTestExpirationDate"`
 	IsApproved             int    `json:"IsApproved"`
+	Transporter            string `json:"Transporter"`
 }
 
 type Transporter struct {
@@ -229,6 +230,9 @@ func RegisterCar(c *fiber.Ctx) error {
 			} else {
 				car.IsApproved = 0
 			}
+			if car.Transporter == "" {
+				car.Transporter = Controllers.CurrentUser.Name
+			}
 			// Insert the car into the database
 			_, err = db.Exec("INSERT INTO `Cars` (`CarId`, `CarNoPlate`, `Transporter`, `TankCapacity`, `Compartments`, `LicenseExpirationDate`, `CalibrationExpirationDate`, `IsApproved`) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?)", car.CarNoPlate, car.Transporter, car.TankCapacity, jsonCompartments, car.LicenseExpirationDate, car.CalibrationExpirationDate, car.IsApproved)
 			if err != nil {
@@ -249,77 +253,102 @@ func RegisterCar(c *fiber.Ctx) error {
 	}
 }
 
-func GetCarProfileData(c *fiber.Ctx) error {
+func RegisterTransporter(c *fiber.Ctx) error {
 	Controllers.User(c)
 	if Controllers.CurrentUser.Id != 0 {
 		if Controllers.CurrentUser.Permission == 0 {
 			return c.Status(fiber.StatusForbidden).SendString("You do not have permission to access this page")
 		} else {
 			db := Database.ConnectToDB()
-			// Get List Of Transporters
-			var Transporters []string
-			transporters, err := db.Query("SELECT `TransporterName` FROM `Transporters` WHERE 1;")
+			// Get the body of the request
+			var data Transporter
+			err := c.BodyParser(&data)
+			if err != nil {
+				log.Println(err.Error())
+				return c.Status(fiber.StatusBadRequest).SendString("Invalid request body")
+			}
+			// Insert the transporter into the database
+			// Encode the transporter mobile numbers to json
+			jsonPhoneNumbers, err := json.Marshal(data.PhoneNumbers)
+			if err != nil {
+				log.Println(err.Error())
+				return c.Status(fiber.StatusBadRequest).SendString("Invalid request body")
+			}
+
+			_, err = db.Exec("INSERT INTO `Transporters` (`TransporterId`, `TransporterName`, `TransporterMobilePhone`) VALUES (NULL, ?, ?);", data.Name, jsonPhoneNumbers)
+			if err != nil {
+				log.Println(err.Error())
+				return c.Status(fiber.StatusBadRequest).SendString("Invalid request body")
+			}
+
+			return c.JSON(
+				fiber.Map{
+					"Message": "Transporter added successfully",
+					"Name":    data.Name,
+				},
+			)
+		}
+	} else {
+		return c.JSON(fiber.Map{
+			"message": "Not Logged In.",
+		})
+	}
+}
+
+func GetCarProfileData(c *fiber.Ctx) error {
+	Controllers.User(c)
+	if Controllers.CurrentUser.Id != 0 {
+		if Controllers.CurrentUser.Permission == 0 {
+			return c.Status(fiber.StatusForbidden).SendString("You do not have permission to access this page")
+		} else if Controllers.CurrentUser.Permission == 1 {
+			db := Database.ConnectToDB()
+			var Cars []Car
+			cars, err := db.Query("SELECT `CarId`, `CarNoPlate`, `Transporter`, `TankCapacity`, `Compartments`, `LicenseExpirationDate`, `CalibrationExpirationDate`, `IsApproved` FROM `Cars` WHERE `Transporter` = ?;", Controllers.CurrentUser.Name)
 			if err != nil {
 				log.Println(err.Error())
 			}
-			defer transporters.Close()
-			for transporters.Next() {
-				var transporter string
-				err := transporters.Scan(&transporter)
+
+			defer cars.Close()
+			for cars.Next() {
+				var car Car
+				var jsonCompartments string
+				err = cars.Scan(&car.CarId, &car.CarNoPlate, &car.Transporter, &car.TankCapacity, &jsonCompartments, &car.LicenseExpirationDate, &car.CalibrationExpirationDate, &car.IsApproved)
 				if err != nil {
 					log.Println(err.Error())
 				}
-				Transporters = append(Transporters, transporter)
-			}
-			// var TransporterCarMap map[string][]Car
-			var TransporterCarMap = make(map[string][]Car)
-
-			for _, transporter := range Transporters {
-				var Cars []Car
-				cars, err := db.Query("SELECT `CarId`, `CarNoPlate`, `Transporter`, `TankCapacity`, `Compartments`, `LicenseExpirationDate`, `CalibrationExpirationDate`, `IsApproved` FROM `Cars` WHERE `Transporter` = ?;", transporter)
+				// Covert jsonCompartments To An Array of string
+				err = json.Unmarshal([]byte(jsonCompartments), &car.Compartments)
 				if err != nil {
 					log.Println(err.Error())
 				}
-				defer cars.Close()
-				for cars.Next() {
-					var car Car
-					var jsonCompartments string
-					err = cars.Scan(&car.CarId, &car.CarNoPlate, &car.Transporter, &car.TankCapacity, &jsonCompartments, &car.LicenseExpirationDate, &car.CalibrationExpirationDate, &car.IsApproved)
-					if err != nil {
-						log.Println(err.Error())
-					}
-					// Covert jsonCompartments To An Array of string
-					err = json.Unmarshal([]byte(jsonCompartments), &car.Compartments)
-					if err != nil {
-						log.Println(err.Error())
-					}
-					Cars = append(Cars, car)
-				}
-				TransporterCarMap[transporter] = Cars
+				Cars = append(Cars, car)
 			}
-			// query, err := db.Query("SELECT `CarId`, `CarNoPlate`, `Transporter`, `TankCapacity`, `Compartments`, `LicenseExpirationDate`, `CalibrationExpirationDate`, `IsApproved` FROM `Cars` WHERE IsApproved = 1;")
-			// if err != nil {
-			// 	log.Println(err.Error())
-			// }
-			// defer query.Close()
+			return c.JSON(Cars)
+		} else {
+			db := Database.ConnectToDB()
+			// Get List Of Transporters
 
-			// var Cars []Car
-			// for query.Next() {
-			// 	var car Car
-			// 	var jsonCompartments string
-			// 	err = query.Scan(&car.CarId, &car.CarNoPlate, &car.Transporter, &car.TankCapacity, &jsonCompartments, &car.LicenseExpirationDate, &car.CalibrationExpirationDate, &car.IsApproved)
-			// 	if err != nil {
-			// 		log.Println(err.Error())
-			// 	}
-			// 	// Covert jsonCompartments To An Array of string
-			// 	err = json.Unmarshal([]byte(jsonCompartments), &car.Compartments)
-			// 	if err != nil {
-			// 		log.Println(err.Error())
-			// 	}
-			// 	Cars = append(Cars, car)
-			// }
-			// fmt.Println(TransporterCarMap)
-			return c.JSON(TransporterCarMap["Falcon"])
+			var Cars []Car
+			cars, err := db.Query("SELECT `CarId`, `CarNoPlate`, `Transporter`, `TankCapacity`, `Compartments`, `LicenseExpirationDate`, `CalibrationExpirationDate`, `IsApproved` FROM `Cars` WHERE 1;")
+			if err != nil {
+				log.Println(err.Error())
+			}
+			defer cars.Close()
+			for cars.Next() {
+				var car Car
+				var jsonCompartments string
+				err = cars.Scan(&car.CarId, &car.CarNoPlate, &car.Transporter, &car.TankCapacity, &jsonCompartments, &car.LicenseExpirationDate, &car.CalibrationExpirationDate, &car.IsApproved)
+				if err != nil {
+					log.Println(err.Error())
+				}
+				// Covert jsonCompartments To An Array of string
+				err = json.Unmarshal([]byte(jsonCompartments), &car.Compartments)
+				if err != nil {
+					log.Println(err.Error())
+				}
+				Cars = append(Cars, car)
+			}
+			return c.JSON(Cars)
 		}
 	} else {
 		return c.JSON(fiber.Map{
@@ -333,17 +362,36 @@ func GetDriverProfileData(c *fiber.Ctx) error {
 	if Controllers.CurrentUser.Id != 0 {
 		if Controllers.CurrentUser.Permission == 0 {
 			return c.Status(fiber.StatusForbidden).SendString("You do not have permission to access this page")
-		} else {
+		} else if Controllers.CurrentUser.Permission == 1 {
 			db := Database.ConnectToDB()
-			query, err := db.Query("SELECT `id`, `name`, `email`, `mobile_number`, `driver_license_expiration_date`, `safety_license_expiration_date`, `drug_test_expiration_date`, `IsApproved` FROM `users` WHERE permission = 0 AND `IsApproved` = 1;")
+			var Drivers []Driver
+			query, err := db.Query("SELECT `id`, `name`, `email`, `mobile_number`, `driver_license_expiration_date`, `safety_license_expiration_date`, `drug_test_expiration_date`, `IsApproved`, `Transporter` FROM `users` WHERE permission = 0 AND `IsApproved` = 1 AND `Transporter` = ?", Controllers.CurrentUser.Name)
 			if err != nil {
 				log.Println(err.Error())
 			}
 			defer query.Close()
-			var Drivers []Driver
+
 			for query.Next() {
 				var driver Driver
-				err = query.Scan(&driver.DriverId, &driver.Name, &driver.Email, &driver.MobileNumber, &driver.LicenseExpirationDate, &driver.SafetyExpirationDate, &driver.DrugTestExpirationDate, &driver.IsApproved)
+				err = query.Scan(&driver.DriverId, &driver.Name, &driver.Email, &driver.MobileNumber, &driver.LicenseExpirationDate, &driver.SafetyExpirationDate, &driver.DrugTestExpirationDate, &driver.IsApproved, &driver.Transporter)
+				if err != nil {
+					log.Println(err.Error())
+				}
+				Drivers = append(Drivers, driver)
+			}
+			return c.JSON(Drivers)
+		} else {
+			db := Database.ConnectToDB()
+			var Drivers []Driver
+			query, err := db.Query("SELECT `id`, `name`, `email`, `mobile_number`, `driver_license_expiration_date`, `safety_license_expiration_date`, `drug_test_expiration_date`, `IsApproved`, `Transporter` FROM `users` WHERE permission = 0 AND `IsApproved` = 1;")
+			if err != nil {
+				log.Println(err.Error())
+			}
+			defer query.Close()
+
+			for query.Next() {
+				var driver Driver
+				err = query.Scan(&driver.DriverId, &driver.Name, &driver.Email, &driver.MobileNumber, &driver.LicenseExpirationDate, &driver.SafetyExpirationDate, &driver.DrugTestExpirationDate, &driver.IsApproved, &driver.Transporter)
 				if err != nil {
 					log.Println(err.Error())
 				}
@@ -538,6 +586,41 @@ func EditDriver(c *fiber.Ctx) error {
 			}
 			return c.JSON(fiber.Map{
 				"Message": "Driver updated successfully",
+			})
+		}
+	} else {
+		return c.JSON(fiber.Map{
+			"message": "Not Logged In.",
+		})
+	}
+}
+
+func EditTransporter(c *fiber.Ctx) error {
+	Controllers.User(c)
+	if Controllers.CurrentUser.Id != 0 {
+		if Controllers.CurrentUser.Permission == 0 {
+			return c.Status(fiber.StatusForbidden).SendString("You do not have permission to access this page")
+		} else {
+			db := Database.ConnectToDB()
+			// Get Request Data
+			var transporter Transporter
+			err := c.BodyParser(&transporter)
+			if err != nil {
+				log.Println(err.Error())
+				return c.Status(fiber.StatusBadRequest).SendString("Invalid request body")
+			}
+			jsonPhoneNumbers, err := json.Marshal(transporter.PhoneNumbers)
+			if err != nil {
+				log.Println(err.Error())
+				return c.Status(fiber.StatusBadRequest).SendString("Invalid request body")
+			}
+			_, err = db.Exec("UPDATE `Transporters` SET `TransporterName` = ?, `TransporterMobilePhone` = ? WHERE `TransporterId` = ?;", transporter.Name, jsonPhoneNumbers, transporter.Id)
+			if err != nil {
+				log.Println(err.Error())
+				return c.Status(fiber.StatusBadRequest).SendString("Invalid request body")
+			}
+			return c.JSON(fiber.Map{
+				"Message": "Transporter updated successfully",
 			})
 		}
 	} else {

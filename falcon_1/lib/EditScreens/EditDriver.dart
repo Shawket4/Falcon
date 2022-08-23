@@ -49,7 +49,7 @@ class _EditDriverScreenState extends State<EditDriverScreen> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        backgroundColor: const Color.fromRGBO(50, 75, 205, 1),
+        backgroundColor: Theme.of(context).primaryColor,
         title: Text(
           'تعديل السائق ${widget.driver["Name"]}',
           style: GoogleFonts.josefinSans(
@@ -311,7 +311,7 @@ class _EditDriverScreenState extends State<EditDriverScreen> {
                           _licenseExpirationDateController.clear();
                           _safetyLicenseExpirationDateController.clear();
                           _drugTestExpirationDate.clear();
-                          Navigator.of(context).pop();
+                          Navigator.pop(dialogContext);
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
@@ -325,7 +325,7 @@ class _EditDriverScreenState extends State<EditDriverScreen> {
                   },
                   child: Container(
                     decoration: BoxDecoration(
-                      color: const Color.fromRGBO(50, 75, 205, 1),
+                      color: Theme.of(context).primaryColor,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     width: 200,

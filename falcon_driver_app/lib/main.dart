@@ -47,6 +47,7 @@ class MainWidget extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        primaryColor: const Color.fromRGBO(24, 59, 160, 1),
       ),
       home: FutureBuilder(
           future: jwtOrEmpty,
@@ -98,8 +99,8 @@ class MainWidget extends StatelessWidget {
                       } else {
                         return Scaffold(
                           appBar: AppBar(
-                            backgroundColor:
-                                const Color.fromRGBO(50, 75, 205, 1),
+                            centerTitle: true,
+                            backgroundColor: Theme.of(context).primaryColor,
                             title: const Text("ليس لديك نقلة حالية"),
                             actions: [
                               // Logout Button

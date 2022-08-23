@@ -1,14 +1,14 @@
 // ignore_for_file: non_constant_identifier_names, file_names
 
-import 'dart:convert';
-
 import 'package:falcon_1/DetailScreens/CarProfileDetails.dart';
 import 'package:falcon_1/DetailScreens/DriverProfileDetails.dart';
 import 'package:falcon_1/Forms/AddCar.dart';
 import 'package:falcon_1/Forms/AddDriver.dart';
+import 'package:falcon_1/Forms/AddTransporter.dart';
 import 'package:falcon_1/Forms/AddTrip.dart';
 import 'package:falcon_1/Screens/AllCars.dart';
 import 'package:falcon_1/Screens/AllDrivers.dart';
+import 'package:falcon_1/Screens/AllTransporters.dart';
 import 'package:falcon_1/Screens/CarProgressScreen.dart';
 import 'package:falcon_1/Screens/PermissionScreen.dart';
 import 'package:falcon_1/main.dart';
@@ -19,7 +19,7 @@ import 'package:lottie/lottie.dart';
 
 import 'Login.dart';
 
-var Cars = [];
+List<dynamic> Cars = [];
 var Drivers = [];
 
 Future<Object> loadRequest(String jwt) async {
@@ -29,8 +29,12 @@ Future<Object> loadRequest(String jwt) async {
   dio.options.headers["Content-Type"] = "application/json";
   var res = await dio.get("$SERVER_IP/api/GetPendingRequests").then((response) {
     var str = response.data;
-    Cars = str["Cars"];
-    Drivers = str["Drivers"];
+    if (str["Cars"] != null) {
+      Cars = str["Cars"];
+    }
+    if (str["Drivers"] != null) {
+      Drivers = str["Drivers"];
+    }
   });
 
   return {
@@ -91,7 +95,7 @@ class _ApproveRequestScreenState extends State<ApproveRequestScreen> {
                     ),
                   ),
                 ),
-                backgroundColor: const Color.fromRGBO(50, 75, 205, 1),
+                backgroundColor:  Theme.of(context).primaryColor,
                 // Hamburger Menu
                 leading: InkWell(
                   child: Builder(
@@ -107,7 +111,7 @@ class _ApproveRequestScreenState extends State<ApproveRequestScreen> {
                 ),
               ),
               drawer: Drawer(
-                backgroundColor: const Color.fromRGBO(50, 75, 205, 1),
+                backgroundColor: Theme.of(context).primaryColor,
                 child: ListView(
                   padding: EdgeInsets.zero,
                   children: [
@@ -203,29 +207,19 @@ class _ApproveRequestScreenState extends State<ApproveRequestScreen> {
                             ),
                           );
                         }),
+                    int.parse(permission) > 1 ?
                     buildDrawerItem(
-                      title: "All Cars",
+                      title: "Add Transporter",
                       onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => AllCars(jwt: widget.jwt.toString()),
+                            builder: (_) => AddTransporter(jwt: widget.jwt,),
                           ),
                         );
                       },
-                    ),
-                    buildDrawerItem(
-                      title: "All Drivers",
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                AllDrivers(jwt: widget.jwt.toString()),
-                          ),
-                        );
-                      },
-                    ),
+                    ) : Container(),
+                    int.parse(permission) > 1 ?
                     buildDrawerItem(
                       title: "Add Trip",
                       onTap: () {
@@ -237,7 +231,44 @@ class _ApproveRequestScreenState extends State<ApproveRequestScreen> {
                           ),
                         );
                       },
+                    ) : Container(),
+                    buildDrawerItem(
+                      title: int.parse(permission) > 1 ? "All Cars" : "My Cars",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => AllCars(jwt: widget.jwt.toString()),
+                          ),
+                        );
+                      },
                     ),
+                    buildDrawerItem(
+                      title: int.parse(permission) > 1 ? "All Drivers" : "My Drivers",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                AllDrivers(jwt: widget.jwt.toString()),
+                          ),
+                        );
+                      },
+                    ),
+                    int.parse(permission) > 1 ?
+                    buildDrawerItem(
+                      title: "All Transporters",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                AllTransporters(jwt: widget.jwt.toString()),
+                          ),
+                        );
+                      },
+                    ) : Container(),
+
                     int.parse(permission) > 3
                         ? buildDrawerItem(
                             title: "Permissions",
@@ -298,7 +329,7 @@ class _ApproveRequestScreenState extends State<ApproveRequestScreen> {
                 physics: const BouncingScrollPhysics(),
                 // shrinkWrap: true,
                 children: [
-                  Container(
+                  Cars.isNotEmpty ? Container(
                     width: double.infinity,
                     color: Colors.black,
                     height: 50,
@@ -318,7 +349,8 @@ class _ApproveRequestScreenState extends State<ApproveRequestScreen> {
                         ),
                       ),
                     ),
-                  ),
+                  ) : Container(),
+                  Cars.isNotEmpty ?
                   ListView.builder(
                     physics: const BouncingScrollPhysics(),
                     shrinkWrap: true,
@@ -377,7 +409,8 @@ class _ApproveRequestScreenState extends State<ApproveRequestScreen> {
                         ),
                       );
                     },
-                  ),
+                  ) : Container(),
+                  Drivers.isNotEmpty ?
                   Container(
                     width: double.infinity,
                     color: Colors.black,
@@ -398,7 +431,8 @@ class _ApproveRequestScreenState extends State<ApproveRequestScreen> {
                         ),
                       ),
                     ),
-                  ),
+                  ) : Container(),
+                  Drivers.isNotEmpty ?
                   ListView.builder(
                     physics: const BouncingScrollPhysics(),
                     shrinkWrap: true,
@@ -451,9 +485,11 @@ class _ApproveRequestScreenState extends State<ApproveRequestScreen> {
                         ),
                       );
                     },
-                  ),
+                  ) : Container(),
                 ],
     );
-        }));
+        },
+              ),
+          );
   }
 }

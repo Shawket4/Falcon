@@ -129,9 +129,9 @@ Widget _loginBtn(BuildContext context) {
   return Container(
     width: double.infinity,
     height: 60,
-    decoration: const BoxDecoration(
-      color: Color.fromRGBO(50, 75, 205, 1),
-      borderRadius: BorderRadius.all(Radius.circular(10)),
+    decoration: BoxDecoration(
+      color: Theme.of(context).primaryColor,
+      borderRadius: const BorderRadius.all(Radius.circular(10)),
     ),
     child: TextButton(
       onPressed: () async {
