@@ -12,4 +12,10 @@ type User struct {
 	MobileNumber                string `json:"mobile_number"`
 	Transporter                 string `gorm:"column:Transporter" json:"Transporter"`
 	IsApproved                  int    `gorm:"column:IsApproved" json:"IsApproved"`
+	DriverLicenseImageName      string `gorm:"column:DriverLicenseImageName;default:'';not null" json:"DriverLicenseImageName"`
+	SafetyLicenseImageName      string `gorm:"column:SafetyLicenseImageName;default:'';not null" json:"SafetyLicenseImageName"`
+	DrugTestImageName           string `gorm:"column:DrugTestImageName;default:'';not null" json:"DrugTestImageName"`
+	DriverLicenseImageNameBack  string `gorm:"column:DriverLicenseImageNameBack;default:'';not null" json:"DriverLicenseImageNameBack"`
+	SafetyLicenseImageNameBack  string `gorm:"column:SafetyLicenseImageNameBack;default:'';not null" json:"SafetyLicenseImageNameBack"`
+	DrugTestImageNameBack       string `gorm:"column:DrugTestImageNameBack;default:'';not null" json:"DrugTestImageNameBack"`
 }

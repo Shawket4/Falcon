@@ -7,13 +7,14 @@ import (
 	"Falcon/ManipulateData"
 	"Falcon/PreviewData"
 	"fmt"
-	"log"
+
+	// "log"
 
 	"github.com/gofiber/adaptor/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/template/html"
-	"github.com/gofiber/websocket/v2"
+	// "github.com/gofiber/websocket/v2"
 )
 
 func FiberConfig() {
@@ -44,7 +45,6 @@ func FiberConfig() {
 	app.Use("/api/GetCarProfileData", Apis.GetCarProfileData)
 	app.Use("/api/GetDriverProfileData", Apis.GetDriverProfileData)
 	app.Use("/api/GetTransporterProfileData", Apis.GetTransporterProfileData)
-	app.Post("/api/Upload", Controllers.Upload)
 	app.Post("/api/DeleteDriver", Apis.DeleteDriver)
 	app.Post("/api/DeleteCar", Apis.DeleteCar)
 	app.Post("/api/EditCar", Apis.EditCar)
@@ -57,47 +57,54 @@ func FiberConfig() {
 	app.Post("/api/UpdateTempPermission", Apis.UpdateTempPermission)
 	app.Use("/api/GetNonDriverUsers", Apis.GetNonDriverUsers)
 	app.Use("/AddServiceEvent", adaptor.HTTPHandlerFunc(AddEvent.AddServiceEventTmpl))
+	app.Use("/api/GetVehicleStatus", Apis.GetVehicleStatus)
+	app.Use("/api/GetVehicleMapPoints", Apis.GetVechileMapPoints)
 	// app.Use("/api/AddCar", AddEvent.AddCarHandler)
 	// app.Use("/api/AddServiceEvent", AddEvent.AddCarHandler)
 	app.Use("/AddDailyDelivery", adaptor.HTTPHandlerFunc(AddEvent.AddDeliveryTmpl))
 	app.Use("/ShowAllDeliveries", PreviewData.ShowAllDailyDeliveries)
 	app.Use("/GetProgressOfCars", Apis.GetProgressOfCars)
-
+	// Serve Static Images
+	app.Static("/CarLicenses", "./CarLicenses")
+	app.Static("/CalibrationLicenses", "./CalibrationLicenses")
+	app.Static("/DriverLicenses", "./DriverLicenses")
+	app.Static("/SafetyLicenses", "./SafetyLicenses")
+	app.Static("/DrugTests", "./DrugTests")
 	// WebSocket
-	app.Use("/ws", func(c *fiber.Ctx) error {
-		// IsWebSocketUpgrade returns true if the client
-		// requested upgrade to the WebSocket protocol.
-		if websocket.IsWebSocketUpgrade(c) {
-			c.Locals("allowed", true)
-			return c.Next()
-		}
-		return fiber.ErrUpgradeRequired
-	})
+	// app.Use("/ws", func(c *fiber.Ctx) error {
+	// 	// IsWebSocketUpgrade returns true if the client
+	// 	// requested upgrade to the WebSocket protocol.
+	// 	if websocket.IsWebSocketUpgrade(c) {
+	// 		c.Locals("allowed", true)
+	// 		return c.Next()
+	// 	}
+	// 	return fiber.ErrUpgradeRequired
+	// })
 
-	app.Get("/api/ws/", websocket.New(func(c *websocket.Conn) {
-		// c.Locals is added to the *websocket.Conn
-		log.Println(c.Locals("allowed")) // true
+	// app.Get("/api/ws/", websocket.New(func(c *websocket.Conn) {
+	// 	// c.Locals is added to the *websocket.Conn
+	// 	log.Println(c.Locals("allowed")) // true
 
-		// websocket.Conn bindings https://pkg.go.dev/github.com/fasthttp/websocket?tab=doc#pkg-index
-		var (
-			mt  int
-			msg []byte
-			err error
-		)
+	// 	// websocket.Conn bindings https://pkg.go.dev/github.com/fasthttp/websocket?tab=doc#pkg-index
+	// 	var (
+	// 		mt  int
+	// 		msg []byte
+	// 		err error
+	// 	)
 
-		for {
-			if mt, msg, err = c.ReadMessage(); err != nil {
-				log.Println("read:", err)
-				break
-			}
-			log.Printf("recv: %s", msg)
+	// 	for {
+	// 		if mt, msg, err = c.ReadMessage(); err != nil {
+	// 			log.Println("read:", err)
+	// 			break
+	// 		}
+	// 		log.Printf("recv: %s", msg)
 
-			if err = c.WriteMessage(mt, msg); err != nil {
-				log.Println("write:", err)
-				break
-			}
-		}
+	// 		if err = c.WriteMessage(mt, msg); err != nil {
+	// 			log.Println("write:", err)
+	// 			break
+	// 		}
+	// 	}
 
-	}))
+	// }))
 	app.Listen(":3001")
 }

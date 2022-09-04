@@ -1,4 +1,4 @@
-// ignore_for_file: file_names
+// ignore_for_file: file_names, unused_local_variable
 
 import 'dart:convert';
 import 'package:dio/dio.dart';
@@ -34,6 +34,7 @@ class _PermissionScreenState extends State<PermissionScreen> {
     dio.options.headers["Content-Type"] = "application/json";
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

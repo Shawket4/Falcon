@@ -4,6 +4,7 @@ import (
 	"Falcon/Controllers"
 	"Falcon/Database"
 	"Falcon/Models"
+	"Falcon/Scrapper"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -13,27 +14,37 @@ import (
 )
 
 type Car struct {
-	CarId                     int    `json:"CarId"`
-	CarNoPlate                string `json:"CarNoPlate"`
-	Transporter               string `json:"Transporter"`
-	TankCapacity              int    `json:"TankCapacity"`
-	Compartments              []int  `json:"Compartments"`
-	LicenseExpirationDate     string `json:"LicenseExpirationDate"`
-	CalibrationExpirationDate string `json:"CalibrationExpirationDate"`
-	IsInTrip                  string `json:"IsInTrip"`
-	IsApproved                int    `json:"IsApproved"`
+	CarId                           int    `json:"CarId"`
+	CarNoPlate                      string `json:"CarNoPlate"`
+	Transporter                     string `json:"Transporter"`
+	TankCapacity                    int    `json:"TankCapacity"`
+	Compartments                    []int  `json:"Compartments"`
+	LicenseExpirationDate           string `json:"LicenseExpirationDate"`
+	CalibrationExpirationDate       string `json:"CalibrationExpirationDate"`
+	CarLicenseImageName             string `json:"CarLicenseImageName"`
+	CalibrationLicenseImageName     string `json:"CalibrationLicenseImageName"`
+	CarLicenseImageNameBack         string `json:"CarLicenseImageNameBack"`
+	CalibrationLicenseImageNameBack string `json:"CalibrationLicenseImageNameBack"`
+	IsInTrip                        string `json:"IsInTrip"`
+	IsApproved                      int    `json:"IsApproved"`
 }
 
 type Driver struct {
-	DriverId               int    `json:"DriverId"`
-	Name                   string `json:"Name"`
-	Email                  string `json:"Email"`
-	MobileNumber           string `json:"MobileNumber"`
-	LicenseExpirationDate  string `json:"LicenseExpirationDate"`
-	SafetyExpirationDate   string `json:"SafetyExpirationDate"`
-	DrugTestExpirationDate string `json:"DrugTestExpirationDate"`
-	IsApproved             int    `json:"IsApproved"`
-	Transporter            string `json:"Transporter"`
+	DriverId                   int    `json:"DriverId"`
+	Name                       string `json:"Name"`
+	Email                      string `json:"Email"`
+	MobileNumber               string `json:"MobileNumber"`
+	LicenseExpirationDate      string `json:"LicenseExpirationDate"`
+	SafetyExpirationDate       string `json:"SafetyExpirationDate"`
+	DrugTestExpirationDate     string `json:"DrugTestExpirationDate"`
+	IsApproved                 int    `json:"IsApproved"`
+	Transporter                string `json:"Transporter"`
+	DriverLicenseImageName     string `json:"DriverLicenseImageName"`
+	SafetyLicenseImageName     string `json:"SafetyLicenseImageName"`
+	DrugTestImageName          string `json:"DrugTestImageName"`
+	DriverLicenseImageNameBack string `json:"DriverLicenseImageNameBack"`
+	SafetyLicenseImageNameBack string `json:"SafetyLicenseImageNameBack"`
+	DrugTestImageNameBack      string `json:"DrugTestImageNameBack"`
 }
 
 type Transporter struct {
@@ -215,11 +226,18 @@ func RegisterCar(c *fiber.Ctx) error {
 			// Get the body of the request
 			// Convert the body to a map
 			var car Car
-			err := c.BodyParser(&car)
+			formData := c.FormValue("request")
+			// format formData into data map
+			err := json.Unmarshal([]byte(formData), &car)
 			if err != nil {
-				log.Println(err.Error())
-				return c.Status(fiber.StatusBadRequest).SendString("Invalid request body")
+				log.Println(err)
 			}
+			// err := c.BodyParser(&car)
+			// if err != nil {
+			// 	log.Println(err.Error())
+			// 	return c.Status(fiber.StatusBadRequest).SendString("Invalid request body")
+			// }
+
 			jsonCompartments, err := json.Marshal(car.Compartments)
 			if err != nil {
 				log.Println(err.Error())
@@ -233,8 +251,80 @@ func RegisterCar(c *fiber.Ctx) error {
 			if car.Transporter == "" {
 				car.Transporter = Controllers.CurrentUser.Name
 			}
+			carLicense, err := c.FormFile("CarLicense")
+			if err != nil {
+				log.Println(err.Error())
+				return c.JSON(fiber.Map{
+					"message": err.Error(),
+					"file":    "save",
+				})
+			}
+			// Save file to disk
+			// Allow multipart form
+			err = c.SaveFile(carLicense, fmt.Sprintf("./CarLicenses/%s", carLicense.Filename))
+			if err != nil {
+				log.Println(err.Error())
+				return c.JSON(fiber.Map{
+					"message": err.Error(),
+					"file":    "save",
+				})
+			}
+			carLicenseBack, err := c.FormFile("CarLicenseBack")
+			if err != nil {
+				log.Println(err.Error())
+				return c.JSON(fiber.Map{
+					"message": err.Error(),
+					"file":    "save",
+				})
+			}
+			// Save file to disk
+			// Allow multipart form
+			err = c.SaveFile(carLicenseBack, fmt.Sprintf("./CarLicenses/%s", carLicenseBack.Filename))
+			if err != nil {
+				log.Println(err.Error())
+				return c.JSON(fiber.Map{
+					"message": err.Error(),
+					"file":    "save",
+				})
+			}
+			calibrationLicense, err := c.FormFile("CalibrationLicense")
+			if err != nil {
+				log.Println(err.Error())
+				return c.JSON(fiber.Map{
+					"message": err.Error(),
+					"file":    "save",
+				})
+			}
+			// Save file to disk
+			// Allow multipart form
+			err = c.SaveFile(calibrationLicense, fmt.Sprintf("./CalibrationLicenses/%s", calibrationLicense.Filename))
+			if err != nil {
+				log.Println(err.Error())
+				return c.JSON(fiber.Map{
+					"message": err.Error(),
+					"file":    "save",
+				})
+			}
+			calibrationLicenseBack, err := c.FormFile("CalibrationLicenseBack")
+			if err != nil {
+				log.Println(err.Error())
+				return c.JSON(fiber.Map{
+					"message": err.Error(),
+					"file":    "save",
+				})
+			}
+			// Save file to disk
+			// Allow multipart form
+			err = c.SaveFile(calibrationLicenseBack, fmt.Sprintf("./CalibrationLicenses/%s", calibrationLicenseBack.Filename))
+			if err != nil {
+				log.Println(err.Error())
+				return c.JSON(fiber.Map{
+					"message": err.Error(),
+					"file":    "save",
+				})
+			}
 			// Insert the car into the database
-			_, err = db.Exec("INSERT INTO `Cars` (`CarId`, `CarNoPlate`, `Transporter`, `TankCapacity`, `Compartments`, `LicenseExpirationDate`, `CalibrationExpirationDate`, `IsApproved`) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?)", car.CarNoPlate, car.Transporter, car.TankCapacity, jsonCompartments, car.LicenseExpirationDate, car.CalibrationExpirationDate, car.IsApproved)
+			_, err = db.Exec("INSERT INTO `Cars` (`CarId`, `CarNoPlate`, `Transporter`, `TankCapacity`, `Compartments`, `LicenseExpirationDate`, `CalibrationExpirationDate`, `IsApproved`, `CarLicenseImageName`, `CalibrationLicenseImageName`, `CarLicenseImageNameBack`, `CalibrationLicenseImageNameBack`) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", car.CarNoPlate, car.Transporter, car.TankCapacity, jsonCompartments, car.LicenseExpirationDate, car.CalibrationExpirationDate, car.IsApproved, carLicense.Filename, calibrationLicense.Filename, carLicenseBack.Filename, calibrationLicenseBack.Filename)
 			if err != nil {
 				log.Println(err.Error())
 				return c.Status(fiber.StatusBadRequest).SendString("Invalid request body")
@@ -303,7 +393,7 @@ func GetCarProfileData(c *fiber.Ctx) error {
 		} else if Controllers.CurrentUser.Permission == 1 {
 			db := Database.ConnectToDB()
 			var Cars []Car
-			cars, err := db.Query("SELECT `CarId`, `CarNoPlate`, `Transporter`, `TankCapacity`, `Compartments`, `LicenseExpirationDate`, `CalibrationExpirationDate`, `IsApproved` FROM `Cars` WHERE `Transporter` = ?;", Controllers.CurrentUser.Name)
+			cars, err := db.Query("SELECT `CarId`, `CarNoPlate`, `Transporter`, `TankCapacity`, `Compartments`, `LicenseExpirationDate`, `CalibrationExpirationDate`, `IsApproved`, `CarLicenseImageName`, `CalibrationLicenseImageName`, `CarLicenseImageNameBack`, `CalibrationLicenseImageNameBack` FROM `Cars` WHERE `Transporter` = ? AND `IsApproved` = 1;", Controllers.CurrentUser.Name)
 			if err != nil {
 				log.Println(err.Error())
 			}
@@ -312,7 +402,7 @@ func GetCarProfileData(c *fiber.Ctx) error {
 			for cars.Next() {
 				var car Car
 				var jsonCompartments string
-				err = cars.Scan(&car.CarId, &car.CarNoPlate, &car.Transporter, &car.TankCapacity, &jsonCompartments, &car.LicenseExpirationDate, &car.CalibrationExpirationDate, &car.IsApproved)
+				err = cars.Scan(&car.CarId, &car.CarNoPlate, &car.Transporter, &car.TankCapacity, &jsonCompartments, &car.LicenseExpirationDate, &car.CalibrationExpirationDate, &car.IsApproved, &car.CarLicenseImageName, &car.CalibrationLicenseImageName, &car.CarLicenseImageNameBack, &car.CalibrationLicenseImageNameBack)
 				if err != nil {
 					log.Println(err.Error())
 				}
@@ -329,7 +419,7 @@ func GetCarProfileData(c *fiber.Ctx) error {
 			// Get List Of Transporters
 
 			var Cars []Car
-			cars, err := db.Query("SELECT `CarId`, `CarNoPlate`, `Transporter`, `TankCapacity`, `Compartments`, `LicenseExpirationDate`, `CalibrationExpirationDate`, `IsApproved` FROM `Cars` WHERE 1;")
+			cars, err := db.Query("SELECT `CarId`, `CarNoPlate`, `Transporter`, `TankCapacity`, `Compartments`, `LicenseExpirationDate`, `CalibrationExpirationDate`, `IsApproved`, `CarLicenseImageName`, `CalibrationLicenseImageName`, `CarLicenseImageNameBack`, `CalibrationLicenseImageNameBack` FROM `Cars` WHERE `IsApproved` = 1;")
 			if err != nil {
 				log.Println(err.Error())
 			}
@@ -337,7 +427,7 @@ func GetCarProfileData(c *fiber.Ctx) error {
 			for cars.Next() {
 				var car Car
 				var jsonCompartments string
-				err = cars.Scan(&car.CarId, &car.CarNoPlate, &car.Transporter, &car.TankCapacity, &jsonCompartments, &car.LicenseExpirationDate, &car.CalibrationExpirationDate, &car.IsApproved)
+				err = cars.Scan(&car.CarId, &car.CarNoPlate, &car.Transporter, &car.TankCapacity, &jsonCompartments, &car.LicenseExpirationDate, &car.CalibrationExpirationDate, &car.IsApproved, &car.CarLicenseImageName, &car.CalibrationLicenseImageName, &car.CarLicenseImageNameBack, &car.CalibrationLicenseImageNameBack)
 				if err != nil {
 					log.Println(err.Error())
 				}
@@ -365,7 +455,7 @@ func GetDriverProfileData(c *fiber.Ctx) error {
 		} else if Controllers.CurrentUser.Permission == 1 {
 			db := Database.ConnectToDB()
 			var Drivers []Driver
-			query, err := db.Query("SELECT `id`, `name`, `email`, `mobile_number`, `driver_license_expiration_date`, `safety_license_expiration_date`, `drug_test_expiration_date`, `IsApproved`, `Transporter` FROM `users` WHERE permission = 0 AND `IsApproved` = 1 AND `Transporter` = ?", Controllers.CurrentUser.Name)
+			query, err := db.Query("SELECT `id`, `name`, `email`, `mobile_number`, `driver_license_expiration_date`, `safety_license_expiration_date`, `drug_test_expiration_date`, `IsApproved`, `Transporter`, `DriverLicenseImageName`, `SafetyLicenseImageName`, `DrugTestImageName`, `DriverLicenseImageNameBack`, `SafetyLicenseImageNameBack`, `DrugTestImageNameBack` FROM `users` WHERE permission = 0 AND `IsApproved` = 1 AND `Transporter` = ?", Controllers.CurrentUser.Name)
 			if err != nil {
 				log.Println(err.Error())
 			}
@@ -373,7 +463,7 @@ func GetDriverProfileData(c *fiber.Ctx) error {
 
 			for query.Next() {
 				var driver Driver
-				err = query.Scan(&driver.DriverId, &driver.Name, &driver.Email, &driver.MobileNumber, &driver.LicenseExpirationDate, &driver.SafetyExpirationDate, &driver.DrugTestExpirationDate, &driver.IsApproved, &driver.Transporter)
+				err = query.Scan(&driver.DriverId, &driver.Name, &driver.Email, &driver.MobileNumber, &driver.LicenseExpirationDate, &driver.SafetyExpirationDate, &driver.DrugTestExpirationDate, &driver.IsApproved, &driver.Transporter, &driver.DriverLicenseImageName, &driver.SafetyLicenseImageName, &driver.DrugTestImageName, &driver.DriverLicenseImageNameBack, &driver.SafetyLicenseImageNameBack, &driver.DrugTestImageNameBack)
 				if err != nil {
 					log.Println(err.Error())
 				}
@@ -383,7 +473,7 @@ func GetDriverProfileData(c *fiber.Ctx) error {
 		} else {
 			db := Database.ConnectToDB()
 			var Drivers []Driver
-			query, err := db.Query("SELECT `id`, `name`, `email`, `mobile_number`, `driver_license_expiration_date`, `safety_license_expiration_date`, `drug_test_expiration_date`, `IsApproved`, `Transporter` FROM `users` WHERE permission = 0 AND `IsApproved` = 1;")
+			query, err := db.Query("SELECT `id`, `name`, `email`, `mobile_number`, `driver_license_expiration_date`, `safety_license_expiration_date`, `drug_test_expiration_date`, `IsApproved`, `Transporter`, `DriverLicenseImageName`, `SafetyLicenseImageName`, `DrugTestImageName`, `DriverLicenseImageNameBack`, `SafetyLicenseImageNameBack`, `DrugTestImageNameBack` FROM `users` WHERE permission = 0 AND `IsApproved` = 1;")
 			if err != nil {
 				log.Println(err.Error())
 			}
@@ -391,7 +481,7 @@ func GetDriverProfileData(c *fiber.Ctx) error {
 
 			for query.Next() {
 				var driver Driver
-				err = query.Scan(&driver.DriverId, &driver.Name, &driver.Email, &driver.MobileNumber, &driver.LicenseExpirationDate, &driver.SafetyExpirationDate, &driver.DrugTestExpirationDate, &driver.IsApproved, &driver.Transporter)
+				err = query.Scan(&driver.DriverId, &driver.Name, &driver.Email, &driver.MobileNumber, &driver.LicenseExpirationDate, &driver.SafetyExpirationDate, &driver.DrugTestExpirationDate, &driver.IsApproved, &driver.Transporter, &driver.DriverLicenseImageName, &driver.SafetyLicenseImageName, &driver.DrugTestImageName, &driver.DriverLicenseImageNameBack, &driver.SafetyLicenseImageNameBack, &driver.DrugTestImageNameBack)
 				if err != nil {
 					log.Println(err.Error())
 				}
@@ -682,7 +772,7 @@ func GetPendingRequests(c *fiber.Ctx) error {
 			return c.Status(fiber.StatusForbidden).SendString("You do not have permission to access this page")
 		} else {
 			db := Database.ConnectToDB()
-			Cars, err := db.Query("SELECT `CarId`, `CarNoPlate`, `Transporter`, `TankCapacity`, `Compartments`, `LicenseExpirationDate`, `CalibrationExpirationDate`, `IsApproved` FROM `Cars` WHERE `IsApproved` = ?;", 0)
+			Cars, err := db.Query("SELECT `CarId`, `CarNoPlate`, `Transporter`, `TankCapacity`, `Compartments`, `LicenseExpirationDate`, `CalibrationExpirationDate`, `IsApproved`, `CarLicenseImageName`, `CalibrationLicenseImageName`, `CarLicenseImageNameBack`, `CalibrationLicenseImageNameBack` FROM `Cars` WHERE `IsApproved` = 0;")
 			if err != nil {
 				log.Println(err.Error())
 				return c.Status(fiber.StatusBadRequest).SendString("Invalid request body")
@@ -692,7 +782,7 @@ func GetPendingRequests(c *fiber.Ctx) error {
 			for Cars.Next() {
 				var car Car
 				var jsonData string
-				err := Cars.Scan(&car.CarId, &car.CarNoPlate, &car.Transporter, &car.TankCapacity, &jsonData, &car.LicenseExpirationDate, &car.CalibrationExpirationDate, &car.IsApproved)
+				err := Cars.Scan(&car.CarId, &car.CarNoPlate, &car.Transporter, &car.TankCapacity, &jsonData, &car.LicenseExpirationDate, &car.CalibrationExpirationDate, &car.IsApproved, &car.CarLicenseImageName, &car.CalibrationLicenseImageName, &car.CarLicenseImageNameBack, &car.CalibrationLicenseImageNameBack)
 				json.Unmarshal([]byte(jsonData), &car.Compartments)
 				if err != nil {
 					log.Println(err.Error())
@@ -704,7 +794,7 @@ func GetPendingRequests(c *fiber.Ctx) error {
 				CarsArray = append(CarsArray, car)
 			}
 			// Get Pending Driver Requests
-			Drivers, err := db.Query("SELECT `id`, `name`, `email`, `mobile_number`, `driver_license_expiration_date`, `safety_license_expiration_date`, `drug_test_expiration_date`, `IsApproved` FROM `users` WHERE `IsApproved` = ? AND permission = 0;", 0)
+			Drivers, err := db.Query("SELECT `id`, `name`, `email`, `mobile_number`, `driver_license_expiration_date`, `safety_license_expiration_date`, `drug_test_expiration_date`, `IsApproved`, `Transporter`, `DriverLicenseImageName`, `SafetyLicenseImageName`, `DrugTestImageName`, `DriverLicenseImageNameBack`, `SafetyLicenseImageNameBack`, `DrugTestImageNameBack` FROM `users` WHERE `IsApproved` = 0 AND permission = 0;")
 			if err != nil {
 				log.Println(err.Error())
 				return c.Status(fiber.StatusBadRequest).SendString("Invalid request body")
@@ -713,7 +803,7 @@ func GetPendingRequests(c *fiber.Ctx) error {
 			var DriversArray []Driver
 			for Drivers.Next() {
 				var driver Driver
-				err := Drivers.Scan(&driver.DriverId, &driver.Name, &driver.Email, &driver.MobileNumber, &driver.LicenseExpirationDate, &driver.SafetyExpirationDate, &driver.DrugTestExpirationDate, &driver.IsApproved)
+				err := Drivers.Scan(&driver.DriverId, &driver.Name, &driver.Email, &driver.MobileNumber, &driver.LicenseExpirationDate, &driver.SafetyExpirationDate, &driver.DrugTestExpirationDate, &driver.IsApproved, &driver.Transporter, &driver.DriverLicenseImageName, &driver.SafetyLicenseImageName, &driver.DrugTestImageName, &driver.DriverLicenseImageNameBack, &driver.SafetyLicenseImageNameBack, &driver.DrugTestImageNameBack)
 				if err != nil {
 					log.Println(err.Error())
 					return c.Status(fiber.StatusBadRequest).SendString("Invalid request body")
@@ -857,6 +947,80 @@ func UpdateTempPermission(c *fiber.Ctx) error {
 			}
 			return c.JSON(fiber.Map{
 				"Message": "Permission Updated",
+			})
+		}
+	} else {
+		return c.JSON(fiber.Map{
+			"message": "Not Logged In.",
+		})
+	}
+}
+
+func GetVehicleStatus(c *fiber.Ctx) error {
+	Controllers.User(c)
+	if Controllers.CurrentUser.Id != 0 {
+		if Controllers.CurrentUser.Permission == 0 {
+			return c.Status(fiber.StatusForbidden).SendString("You do not have permission to access this page")
+		} else {
+			var data struct {
+				CarNoPlate string `json:"CarNoPlate"`
+			}
+
+			err := c.BodyParser(&data)
+
+			if err != nil {
+				log.Println(err.Error())
+			}
+			for _, s := range Scrapper.VechileStatusList {
+				if s.PlateNo == data.CarNoPlate {
+					return c.JSON(s)
+				}
+			}
+			return c.JSON(fiber.Map{
+				"message": "Car Not Found",
+			})
+		}
+	} else {
+		return c.JSON(fiber.Map{
+			"message": "Not Logged In.",
+		})
+	}
+}
+
+func GetVechileMapPoints(c *fiber.Ctx) error {
+	Controllers.User(c)
+	if Controllers.CurrentUser.Id != 0 {
+		if Controllers.CurrentUser.Permission == 0 {
+			return c.Status(fiber.StatusForbidden).SendString("You do not have permission to access this page")
+		} else if Controllers.CurrentUser.Permission >= 2 {
+			return c.JSON(Scrapper.VechileStatusList)
+		} else if Controllers.CurrentUser.Permission == 1 {
+			db := Database.ConnectToDB()
+			defer db.Close()
+			Cars, err := db.Query("SELECT `CarNoPlate` FROM `Cars` WHERE `Transporter` = ?", Controllers.CurrentUser.Name)
+
+			if err != nil {
+				log.Println(err.Error())
+			}
+			var CarPlates []string
+			var CarsList []Scrapper.VechileStatusStruct
+			for Cars.Next() {
+				var carPlate string
+				Cars.Scan(&carPlate)
+				CarPlates = append(CarPlates, carPlate)
+			}
+
+			for _, scrapperPlate := range Scrapper.VechileStatusList {
+				for _, transporterPlate := range CarPlates {
+					if scrapperPlate.PlateNo == transporterPlate {
+						CarsList = append(CarsList, scrapperPlate)
+					}
+				}
+			}
+			return c.JSON(CarsList)
+		} else {
+			return c.JSON(fiber.Map{
+				"message": "An Error Occurred",
 			})
 		}
 	} else {

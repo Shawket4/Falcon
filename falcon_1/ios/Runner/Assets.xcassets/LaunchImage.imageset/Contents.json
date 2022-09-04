@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "AndroidAsset 15.png",
+      "filename" : "launch_screen.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "AndroidAsset 15-1.png",
+      "filename" : "launch_screen-1.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "AndroidAsset 15-2.png",
+      "filename" : "launch_screen-2.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

@@ -90,6 +90,24 @@ func RegisterUser(c *fiber.Ctx) error {
 						"file":    "save",
 					})
 				}
+				driverLicenseBack, err := c.FormFile("DriverLicenseBack")
+				if err != nil {
+					log.Println(err.Error())
+					return c.JSON(fiber.Map{
+						"message": err.Error(),
+						"file":    "save",
+					})
+				}
+				// Save file to disk
+				// Allow multipart form
+				err = c.SaveFile(driverLicenseBack, fmt.Sprintf("./DriverLicenses/%s", driverLicenseBack.Filename))
+				if err != nil {
+					log.Println(err.Error())
+					return c.JSON(fiber.Map{
+						"message": err.Error(),
+						"file":    "save",
+					})
+				}
 				safetyLicense, err := c.FormFile("SafetyLicense")
 				if err != nil {
 					log.Println(err.Error())
@@ -101,6 +119,24 @@ func RegisterUser(c *fiber.Ctx) error {
 				// Save file to disk
 				// Allow multipart form
 				err = c.SaveFile(safetyLicense, fmt.Sprintf("./SafetyLicenses/%s", safetyLicense.Filename))
+				if err != nil {
+					log.Println(err.Error())
+					return c.JSON(fiber.Map{
+						"message": err.Error(),
+						"file":    "save",
+					})
+				}
+				safetyLicenseBack, err := c.FormFile("SafetyLicenseBack")
+				if err != nil {
+					log.Println(err.Error())
+					return c.JSON(fiber.Map{
+						"message": err.Error(),
+						"file":    "save",
+					})
+				}
+				// Save file to disk
+				// Allow multipart form
+				err = c.SaveFile(safetyLicenseBack, fmt.Sprintf("./SafetyLicenses/%s", safetyLicenseBack.Filename))
 				if err != nil {
 					log.Println(err.Error())
 					return c.JSON(fiber.Map{
@@ -126,7 +162,31 @@ func RegisterUser(c *fiber.Ctx) error {
 						"file":    "save",
 					})
 				}
+				drugTestBack, err := c.FormFile("DrugTestBack")
+				if err != nil {
+					log.Println(err.Error())
+					return c.JSON(fiber.Map{
+						"message": err.Error(),
+						"file":    "save",
+					})
+				}
+				// Save file to disk
+				// Allow multipart form
+				err = c.SaveFile(drugTestBack, fmt.Sprintf("./DrugTests/%s", drugTestBack.Filename))
+				if err != nil {
+					log.Println(err.Error())
+					return c.JSON(fiber.Map{
+						"message": err.Error(),
+						"file":    "save",
+					})
+				}
 				// user.Image = file.Filename
+				user.DriverLicenseImageName = driverLicense.Filename
+				user.DriverLicenseImageNameBack = driverLicenseBack.Filename
+				user.SafetyLicenseImageName = safetyLicense.Filename
+				user.SafetyLicenseImageNameBack = safetyLicenseBack.Filename
+				user.DrugTestImageName = drugTest.Filename
+				user.DrugTestImageNameBack = drugTestBack.Filename
 
 				Database.DB.Create(&user)
 			} else {
@@ -159,53 +219,6 @@ func RegisterUser(c *fiber.Ctx) error {
 		})
 	}
 }
-
-func Upload(c *fiber.Ctx) error {
-	file, err := c.FormFile("file")
-	if err != nil {
-		return c.Status(422).JSON(fiber.Map{"errors": [1]string{"We were not able upload your attachment"}})
-	}
-	err = c.SaveFile(file, fmt.Sprintf("./uploads/%s", file.Filename))
-	if err != nil {
-		return c.Status(422).JSON(fiber.Map{"errors": [1]string{"We were not able upload your attachment"}})
-	}
-	return c.JSON(fiber.Map{
-		"message": "File uploaded successfully",
-	})
-}
-
-// func Register(c *fiber.Ctx) error {
-// 	fmt.Println("Register")
-// 	var data map[string]string
-// 	user := new(models.User)
-// 	fmt.Println("c", c.BodyParser(&data))
-// 	if err := c.BodyParser(&user); err != nil {
-// 		// return err
-// 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-// 			"message": err.Error(),
-// 		})
-// 	}
-
-// 	errors := validation.ValidateStruct(*user)
-// 	if errors != nil {
-// 		return c.Status(fiber.StatusBadRequest).JSON(errors)
-// 	}
-
-// 	password, _ := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-
-// 	newuser := models.User{
-// 		Name:     user.Name,
-// 		Email:    user.Email,
-// 		Password: password,
-// 	}
-
-// 	fmt.Println("dd", user, newuser)
-
-// 	database.DB.Create(&newuser)
-
-// 	// return c.SendString("Hello, World 👋!")
-// 	return c.JSON(newuser)
-// }
 
 func Login(c *fiber.Ctx) error {
 	var data map[string]string

@@ -1,4 +1,4 @@
-// ignore_for_file: non_constant_identifier_names, import_of_legacy_library_into_null_safe, file_names
+// ignore_for_file: non_constant_identifier_names, import_of_legacy_library_into_null_safe, file_names, unused_local_variable
 
 import 'dart:convert';
 
@@ -24,7 +24,19 @@ class CarProgressDetailScreen extends StatefulWidget {
 late BuildContext dialogContext;
 var isCompleted = false;
 final String currentTime = intl.DateFormat('hh:mm a').format(DateTime.now());
+late int Speed;
 Dio dio = Dio();
+
+Future<String> loadData (String CarNoPlate) async {
+  await dio.post("$SERVER_IP/api/GetVehicleStatus", data: jsonEncode({
+    "CarNoPlate": CarNoPlate,
+  })).then((value) {
+    // var jsonResponse = json.decode(utf8.decode(value.data));
+    Speed = value.data["Speed"];
+  });
+  return "";
+}
+
 class _CarProgressDetailScreenState extends State<CarProgressDetailScreen>
     with TickerProviderStateMixin {
   List<step.Step> steps = [];
@@ -32,8 +44,7 @@ class _CarProgressDetailScreenState extends State<CarProgressDetailScreen>
   @override
   void initState() {
     dio.options.headers["Cookie"] = "jwt=${widget.jwt}";
-    dio.options.headers["Content-Type"] =
-    "application/json";
+    dio.options.headers["Content-Type"] = "application/json";
     var StepsJson = jsonDecode(widget.car["StepCompleteTime"]);
     if (StepsJson["DropOffPoints"][widget.car["NoOfDropOffPoints"] - 1][2] ==
         true) {
@@ -171,13 +182,18 @@ class _CarProgressDetailScreenState extends State<CarProgressDetailScreen>
                       ),
                     );
                   });
-              var res = await dio.post("$SERVER_IP/api/DeleteCarTrip", data: jsonEncode({
-                "TripId": widget.car["CardID"],
-                "CarNoPlate": widget.car["CarNoPlate"],
-                "DriverName": widget.car["DriverName"],
+              var res = await dio
+                  .post(
+                "$SERVER_IP/api/DeleteCarTrip",
+                data: jsonEncode(
+                  {
+                    "TripId": widget.car["CardID"],
+                    "CarNoPlate": widget.car["CarNoPlate"],
+                    "DriverName": widget.car["DriverName"],
                   },
                 ),
-              ).then((value) {
+              )
+                  .then((value) {
                 Navigator.pop(dialogContext);
                 Navigator.pushReplacement(
                   context,
@@ -222,7 +238,24 @@ class _CarProgressDetailScreenState extends State<CarProgressDetailScreen>
           ),
         ),
       ),
-      body: content(),
+      body: FutureBuilder(
+        future: loadData(widget.car["CarNoPlate"]),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return content();
+          }
+          else {
+            return Center(
+              // Display lottie animation
+              child: Lottie.asset(
+                "lottie/SplashScreen.json",
+                height: 200,
+                width: 200,
+              ),
+            );
+          }
+        },
+      ),
     );
   }
 
@@ -283,7 +316,14 @@ class _CarProgressDetailScreenState extends State<CarProgressDetailScreen>
             ),
           ),
         ),
-        body()
+       const SizedBox(height: 20,),
+        Center(child: Text("Current Speed: ${Speed.toString()}", style: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
+        ),
+        ),
+        body(),
       ],
     );
   }
@@ -359,11 +399,14 @@ class _CarProgressDetailScreenState extends State<CarProgressDetailScreen>
                             });
                         // Connect to websocket and send message
                         setState(() {});
-                        var res = await dio.post("$SERVER_IP/api/NextStep", data: jsonEncode({
-                          "Date":
-                          DateTime.now().toString().substring(0, 10),
-                          "Time": currentTime,
-                          "TripId": widget.car["CardID"],
+                        var res = await dio.post(
+                          "$SERVER_IP/api/NextStep",
+                          data: jsonEncode(
+                            {
+                              "Date":
+                                  DateTime.now().toString().substring(0, 10),
+                              "Time": currentTime,
+                              "TripId": widget.car["CardID"],
                             },
                           ),
                         );
@@ -422,11 +465,15 @@ class _CarProgressDetailScreenState extends State<CarProgressDetailScreen>
                                 ),
                               );
                             });
-                        var res = await dio.post("$SERVER_IP/api/CompleteTrip", data: jsonEncode({
-                          "Date": DateTime.now().toString().substring(0, 10),
-                          "CarNoPlate": widget.car["CarNoPlate"],
-                          "TripId": widget.car["CardID"],
-                          "DriverName": widget.car["DriverName"],
+                        var res = await dio.post(
+                          "$SERVER_IP/api/CompleteTrip",
+                          data: jsonEncode(
+                            {
+                              "Date":
+                                  DateTime.now().toString().substring(0, 10),
+                              "CarNoPlate": widget.car["CarNoPlate"],
+                              "TripId": widget.car["CardID"],
+                              "DriverName": widget.car["DriverName"],
                             },
                           ),
                         );
@@ -485,9 +532,12 @@ class _CarProgressDetailScreenState extends State<CarProgressDetailScreen>
                           ),
                         );
                       });
-                  var res = await dio.post("$SERVER_IP/api/PreviousStep", data: jsonEncode({
-                    "Date": DateTime.now().toString().substring(0, 10),
-                    "TripId": widget.car["CardID"],
+                  var res = await dio.post(
+                    "$SERVER_IP/api/PreviousStep",
+                    data: jsonEncode(
+                      {
+                        "Date": DateTime.now().toString().substring(0, 10),
+                        "TripId": widget.car["CardID"],
                       },
                     ),
                   );

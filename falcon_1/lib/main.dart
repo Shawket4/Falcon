@@ -1,10 +1,13 @@
-// ignore_for_file: constant_identifier_names, non_constant_identifier_names
+// ignore_for_file: constant_identifier_names, non_constant_identifier_names, unused_local_variable
 
 import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:falcon_1/Screens/ApproveRequest.dart';
 import 'package:falcon_1/Screens/CarProgressScreen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:lottie/lottie.dart';
 import 'Screens/Login.dart';
 
@@ -17,6 +20,14 @@ void main() {
   runApp(const MainWidget());
 }
 
+Future<Uint8List?> CompressFile(File file) async {
+  final result = await FlutterImageCompress.compressWithFile(
+    file.absolute.path,
+    quality: 30,
+  );
+  return result;
+}
+
 String permission = "";
 String name = "";
 
@@ -26,7 +37,6 @@ Future<Object> getPermission(String jwt) async {
   dio.options.headers["Content-Type"] = "application/json";
   var res = await dio.post("$SERVER_IP/api/user").then((response) {
     var str = response.data;
-    print(response.statusCode);
     permission = str["permission"].toString();
     name = str["name"];
   });
@@ -35,6 +45,7 @@ Future<Object> getPermission(String jwt) async {
     "name": name,
   };
 }
+
 Future<String> get jwtOrEmpty async {
   var jwt = await storage.read(key: "jwt");
   if (jwt == null) {
@@ -47,9 +58,8 @@ Future<String> get jwtOrEmpty async {
   dio.options.headers["Content-Type"] = "application/json";
   var res = await dio.post("$SERVER_IP/api/user").then((response) async {
     var str = response.data;
-    print(response.statusCode);
     if (response.statusCode == 401) {
-    await storage.delete(key: "jwt");
+      await storage.delete(key: "jwt");
     }
     permission = str["permission"].toString();
     name = str["name"];
