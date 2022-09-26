@@ -19,16 +19,20 @@ Dio dio = Dio();
 class _AllTransportersState extends State<AllTransporters> {
   Future<String> get loadData async {
     if (TransporterList.isEmpty) {
-      var res = await dio
-          .post("$SERVER_IP/api/GetTransporterProfileData")
-          .then((response) {
-        // Print Json Response  where date is = DateFrom
-        for (var i = 0; i < response.data.length; i++) {
-          TransporterList.add(response.data[i]);
-        }
-        TransporterList.sort(
-            (a, b) => a['TransporterName'].compareTo(b['TransporterName']));
-      });
+      try {
+        var res = await dio
+            .post("$SERVER_IP/api/GetTransporterProfileData")
+            .then((response) {
+          // Print Json Response  where date is = DateFrom
+          for (var i = 0; i < response.data.length; i++) {
+            TransporterList.add(response.data[i]);
+          }
+          TransporterList.sort(
+              (a, b) => a['TransporterName'].compareTo(b['TransporterName']));
+        });
+      } catch (e) {
+        return "Error";
+      }
     }
     setState(() {});
     return "";
@@ -70,7 +74,53 @@ class _AllTransportersState extends State<AllTransporters> {
       body: FutureBuilder(
           future: loadData,
           builder: (context, snapshot) {
-            if (snapshot.hasData) {
+            if (!snapshot.hasData) {
+              return Center(
+                // Display lottie animation
+                child: Lottie.asset(
+                  "lottie/SplashScreen.json",
+                  height: 200,
+                  width: 200,
+                ),
+              );
+            } else if (snapshot.data.toString() == "Error") {
+              return Scaffold(
+                body: Padding(
+                  padding: const EdgeInsets.only(bottom: 100.0),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: double.infinity,
+                          child: Center(
+                            // Display lottie animation
+                            child: Lottie.asset(
+                              "lottie/Error.json",
+                              height: 300,
+                              width: 300,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => AllTransporters(
+                                  jwt: widget.jwt,
+                                ),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.refresh),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            } else {
               return LiquidPullToRefresh(
                 onRefresh: reloadData,
                 animSpeedFactor: 1.5,
@@ -131,15 +181,6 @@ class _AllTransportersState extends State<AllTransporters> {
                       itemCount: TransporterList.length,
                     ),
                   ],
-                ),
-              );
-            } else {
-              return Center(
-                // Display lottie animation
-                child: Lottie.asset(
-                  "lottie/SplashScreen.json",
-                  height: 200,
-                  width: 200,
                 ),
               );
             }

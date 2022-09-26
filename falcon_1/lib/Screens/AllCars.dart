@@ -22,14 +22,18 @@ Dio dio = Dio();
 class _AllCarsState extends State<AllCars> {
   Future<String> get loadData async {
     if (CarList.isEmpty) {
-      var res =
-          await dio.post("$SERVER_IP/api/GetCarProfileData").then((response) {
-        // Print Json Response  where date is = DateFrom
-        for (var i = 0; i < response.data.length; i++) {
-          CarList.add(response.data[i]);
-        }
-        CarList.sort((a, b) => a['CarNoPlate'].compareTo(b['CarNoPlate']));
-      });
+      try {
+        var res =
+            await dio.post("$SERVER_IP/api/GetCarProfileData").then((response) {
+          // Print Json Response  where date is = DateFrom
+          for (var i = 0; i < response.data.length; i++) {
+            CarList.add(response.data[i]);
+          }
+          CarList.sort((a, b) => a['CarNoPlate'].compareTo(b['CarNoPlate']));
+        });
+      } catch (e) {
+        return "Error";
+      }
     }
     setState(() {});
     return "";
@@ -71,7 +75,53 @@ class _AllCarsState extends State<AllCars> {
       body: FutureBuilder(
           future: loadData,
           builder: (context, snapshot) {
-            if (snapshot.hasData) {
+            if (!snapshot.hasData) {
+              return Center(
+                // Display lottie animation
+                child: Lottie.asset(
+                  "lottie/SplashScreen.json",
+                  height: 200,
+                  width: 200,
+                ),
+              );
+            } else if (snapshot.data.toString() == "Error") {
+              return Scaffold(
+                body: Padding(
+                  padding: const EdgeInsets.only(bottom: 100.0),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: double.infinity,
+                          child: Center(
+                            // Display lottie animation
+                            child: Lottie.asset(
+                              "lottie/Error.json",
+                              height: 300,
+                              width: 300,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => AllCars(
+                                  jwt: widget.jwt,
+                                ),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.refresh),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            } else {
               return CarList.isEmpty
                   ? const Center(
                       child: Text("No Cars Found"),
@@ -160,15 +210,6 @@ class _AllCarsState extends State<AllCars> {
                         ),
                       ),
                     );
-            } else {
-              return Center(
-                // Display lottie animation
-                child: Lottie.asset(
-                  "lottie/SplashScreen.json",
-                  height: 200,
-                  width: 200,
-                ),
-              );
             }
           }),
     );

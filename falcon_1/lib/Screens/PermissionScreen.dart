@@ -11,9 +11,14 @@ import 'package:lottie/lottie.dart';
 List<dynamic> users = [];
 Dio dio = Dio();
 Future<Object> loadData(String jwt) async {
-  var res = await dio.post("$SERVER_IP/api/GetNonDriverUsers").then((response) {
-    users = response.data["Users"];
-  });
+  try {
+    var res =
+        await dio.post("$SERVER_IP/api/GetNonDriverUsers").then((response) {
+      users = response.data["Users"];
+    });
+  } catch (e) {
+    return "Error";
+  }
   return {
     "Users": users,
   };
@@ -54,8 +59,54 @@ class _PermissionScreenState extends State<PermissionScreen> {
       body: FutureBuilder(
         future: loadData(widget.jwt),
         builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            //Return a listtile check list of users
+          if (!snapshot.hasData) {
+            //Return a List tile check list of users
+            return Center(
+              // Display lottie animation
+              child: Lottie.asset(
+                "lottie/SplashScreen.json",
+                height: 200,
+                width: 200,
+              ),
+            );
+          } else if (snapshot.data.toString() == "Error") {
+            return Scaffold(
+              body: Padding(
+                padding: const EdgeInsets.only(bottom: 100.0),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: double.infinity,
+                        child: Center(
+                          // Display lottie animation
+                          child: Lottie.asset(
+                            "lottie/Error.json",
+                            height: 300,
+                            width: 300,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => PermissionScreen(
+                                jwt: widget.jwt,
+                              ),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.refresh),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          } else {
             return Column(
               children: [
                 Container(
@@ -148,15 +199,6 @@ class _PermissionScreenState extends State<PermissionScreen> {
                   },
                 ),
               ],
-            );
-          } else {
-            return Center(
-              // Display lottie animation
-              child: Lottie.asset(
-                "lottie/SplashScreen.json",
-                height: 200,
-                width: 200,
-              ),
             );
           }
         },

@@ -137,63 +137,59 @@ class _AddTransporterState extends State<AddTransporter> {
               const SizedBox(height: 20),
               Center(
                 // ignore: deprecated_member_use
-                child: FlatButton(
-                  onPressed: () async => {
+                child: TextButton(
+                  onPressed: () async {
                     if (_nameController.text.isEmpty ||
                         _phoneControllers[0].text.isEmpty ||
                         _phoneNameControllers[0].text.isEmpty ||
                         _emailController.text.isEmpty ||
-                        _passwordController.text.isEmpty)
-                      {
-                        showCupertinoDialog(
-                          context: context,
-                          builder: (context) => CupertinoAlertDialog(
-                            title: const Text("خطأ"),
-                            content: const Text("يرجى ملء جميع الحقول"),
-                            actions: <Widget>[
-                              CupertinoDialogAction(
-                                child: const Text("حسنا"),
-                                onPressed: () => Navigator.pop(context),
-                              ),
-                            ],
-                          ),
+                        _passwordController.text.isEmpty) {
+                      showCupertinoDialog(
+                        context: context,
+                        builder: (context) => CupertinoAlertDialog(
+                          title: const Text("خطأ"),
+                          content: const Text("يرجى ملء جميع الحقول"),
+                          actions: <Widget>[
+                            CupertinoDialogAction(
+                              child: const Text("حسنا"),
+                              onPressed: () => Navigator.pop(context),
+                            ),
+                          ],
                         ),
-                      }
-                    else
-                      {
-                        showDialog(
-                            context: context,
-                            barrierDismissible: false,
-                            builder: (context) {
-                              dialogContext = context;
-                              return Dialog(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12.0),
-                                ),
-                                child: SizedBox(
-                                  height: 400,
-                                  width: double.infinity,
-                                  child: Center(
-                                    // Display lottie animation
-                                    child: Lottie.asset(
-                                      "lottie/SplashScreen.json",
-                                      height: 200,
-                                      width: 200,
-                                    ),
+                      );
+                    } else {
+                      showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) {
+                            dialogContext = context;
+                            return Dialog(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              child: SizedBox(
+                                height: 400,
+                                width: double.infinity,
+                                child: Center(
+                                  // Display lottie animation
+                                  child: Lottie.asset(
+                                    "lottie/SplashScreen.json",
+                                    height: 200,
+                                    width: 200,
                                   ),
                                 ),
-                              );
-                            }),
-                        // Make a list of map of phoneNumber and phoneName
+                              ),
+                            );
+                          });
+                      // Make a list of map of phoneNumber and phoneName
 
-                        for (int i = 0; i <= _phoneCount; i++)
-                          {
-                            phoneNumbers.add({
-                              _phoneNameControllers[i].text:
-                                  _phoneControllers[i].text,
-                            }),
-                          },
-
+                      for (int i = 0; i <= _phoneCount; i++) {
+                        phoneNumbers.add({
+                          _phoneNameControllers[i].text:
+                              _phoneControllers[i].text,
+                        });
+                      }
+                      try {
                         await http
                             .post(
                           Uri.parse("$SERVER_IP/api/RegisterTransporter"),
@@ -209,39 +205,198 @@ class _AddTransporterState extends State<AddTransporter> {
                           ),
                         )
                             .then((value) async {
-                          // print(value.body);
-                          await http.post(
-                            Uri.parse("$SERVER_IP/api/RegisterUser"),
-                            headers: {
-                              "Content-Type": "application/json",
-                              "Cookie": "jwt=${widget.jwt}",
-                            },
-                            body: jsonEncode({
-                              "name": _nameController.text,
-                              "email": _emailController.text,
-                              "password": _passwordController.text,
-                              "permission": "1",
-                            }),
-                          );
-                          _nameController.clear();
-                          formChildren = [];
-                          _phoneControllers = [];
-                          _phoneNameControllers = [];
-                          phoneNumbers = [];
-                          _phoneControllers.add(TextEditingController());
-                          _phoneNameControllers.add(TextEditingController());
-                          _phoneCount = 0;
-                        }),
-                      },
-                    Navigator.pop(dialogContext),
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => CarProgressScreen(
-                          jwt: widget.jwt.toString(),
-                        ),
-                      ),
-                    ),
+                          if (value.statusCode == 200) {
+                            // print(value.body);
+                            await http.post(
+                              Uri.parse("$SERVER_IP/api/RegisterUser"),
+                              headers: {
+                                "Content-Type": "application/json",
+                                "Cookie": "jwt=${widget.jwt}",
+                              },
+                              body: jsonEncode({
+                                "name": _nameController.text,
+                                "email": _emailController.text,
+                                "password": _passwordController.text,
+                                "permission": "1",
+                              }),
+                            );
+                            _nameController.clear();
+                            formChildren = [];
+                            _phoneControllers = [];
+                            _phoneNameControllers = [];
+                            phoneNumbers = [];
+                            _phoneControllers.add(TextEditingController());
+                            _phoneNameControllers.add(TextEditingController());
+                            _phoneCount = 0;
+                            setState(() {
+                              Navigator.pop(dialogContext);
+                            });
+                            showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (context) {
+                                  dialogContext = context;
+                                  return Dialog(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12.0),
+                                    ),
+                                    child: SizedBox(
+                                      height: 400,
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          SizedBox(
+                                            width: double.infinity,
+                                            child: Center(
+                                              // Display lottie animation
+                                              child: Lottie.asset(
+                                                "lottie/Success.json",
+                                                height: 300,
+                                                width: 300,
+                                              ),
+                                            ),
+                                          ),
+                                          TextButton(
+                                            onPressed: () {
+                                              setState(() {
+                                                Navigator.pop(dialogContext);
+                                              });
+                                              Navigator.pushReplacement(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (_) =>
+                                                      CarProgressScreen(
+                                                    jwt: widget.jwt.toString(),
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                            child: const Text(
+                                              "Close",
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 20,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                });
+                          } else {
+                            showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (context) {
+                                  dialogContext = context;
+                                  return Dialog(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12.0),
+                                    ),
+                                    child: SizedBox(
+                                      height: 400,
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          SizedBox(
+                                            width: double.infinity,
+                                            child: Center(
+                                              // Display lottie animation
+                                              child: Lottie.asset(
+                                                "lottie/Error.json",
+                                                height: 300,
+                                                width: 300,
+                                              ),
+                                            ),
+                                          ),
+                                          TextButton(
+                                            onPressed: () {
+                                              setState(() {
+                                                Navigator.pop(dialogContext);
+                                              });
+                                              Navigator.pushReplacement(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (_) =>
+                                                      CarProgressScreen(
+                                                    jwt: widget.jwt.toString(),
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                            child: const Text(
+                                              "Close",
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 20,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                });
+                          }
+                        });
+                      } catch (_) {
+                        showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (context) {
+                              dialogContext = context;
+                              return Dialog(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12.0),
+                                ),
+                                child: SizedBox(
+                                  height: 400,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      SizedBox(
+                                        width: double.infinity,
+                                        child: Center(
+                                          // Display lottie animation
+                                          child: Lottie.asset(
+                                            "lottie/Error.json",
+                                            height: 300,
+                                            width: 300,
+                                          ),
+                                        ),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            Navigator.pop(dialogContext);
+                                          });
+                                          Navigator.pushReplacement(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) => CarProgressScreen(
+                                                jwt: widget.jwt.toString(),
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        child: const Text(
+                                          "Close",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 20,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            });
+                      }
+                    }
                   },
                   child: Container(
                     decoration: BoxDecoration(

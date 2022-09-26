@@ -230,7 +230,7 @@ class _EditDriverScreenState extends State<EditDriverScreen> {
               const SizedBox(height: 20),
               Center(
                 // ignore: deprecated_member_use
-                child: FlatButton(
+                child: TextButton(
                   onPressed: () async => {
                     if (_driverNameController.text.isEmpty ||
                         _mobileController.text.isEmpty ||

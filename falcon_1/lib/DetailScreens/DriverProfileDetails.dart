@@ -1,4 +1,4 @@
-// ignore_for_file: file_names, unrelated_type_equality_checks, unused_local_variable
+// ignore_for_file: file_names, unrelated_type_equality_checks, unused_local_variable, deprecated_member_use
 
 import 'dart:convert';
 import 'dart:io';
@@ -9,12 +9,10 @@ import 'package:falcon_1/EditScreens/EditDriver.dart';
 import 'package:falcon_1/Screens/CarProgressScreen.dart';
 import 'package:falcon_1/main.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
 import 'package:http/http.dart' as http;
 
 import 'ImageView.dart';
-// import 'package:http/http.dart' as http;
 
 class DriverProfileDetails extends StatefulWidget {
   const DriverProfileDetails(
@@ -33,7 +31,6 @@ class _DriverProfileDetailsState extends State<DriverProfileDetails> {
   Map<String, Uint8List> imageBytes = {};
 
   Future<Object> get loadImages async {
-
     if (widget.driver["DriverLicenseImageName"] == "") {
       return "";
     }
@@ -84,8 +81,7 @@ class _DriverProfileDetailsState extends State<DriverProfileDetails> {
 
     if (widget.driver["DrugTestImageName"] != "") {
       http.Response drugTestFront = await http.get(
-        Uri.parse(
-            "$SERVER_IP/DrugTests/${widget.driver["DrugTestImageName"]}"),
+        Uri.parse("$SERVER_IP/DrugTests/${widget.driver["DrugTestImageName"]}"),
       );
       if (drugTestFront.statusCode == HttpStatus.ok) {
         final Uint8List drugTestBytes = drugTestFront.bodyBytes;
@@ -104,26 +100,6 @@ class _DriverProfileDetailsState extends State<DriverProfileDetails> {
       }
     }
 
-    // final Uint8List driverLicencesBytes = (await NetworkAssetBundle(
-    //   Uri.parse(
-    //       "$SERVER_IP/DriverLicenses/${widget.driver["DriverLicenseImageName"]}"),
-    // ).load("$SERVER_IP/DriverLicenses/${widget.driver["DriverLicenseImageName"]}"))
-    //     .buffer
-    //     .asUint8List();
-    // final Uint8List safetyLicencesBytes = (await NetworkAssetBundle(
-    //   Uri.parse(
-    //       "$SERVER_IP/SafetyLicenses/${widget.driver["SafetyLicenseImageName"]}"),
-    // ).load("$SERVER_IP/SafetyLicenses/${widget.driver["SafetyLicenseImageName"]}"))
-    //     .buffer
-    //     .asUint8List();
-    // final Uint8List drugTestBytes = (await NetworkAssetBundle(
-    //   Uri.parse("$SERVER_IP/DrugTests/${widget.driver["DrugTestImageName"]}"),
-    // ).load("$SERVER_IP/DrugTests/${widget.driver["DrugTestImageName"]}"))
-    //     .buffer
-    //     .asUint8List();
-    // imageBytes.add(driverLicencesBytes);
-    // imageBytes.add(safetyLicencesBytes);
-    // imageBytes.add(drugTestBytes);
     return {
       "Images": imageBytes,
     };
@@ -212,90 +188,134 @@ class _DriverProfileDetailsState extends State<DriverProfileDetails> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        actions: <IconButton>[
-          IconButton(
-            onPressed: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      EditDriverScreen(jwt: widget.jwt, driver: widget.driver),
+    return FutureBuilder(
+        future: loadImages,
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return Scaffold(
+              body: Center(
+                // Display lottie animation
+                child: Lottie.asset(
+                  "lottie/SplashScreen.json",
+                  height: 200,
+                  width: 200,
                 ),
-              );
-            },
-            icon: const Icon(
-              Icons.edit,
-              color: Colors.white,
-            ),
-          ),
-          IconButton(
-            onPressed: () async {
-              showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (context) {
-                    dialogContext = context;
-                    return Dialog(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.0),
-                      ),
-                      child: SizedBox(
-                        height: 400,
+              ),
+            );
+          } else if (snapshot.data.toString() == "Error") {
+            return Scaffold(
+              body: Padding(
+                padding: const EdgeInsets.only(bottom: 100.0),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
                         width: double.infinity,
                         child: Center(
                           // Display lottie animation
                           child: Lottie.asset(
-                            "lottie/SplashScreen.json",
-                            height: 200,
-                            width: 200,
+                            "lottie/Error.json",
+                            height: 300,
+                            width: 300,
                           ),
                         ),
                       ),
-                    );
-                  });
-              var res = await dio
-                  .post(
-                "$SERVER_IP/api/DeleteDriver",
-                data: jsonEncode(
-                  {
-                    "Name": widget.driver["Name"],
-                  },
+                      IconButton(
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const MainWidget()));
+                        },
+                        icon: const Icon(Icons.refresh),
+                      ),
+                    ],
+                  ),
                 ),
-              )
-                  .then((value) {
-                Navigator.pop(dialogContext);
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => CarProgressScreen(
-                      jwt: widget.jwt.toString(),
+              ),
+            );
+          } else {
+            return Scaffold(
+              appBar: AppBar(
+                centerTitle: true,
+                actions: <IconButton>[
+                  IconButton(
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => EditDriverScreen(
+                              jwt: widget.jwt, driver: widget.driver),
+                        ),
+                      );
+                    },
+                    icon: const Icon(
+                      Icons.edit,
+                      color: Colors.white,
                     ),
                   ),
-                );
-              });
-            },
-            icon: const Icon(
-              Icons.delete,
-              color: Colors.red,
-            ),
-          )
-        ],
-        backgroundColor: Theme.of(context).primaryColor,
-        title: Center(
-          child: Text(
-            'تفاصيل السائق: ${widget.driver["Name"]}',
-            textDirection: TextDirection.rtl,
-          ),
-        ),
-      ),
-      body: FutureBuilder(
-          future: loadImages,
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return ListView(
+                  IconButton(
+                    onPressed: () async {
+                      showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) {
+                            dialogContext = context;
+                            return Dialog(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              child: SizedBox(
+                                height: 400,
+                                width: double.infinity,
+                                child: Center(
+                                  // Display lottie animation
+                                  child: Lottie.asset(
+                                    "lottie/SplashScreen.json",
+                                    height: 200,
+                                    width: 200,
+                                  ),
+                                ),
+                              ),
+                            );
+                          });
+                      var res = await dio
+                          .post(
+                        "$SERVER_IP/api/DeleteDriver",
+                        data: jsonEncode(
+                          {
+                            "Name": widget.driver["Name"],
+                          },
+                        ),
+                      )
+                          .then((value) {
+                        Navigator.pop(dialogContext);
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => CarProgressScreen(
+                              jwt: widget.jwt.toString(),
+                            ),
+                          ),
+                        );
+                      });
+                    },
+                    icon: const Icon(
+                      Icons.delete,
+                      color: Colors.red,
+                    ),
+                  )
+                ],
+                backgroundColor: Theme.of(context).primaryColor,
+                title: Center(
+                  child: Text(
+                    'تفاصيل السائق: ${widget.driver["Name"]}',
+                    textDirection: TextDirection.rtl,
+                  ),
+                ),
+              ),
+              body: ListView(
                 shrinkWrap: true,
                 children: <Widget>[
                   SizedBox(
@@ -336,7 +356,7 @@ class _DriverProfileDetailsState extends State<DriverProfileDetails> {
                       : Padding(
                           padding:
                               const EdgeInsets.only(left: 100.0, right: 100),
-                          child: FlatButton(
+                          child: TextButton(
                             onPressed: () async {
                               Navigator.push(
                                 context,
@@ -511,19 +531,9 @@ class _DriverProfileDetailsState extends State<DriverProfileDetails> {
                     height: 15,
                   ),
                 ],
-              );
-            }
-            return Scaffold(
-              body: Center(
-                // Display lottie animation
-                child: Lottie.asset(
-                  "lottie/SplashScreen.json",
-                  height: 200,
-                  width: 200,
-                ),
               ),
             );
-          }),
-    );
+          }
+        });
   }
 }

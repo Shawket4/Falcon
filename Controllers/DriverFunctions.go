@@ -10,118 +10,11 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-type NewTrip struct {
-	DriverName        string   `json:"DriverName"`
-	Date              string   `json:"Date"`
-	CarNoPlate        string   `json:"CarNoPlate"`
-	PickUpPoint       string   `json:"PickUpPoint"`
-	NoOfDropOffPoints int      `json:"NoOfDropOffPoints"`
-	DropOffPoints     []string `json:"DropOffPoints"`
-}
-
-func CreateCarTrip(c *fiber.Ctx) error {
-	if CurrentUser.Id != 0 {
-		var data NewTrip
-		if err := c.BodyParser(&data); err != nil {
-			return err
-		}
-
-		// fmt.Println(data)
-		//
-		db := Database.ConnectToDB()
-		// Step Complete Time
-		var StepCompleteTime string
-		// Format {"TruckLoad": ["", PickUpPoint], DropOffPoints: [[time, DropOffPoint]]}
-		var TruckLoad []string
-		TruckLoad = append(TruckLoad, "0")
-		TruckLoad = append(TruckLoad, data.PickUpPoint)
-		var DropOffPoints [][]string
-
-		for _, DropOffPoint := range data.DropOffPoints {
-			DropOffPoints = append(DropOffPoints, []string{"0", DropOffPoint})
-		}
-		// Step Complete Time
-		StepCompleteTime = fmt.Sprintf("{\"TruckLoad\": [\"%v\",\"%v\", false], \"DropOffPoints\": [", TruckLoad[0], TruckLoad[1])
-		for _, DropOffPoint := range DropOffPoints {
-			StepCompleteTime = fmt.Sprintf("%v[\"%v\", \"%v\", false],", StepCompleteTime, DropOffPoint[0], DropOffPoint[1])
-		}
-		// Remove Last Comma
-		StepCompleteTime = StepCompleteTime[:len(StepCompleteTime)-1]
-		StepCompleteTime = fmt.Sprintf("%v]}", StepCompleteTime)
-		fmt.Println(StepCompleteTime)
-		// Convert DropOffPoints To Array
-		// var DropOffPoints []string
-		// for i := 0; i < len(data["DropOffPoints"]); i++ {
-		// 	if data["DropOffPoints"][i] == ',' {
-		// 		DropOffPoints = append(DropOffPoints, data["DropOffPoints"][i+1:])
-		// 	}
-		// }
-
-		// Check If Car Progress Bar Exists
-
-		// CarProgressBarExistsQuery, err := db.Query("SELECT COUNT(*) FROM CarProgressBars WHERE `Car No Plate` = ? AND Date = ?", data.CarNoPlate, data.Date)
-		// if err != nil {
-		// 	log.Println(err.Error())
-		// }
-		// defer CarProgressBarExistsQuery.Close()
-		// for CarProgressBarExistsQuery.Next() {
-		// 	var count int
-		// 	err = CarProgressBarExistsQuery.Scan(&count)
-		// 	if err != nil {
-		// 		log.Println(err.Error())
-		// 	}
-		// 	if count != 0 {
-		// 		// Remove Car Progress Bar
-		// 		_, err := db.Exec("DELETE FROM CarProgressBars WHERE `Car No Plate` = ? AND Date = ?", data.CarNoPlate, data.Date)
-		// 		if err != nil {
-		// 			log.Println(err.Error())
-		// 		}
-		// 	}
-		// }
-
-		insert, err := db.Query("INSERT INTO CarProgressBars (`CarProgressBarID`, `Date`, `Car No Plate`, `CarProgressIndex`, `Driver Name`, `StepCompleteTime`, `NoOfDropOffPoints`, `IsInTrip`) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?)", data.Date, data.CarNoPlate, 0, data.DriverName, StepCompleteTime, data.NoOfDropOffPoints, "true")
-		if err != nil {
-			log.Println(err.Error())
-		}
-		defer insert.Close()
-		// fmt.Println(data)
-		updateCar, err := db.Query("UPDATE `Cars` SET `IsInTrip` = ? WHERE `CarNoPlate` = ?", "true", data.CarNoPlate)
-		if err != nil {
-			log.Println(err.Error())
-		}
-		defer updateCar.Close()
-		updateDriver, err := db.Query("UPDATE `users` SET `IsInTrip` = ? WHERE `name` = ?", "true", data.DriverName)
-		if err != nil {
-			log.Println(err.Error())
-		}
-		defer updateDriver.Close()
-		// Get Trip id
-		var TripID int
-		TripIDQuery, err := db.Query("SELECT CarProgressBarID FROM CarProgressBars WHERE `Car No Plate` = ? AND Date = ?", data.CarNoPlate, data.Date)
-		if err != nil {
-			log.Println(err.Error())
-		}
-		defer TripIDQuery.Close()
-		for TripIDQuery.Next() {
-			err = TripIDQuery.Scan(&TripID)
-			if err != nil {
-				log.Println(err.Error())
-			}
-		}
-		return c.JSON(fiber.Map{
-			"TripID":  TripID,
-			"message": "Car Trip Created",
-		})
-	}
-	return c.JSON(fiber.Map{
-		"message": "Not Logged In.",
-	})
-}
-
 type DriverStruct struct {
-	DriverName string           `json:"DriverName"`
-	IsInTrip   bool             `json:"IsInTrip"`
-	TripStruct Models.CarStruct `json:"Trip"`
+	DriverName   string           `json:"DriverName"`
+	IsInTrip     bool             `json:"IsInTrip"`
+	Compartments []int            `json:"Compartments"`
+	TripStruct   Models.CarStruct `json:"Trip"`
 }
 
 func GetDriverTrip(c *fiber.Ctx) error {
@@ -129,30 +22,30 @@ func GetDriverTrip(c *fiber.Ctx) error {
 	if CurrentUser.Id != 0 {
 		db := Database.ConnectToDB()
 		var data DriverStruct
-		// Get Date From body parser
-		var bodyDate struct {
-			Date string `json:"Date"`
-		}
-		// Get Date From body parser
-		err := c.BodyParser(&bodyDate)
-		if err != nil {
-			return err
-		}
 
 		data.DriverName = CurrentUser.Name
 		var TripID int
 		// Get the trip of the driver
-		Trip, err := db.Query("SELECT `CarProgressBarID`, `Car No Plate`, `CarProgressIndex`, `StepCompleteTime`, `NoOfDropOffPoints`, `Driver Name` FROM CarProgressBars WHERE `Driver Name` = ? AND `Date` = ? AND `IsInTrip` = ?", data.DriverName, bodyDate.Date, "true")
+		Trip, err := db.Query("SELECT `CarProgressBarID`, `Car No Plate`, `CarProgressIndex`, `StepCompleteTime`, `NoOfDropOffPoints`, `Driver Name`, `Compartments` FROM CarProgressBars WHERE `Driver Name` = ? AND `IsInTrip` = ?", data.DriverName, "true")
 
 		if err != nil {
 			return err
 		}
 
 		defer Trip.Close()
+		var jsonCompartments string
+
 		for Trip.Next() {
-			err = Trip.Scan(&TripID, &data.TripStruct.CarNoPlate, &data.TripStruct.ProgressIndex, &data.TripStruct.StepCompleteTime, &data.TripStruct.NoOfDropOffPoints, &data.TripStruct.DriverName)
+			err = Trip.Scan(&TripID, &data.TripStruct.CarNoPlate, &data.TripStruct.ProgressIndex, &data.TripStruct.StepCompleteTime, &data.TripStruct.NoOfDropOffPoints, &data.TripStruct.DriverName, &jsonCompartments)
 			if err != nil {
 				return c.JSON(err)
+			}
+
+			err = json.Unmarshal([]byte(jsonCompartments), &data.Compartments)
+
+			if err != nil {
+				log.Println(err.Error())
+				return err
 			}
 			data.IsInTrip = true
 		}
@@ -173,9 +66,10 @@ func GetDriverTrip(c *fiber.Ctx) error {
 
 		// Return the trip of the driver
 		return c.JSON(fiber.Map{
-			"IsInTrip": data.IsInTrip,
-			"TripID":   TripID,
-			"Trip":     data.TripStruct,
+			"IsInTrip":     data.IsInTrip,
+			"TripID":       TripID,
+			"Compartments": data.Compartments,
+			"Trip":         data.TripStruct,
 		})
 	} else {
 		return c.JSON(fiber.Map{

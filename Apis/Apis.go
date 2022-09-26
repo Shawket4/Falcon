@@ -10,6 +10,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/360EntSecGroup-Skylar/excelize"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -21,10 +22,13 @@ type Car struct {
 	Compartments                    []int  `json:"Compartments"`
 	LicenseExpirationDate           string `json:"LicenseExpirationDate"`
 	CalibrationExpirationDate       string `json:"CalibrationExpirationDate"`
+	TankLicenseExpirationDate       string `json:"TankLicenseExpirationDate"`
 	CarLicenseImageName             string `json:"CarLicenseImageName"`
 	CalibrationLicenseImageName     string `json:"CalibrationLicenseImageName"`
 	CarLicenseImageNameBack         string `json:"CarLicenseImageNameBack"`
 	CalibrationLicenseImageNameBack string `json:"CalibrationLicenseImageNameBack"`
+	TankLicenseImageName            string `json:"TankLicenseImageName"`
+	TankLicenseImageNameBack        string `json:"TankLicenseImageNameBack"`
 	IsInTrip                        string `json:"IsInTrip"`
 	IsApproved                      int    `json:"IsApproved"`
 }
@@ -89,16 +93,27 @@ func GetProgressOfCars(c *fiber.Ctx) error {
 
 			var Cars []Models.CarStruct
 
-			trips, err := db.Query("SELECT `CarProgressBarID`, `Car No Plate`, `CarProgressIndex`, `Driver Name`, `StepCompleteTime`, `NoOfDropOffPoints`, `Date`, `IsInTrip` FROM CarProgressBars WHERE Date BETWEEN DATE_SUB(?, INTERVAL ? DAY) AND ? ORDER BY `Date` DESC;", Data.DateTo, Days, Data.DateTo)
+			trips, err := db.Query("SELECT `CarProgressBarID`, `Car No Plate`, `CarProgressIndex`, `Driver Name`, `StepCompleteTime`, `NoOfDropOffPoints`, `Date`, `Compartments`, `FeeRate`, `IsInTrip` FROM CarProgressBars WHERE Date BETWEEN DATE_SUB(?, INTERVAL ? DAY) AND ? ORDER BY `Date` DESC;", Data.DateTo, Days, Data.DateTo)
 			if err != nil {
 				log.Println(err)
+				return err
 			}
 			for trips.Next() {
 				var car Models.CarStruct
-				err = trips.Scan(&car.CarID, &car.CarNoPlate, &car.ProgressIndex, &car.DriverName, &car.StepCompleteTime, &car.NoOfDropOffPoints, &car.Date, &car.IsInTrip)
+				var jsonCompartments string
+				err = trips.Scan(&car.CarID, &car.CarNoPlate, &car.ProgressIndex, &car.DriverName, &car.StepCompleteTime, &car.NoOfDropOffPoints, &car.Date, &jsonCompartments, &car.FeeRate, &car.IsInTrip)
 				if err != nil {
 					log.Println(err)
+					return err
 				}
+
+				err = json.Unmarshal([]byte(jsonCompartments), &car.Compartments)
+
+				if err != nil {
+					log.Println(err.Error())
+					return err
+				}
+
 				Cars = append(Cars, car)
 			}
 			if len(Cars) == 0 {
@@ -117,6 +132,17 @@ func GetProgressOfCars(c *fiber.Ctx) error {
 func GetCars(c *fiber.Ctx) error {
 	Controllers.User(c)
 	if Controllers.CurrentUser.Id != 0 {
+		type dataStruct struct {
+			Include string `json:"Include"`
+		}
+		var data dataStruct
+		err := c.BodyParser(&data)
+		if err != nil {
+			return c.JSON(fiber.Map{
+				"message": err.Error(),
+			})
+		}
+
 		db := Database.ConnectToDB()
 		cars, err := db.Query("SELECT `CarNoPlate`, `Compartments` FROM `Cars` WHERE `LicenseExpirationDate` > CURRENT_DATE() AND `CalibrationExpirationDate` > CURRENT_DATE() AND `IsInTrip` = ? AND `IsApproved` = 1;", "false")
 		if err != nil {
@@ -139,6 +165,28 @@ func GetCars(c *fiber.Ctx) error {
 
 			CarNoPlates = append(CarNoPlates, carNoPlateStruct.CarNoPlate)
 			Compartments = append(Compartments, carNoPlateStruct.Compartments)
+		}
+		if data.Include != "" {
+			includedCar, err := db.Query("SELECT `CarNoPlate`, `Compartments` FROM `Cars` WHERE `CarNoPlate` = ?", data.Include)
+			if err != nil {
+				log.Println(err.Error())
+			}
+			defer includedCar.Close()
+			for includedCar.Next() {
+				var carNoPlateStruct struct {
+					CarNoPlate   string `json:"CarNoPlate"`
+					Compartments []int  `json:"Compartments"`
+				}
+				var jsonData string
+				err = includedCar.Scan(&carNoPlateStruct.CarNoPlate, &jsonData)
+				json.Unmarshal([]byte(jsonData), &carNoPlateStruct.Compartments)
+				if err != nil {
+					log.Println(err.Error())
+				}
+
+				CarNoPlates = append(CarNoPlates, carNoPlateStruct.CarNoPlate)
+				Compartments = append(Compartments, carNoPlateStruct.Compartments)
+			}
 		}
 		return c.JSON(fiber.Map{
 			"CarNoPlates":  CarNoPlates,
@@ -287,6 +335,7 @@ func RegisterCar(c *fiber.Ctx) error {
 					"file":    "save",
 				})
 			}
+
 			calibrationLicense, err := c.FormFile("CalibrationLicense")
 			if err != nil {
 				log.Println(err.Error())
@@ -323,8 +372,47 @@ func RegisterCar(c *fiber.Ctx) error {
 					"file":    "save",
 				})
 			}
+
+			tankLicense, err := c.FormFile("TankLicense")
+			if err != nil {
+				log.Println(err.Error())
+				return c.JSON(fiber.Map{
+					"message": err.Error(),
+					"file":    "save",
+				})
+			}
+			// Save file to disk
+			// Allow multipart form
+			err = c.SaveFile(tankLicense, fmt.Sprintf("./TankLicenses/%s", tankLicense.Filename))
+			if err != nil {
+				log.Println(err.Error())
+				return c.JSON(fiber.Map{
+					"message": err.Error(),
+					"file":    "save",
+				})
+			}
+
+			tankLicenseBack, err := c.FormFile("TankLicenseBack")
+			if err != nil {
+				log.Println(err.Error())
+				return c.JSON(fiber.Map{
+					"message": err.Error(),
+					"file":    "save",
+				})
+			}
+			// Save file to disk
+			// Allow multipart form
+			err = c.SaveFile(tankLicenseBack, fmt.Sprintf("./TankLicensesBack/%s", tankLicenseBack.Filename))
+			if err != nil {
+				log.Println(err.Error())
+				return c.JSON(fiber.Map{
+					"message": err.Error(),
+					"file":    "save",
+				})
+			}
+
 			// Insert the car into the database
-			_, err = db.Exec("INSERT INTO `Cars` (`CarId`, `CarNoPlate`, `Transporter`, `TankCapacity`, `Compartments`, `LicenseExpirationDate`, `CalibrationExpirationDate`, `IsApproved`, `CarLicenseImageName`, `CalibrationLicenseImageName`, `CarLicenseImageNameBack`, `CalibrationLicenseImageNameBack`) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", car.CarNoPlate, car.Transporter, car.TankCapacity, jsonCompartments, car.LicenseExpirationDate, car.CalibrationExpirationDate, car.IsApproved, carLicense.Filename, calibrationLicense.Filename, carLicenseBack.Filename, calibrationLicenseBack.Filename)
+			_, err = db.Exec("INSERT INTO `Cars` (`CarId`, `CarNoPlate`, `Transporter`, `TankCapacity`, `Compartments`, `LicenseExpirationDate`, `CalibrationExpirationDate`, `TankLicenseExpirationDate`, `IsApproved`, `CarLicenseImageName`, `CalibrationLicenseImageName`, `CarLicenseImageNameBack`, `CalibrationLicenseImageNameBack`, `TankLicenseImageName`, `TankLicenseImageNameBack`) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", car.CarNoPlate, car.Transporter, car.TankCapacity, jsonCompartments, car.LicenseExpirationDate, car.CalibrationExpirationDate, car.TankLicenseExpirationDate, car.IsApproved, carLicense.Filename, calibrationLicense.Filename, carLicenseBack.Filename, calibrationLicenseBack.Filename, tankLicense.Filename, tankLicenseBack.Filename)
 			if err != nil {
 				log.Println(err.Error())
 				return c.Status(fiber.StatusBadRequest).SendString("Invalid request body")
@@ -971,7 +1059,7 @@ func GetVehicleStatus(c *fiber.Ctx) error {
 			if err != nil {
 				log.Println(err.Error())
 			}
-			for _, s := range Scrapper.VechileStatusList {
+			for _, s := range Scrapper.VehicleStatusList {
 				if s.PlateNo == data.CarNoPlate {
 					return c.JSON(s)
 				}
@@ -987,13 +1075,378 @@ func GetVehicleStatus(c *fiber.Ctx) error {
 	}
 }
 
-func GetVechileMapPoints(c *fiber.Ctx) error {
+type Trip struct {
+	TripId            int             `json:"TripId"`
+	DriverName        string          `json:"DriverName"`
+	Date              string          `json:"Date"`
+	CarNoPlate        string          `json:"CarNoPlate"`
+	PickUpPoint       string          `json:"PickUpPoint"`
+	NoOfDropOffPoints int             `json:"NoOfDropOffPoints"`
+	DropOffPoints     []string        `json:"DropOffPoints"`
+	Compartments      [][]interface{} `json:"Compartments"`
+}
+
+func CreateCarTrip(c *fiber.Ctx) error {
+	Controllers.User(c)
+	if Controllers.CurrentUser.Id != 0 {
+		if Controllers.CurrentUser.Permission == 0 {
+			return c.Status(fiber.StatusForbidden).SendString("You do not have permission to access this page")
+		} else {
+			var data Trip
+			if err := c.BodyParser(&data); err != nil {
+				return err
+			}
+			// fmt.Println(data)
+			//
+			db := Database.ConnectToDB()
+			_ = db
+			// Step Complete Time
+			var StepCompleteTime string
+			// Format {"TruckLoad": ["", PickUpPoint], DropOffPoints: [[time, DropOffPoint]]}
+			var TruckLoad []string
+			TruckLoad = append(TruckLoad, "0")
+			TruckLoad = append(TruckLoad, data.PickUpPoint)
+			var DropOffPoints [][]string
+
+			for _, DropOffPoint := range data.DropOffPoints {
+				DropOffPoints = append(DropOffPoints, []string{"0", DropOffPoint})
+			}
+			// Step Complete Time
+			StepCompleteTime = fmt.Sprintf("{\"TruckLoad\": [\"%v\",\"%v\", false], \"DropOffPoints\": [", TruckLoad[0], TruckLoad[1])
+			for _, DropOffPoint := range DropOffPoints {
+				StepCompleteTime = fmt.Sprintf("%v[\"%v\", \"%v\", false],", StepCompleteTime, DropOffPoint[0], DropOffPoint[1])
+			}
+			// Remove Last Comma
+			StepCompleteTime = StepCompleteTime[:len(StepCompleteTime)-1]
+			StepCompleteTime = fmt.Sprintf("%v]}", StepCompleteTime)
+			// fmt.Println(StepCompleteTime)
+			fmt.Println(data)
+			jsonCompartments, err := json.Marshal(&data.Compartments)
+
+			if err != nil {
+				log.Println(err.Error())
+			}
+
+			getTransporter, err := db.Query("SELECT `Transporter` FROM `Cars` WHERE `CarNoPlate` = ?", data.CarNoPlate)
+
+			if err != nil {
+				log.Println(err.Error())
+			}
+			defer getTransporter.Close()
+			var Transporter string
+			for getTransporter.Next() {
+				err = getTransporter.Scan(&Transporter)
+				if err != nil {
+					log.Println(err.Error())
+					return err
+				}
+			}
+			_, feeRate := GetTransportFee(data.DropOffPoints, data.PickUpPoint)
+
+			insert, err := db.Query("INSERT INTO CarProgressBars (`CarProgressBarID`, `Date`, `Car No Plate`, `CarProgressIndex`, `Driver Name`, `StepCompleteTime`, `NoOfDropOffPoints`, `Compartments`, `PickUpLocation`, `Transporter`, `FeeRate`, `IsInTrip`) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", data.Date, data.CarNoPlate, 0, data.DriverName, StepCompleteTime, data.NoOfDropOffPoints, jsonCompartments, data.PickUpPoint, Transporter, feeRate, "true")
+			if err != nil {
+				log.Println(err.Error())
+			}
+			defer insert.Close()
+			// fmt.Println(data)
+			updateCar, err := db.Query("UPDATE `Cars` SET `IsInTrip` = ? WHERE `CarNoPlate` = ?", "true", data.CarNoPlate)
+			if err != nil {
+				log.Println(err.Error())
+			}
+			defer updateCar.Close()
+			updateDriver, err := db.Query("UPDATE `users` SET `IsInTrip` = ? WHERE `name` = ?", "true", data.DriverName)
+			if err != nil {
+				log.Println(err.Error())
+			}
+			defer updateDriver.Close()
+			// Get Trip id
+			var TripID int
+			TripIDQuery, err := db.Query("SELECT CarProgressBarID FROM CarProgressBars WHERE `Car No Plate` = ? AND Date = ?", data.CarNoPlate, data.Date)
+			if err != nil {
+				log.Println(err.Error())
+			}
+			defer TripIDQuery.Close()
+			for TripIDQuery.Next() {
+				err = TripIDQuery.Scan(&TripID)
+				if err != nil {
+					log.Println(err.Error())
+				}
+			}
+			return c.JSON(fiber.Map{
+				"TripID":  "TripID",
+				"message": "Car Trip Created",
+			})
+		}
+	}
+	return c.JSON(fiber.Map{
+		"message": "Not Logged In.",
+	})
+}
+
+type ExcelTrip struct {
+	Date           string  `json:"Date"`
+	Customer       string  `json:"Customer"`
+	PickUpLocation string  `json:"PickUpLocation"`
+	Transporter    string  `json:"Transporter"`
+	TruckNo        string  `json:"TruckNo"`
+	Diesel         float64 `json:"Diesel"`
+	Gas80          float64 `json:"Gas80"`
+	Gas92          float64 `json:"Gas92"`
+	Gas95          float64 `json:"Gas95"`
+	Mazoot         float64 `json:"Mazoot"`
+	Total          float64 `json:"Total"`
+	FeeRate        float64 `json:"FeeRate"`
+	TotalFees      float64 `json:"TotalFees"`
+}
+
+func GenerateCSVTable(c *fiber.Ctx) error {
+	Controllers.User(c)
+	if Controllers.CurrentUser.Id != 0 {
+		if Controllers.CurrentUser.Permission == 0 {
+			return c.Status(fiber.StatusForbidden).SendString("You do not have permission to access this page")
+		} else {
+			var data struct {
+				DateFrom string `json:"DateFrom"`
+				DateTo   string `json:"DateTo"`
+			}
+
+			err := c.BodyParser(&data)
+
+			if err != nil {
+				log.Println(err.Error())
+				return err
+			}
+
+			headers := map[string]string{
+				"A1": "Date",
+				"B1": "Customer",
+				"C1": "المستودع",
+				"D1": "Transporter",
+				"E1": "Truck Number",
+				"F1": "Diesel",
+				"G1": "Gas 80",
+				"H1": "Gas 92",
+				"I1": "Gas 95",
+				"J1": "مازوت",
+				"K1": "المجموع",
+				"L1": "الفئة",
+				"M1": "التكلفة",
+			}
+			file := excelize.NewFile()
+			for k, v := range headers {
+				file.SetCellValue("Sheet1", k, v)
+			}
+			var trips []ExcelTrip
+			db := Database.ConnectToDB()
+
+			var Days int = DaysBetweenDates(data.DateFrom, data.DateTo)
+
+			getTripsQuery, err := db.Query("SELECT `Date`, `Compartments`, `PickUpLocation`, `Transporter`, `Car No Plate`, `FeeRate` FROM `CarProgressBars` WHERE `Date` BETWEEN DATE_SUB(?, INTERVAL ? DAY) AND ? ORDER BY `Date`;", data.DateTo, Days, data.DateTo)
+			if err != nil {
+				log.Println(err.Error())
+				return err
+			}
+			for getTripsQuery.Next() {
+				var trip ExcelTrip
+				var jsonCompartments string
+				err = getTripsQuery.Scan(&trip.Date, &jsonCompartments, &trip.PickUpLocation, &trip.Transporter, &trip.TruckNo, &trip.FeeRate)
+				if err != nil {
+					log.Println(err.Error())
+					return err
+				}
+				var TruckCompartments [][]interface{}
+				err = json.Unmarshal([]byte(jsonCompartments), &TruckCompartments)
+				if err != nil {
+					log.Println(err.Error())
+					return err
+				}
+				for _, s := range TruckCompartments {
+					var tripFormatted ExcelTrip
+					tripFormatted = trip
+					tripFormatted.Customer = s[1].(string)
+					switch s[2] {
+					case "Diesel":
+						tripFormatted.Diesel = s[0].(float64)
+					case "Gas 80":
+						tripFormatted.Gas80 = s[0].(float64)
+					case "Gas 92":
+						tripFormatted.Gas92 = s[0].(float64)
+					case "Gas 95":
+						tripFormatted.Gas95 = s[0].(float64)
+					case "Mazoot":
+						tripFormatted.Mazoot = s[0].(float64)
+					}
+
+					// if s[2] == "Gas 92" {
+					// 	tripFormatted.Gas92 = int(s[0].(float64))
+					// }
+					tripFormatted.Total = tripFormatted.Diesel + tripFormatted.Gas80 + tripFormatted.Gas92 + tripFormatted.Gas95 + tripFormatted.Mazoot
+					tripFormatted.TotalFees = tripFormatted.Total / 1000 * tripFormatted.FeeRate
+					trips = append(trips, tripFormatted)
+				}
+				fmt.Println(TruckCompartments)
+			}
+			for i := 0; i < len(trips); i++ {
+				appendRow(file, i, trips)
+			}
+			var filename string = fmt.Sprintf("./tasks.xlsx")
+			err = file.SaveAs(filename)
+			if err != nil {
+				fmt.Println(err)
+			}
+			// c.Context().SetContentType("multipart/form-data")
+			// return c.Response().SendFile("./tasks.xlsx")
+			return c.SendFile("./tasks.xlsx", true)
+		}
+	}
+	return c.JSON(fiber.Map{
+		"message": "Not Logged In.",
+	})
+	// appendRow()
+	// fmt.Println(tasks[1])
+}
+
+func appendRow(file *excelize.File, index int, row []ExcelTrip) (fileWriter *excelize.File) {
+	rowCount := index + 2
+	file.SetCellValue("Sheet1", fmt.Sprintf("A%v", rowCount), row[index].Date)
+	file.SetCellValue("Sheet1", fmt.Sprintf("B%v", rowCount), row[index].Customer)
+	file.SetCellValue("Sheet1", fmt.Sprintf("C%v", rowCount), row[index].PickUpLocation)
+	file.SetCellValue("Sheet1", fmt.Sprintf("D%v", rowCount), row[index].Transporter)
+	file.SetCellValue("Sheet1", fmt.Sprintf("E%v", rowCount), row[index].TruckNo)
+	file.SetCellValue("Sheet1", fmt.Sprintf("F%v", rowCount), row[index].Diesel)
+	file.SetCellValue("Sheet1", fmt.Sprintf("G%v", rowCount), row[index].Gas80)
+	file.SetCellValue("Sheet1", fmt.Sprintf("H%v", rowCount), row[index].Gas92)
+	file.SetCellValue("Sheet1", fmt.Sprintf("I%v", rowCount), row[index].Gas95)
+	file.SetCellValue("Sheet1", fmt.Sprintf("J%v", rowCount), row[index].Mazoot)
+	file.SetCellValue("Sheet1", fmt.Sprintf("K%v", rowCount), row[index].Total)
+	file.SetCellValue("Sheet1", fmt.Sprintf("L%v", rowCount), row[index].FeeRate)
+	file.SetCellValue("Sheet1", fmt.Sprintf("M%v", rowCount), row[index].TotalFees)
+	return file
+
+}
+
+func EditCarTrip(c *fiber.Ctx) error {
+	Controllers.User(c)
+	if Controllers.CurrentUser.Id != 0 {
+		if Controllers.CurrentUser.Permission == 0 {
+			return c.Status(fiber.StatusForbidden).SendString("You do not have permission to access this page")
+		} else {
+			var data Trip
+			if err := c.BodyParser(&data); err != nil {
+				return err
+			}
+			// fmt.Println(data)
+			//
+			db := Database.ConnectToDB()
+			_ = db
+			// Step Complete Time
+			var StepCompleteTime string
+			// Format {"TruckLoad": ["", PickUpPoint], DropOffPoints: [[time, DropOffPoint]]}
+			var TruckLoad []string
+			TruckLoad = append(TruckLoad, "0")
+			TruckLoad = append(TruckLoad, data.PickUpPoint)
+			var DropOffPoints [][]string
+
+			for _, DropOffPoint := range data.DropOffPoints {
+				DropOffPoints = append(DropOffPoints, []string{"0", DropOffPoint})
+			}
+			// Step Complete Time
+			StepCompleteTime = fmt.Sprintf("{\"TruckLoad\": [\"%v\",\"%v\", false], \"DropOffPoints\": [", TruckLoad[0], TruckLoad[1])
+			for _, DropOffPoint := range DropOffPoints {
+				StepCompleteTime = fmt.Sprintf("%v[\"%v\", \"%v\", false],", StepCompleteTime, DropOffPoint[0], DropOffPoint[1])
+			}
+			// Remove Last Comma
+			StepCompleteTime = StepCompleteTime[:len(StepCompleteTime)-1]
+			StepCompleteTime = fmt.Sprintf("%v]}", StepCompleteTime)
+			// fmt.Println(StepCompleteTime)
+			fmt.Println(data)
+			jsonCompartments, err := json.Marshal(&data.Compartments)
+
+			if err != nil {
+				log.Println(err.Error())
+			}
+
+			getTransporter, err := db.Query("SELECT `Transporter` FROM `Cars` WHERE `CarNoPlate` = ?", data.CarNoPlate)
+
+			if err != nil {
+				log.Println(err.Error())
+			}
+			defer getTransporter.Close()
+			var Transporter string
+			for getTransporter.Next() {
+				err = getTransporter.Scan(&Transporter)
+				if err != nil {
+					log.Println(err.Error())
+					return err
+				}
+			}
+			_, feeRate := GetTransportFee(data.DropOffPoints, data.PickUpPoint)
+
+			var CurrentCarNoPlate string
+			var CurrentDriverName string
+			ValidationQuery, err := db.Query("SELECT `Car No Plate`, `Driver Name` FROM CarProgressBars WHERE `CarProgressBarID` = ?", data.TripId)
+			if err != nil {
+				log.Println(err.Error())
+			}
+			defer ValidationQuery.Close()
+			for ValidationQuery.Next() {
+				err = ValidationQuery.Scan(&CurrentCarNoPlate, &CurrentDriverName)
+				if err != nil {
+					log.Println(err.Error())
+				}
+				fmt.Println(CurrentCarNoPlate, CurrentDriverName)
+			}
+
+			if data.CarNoPlate != CurrentCarNoPlate {
+				_, err := db.Exec("UPDATE `Cars` SET `IsInTrip` = ? WHERE `CarNoPlate` = ?", "false", CurrentCarNoPlate)
+				if err != nil {
+					return err
+				}
+			}
+
+			if data.DriverName != CurrentDriverName {
+				_, err := db.Exec("UPDATE `users` SET `IsInTrip` = ? WHERE `name` = ?", "false", CurrentDriverName)
+				if err != nil {
+					return err
+				}
+			}
+			fmt.Println(Transporter)
+			updateTrip, err := db.Query("UPDATE `CarProgressBars` SET `Date` = ?, `Car No Plate` = ?, `CarProgressIndex` = ?, `Driver Name` = ?, `StepCompleteTime` = ?, `NoOfDropOffPoints` = ?, `Compartments` = ?, `FeeRate` = ?, `IsInTrip` = ?, `Transporter` = ? WHERE `CarProgressBarID` = ?", data.Date, data.CarNoPlate, 0, data.DriverName, StepCompleteTime, data.NoOfDropOffPoints, jsonCompartments, feeRate, "true", Transporter, data.TripId)
+			if err != nil {
+				log.Println(err.Error())
+			}
+			defer updateTrip.Close()
+			// fmt.Println(data)
+			updateCar, err := db.Query("UPDATE `Cars` SET `IsInTrip` = ? WHERE `CarNoPlate` = ?", "true", data.CarNoPlate)
+			if err != nil {
+				log.Println(err.Error())
+			}
+			defer updateCar.Close()
+			updateDriver, err := db.Query("UPDATE `users` SET `IsInTrip` = ? WHERE `name` = ?", "true", data.DriverName)
+			if err != nil {
+				log.Println(err.Error())
+			}
+			defer updateDriver.Close()
+			// Get Trip id
+
+			return c.JSON(fiber.Map{
+				"TripID":  "TripID",
+				"message": "Car Trip Created",
+			})
+		}
+	}
+	return c.JSON(fiber.Map{
+		"message": "Not Logged In.",
+	})
+}
+
+func GetVehicleMapPoints(c *fiber.Ctx) error {
 	Controllers.User(c)
 	if Controllers.CurrentUser.Id != 0 {
 		if Controllers.CurrentUser.Permission == 0 {
 			return c.Status(fiber.StatusForbidden).SendString("You do not have permission to access this page")
 		} else if Controllers.CurrentUser.Permission >= 2 {
-			return c.JSON(Scrapper.VechileStatusList)
+			return c.JSON(Scrapper.VehicleStatusList)
 		} else if Controllers.CurrentUser.Permission == 1 {
 			db := Database.ConnectToDB()
 			defer db.Close()
@@ -1003,14 +1456,14 @@ func GetVechileMapPoints(c *fiber.Ctx) error {
 				log.Println(err.Error())
 			}
 			var CarPlates []string
-			var CarsList []Scrapper.VechileStatusStruct
+			var CarsList []Scrapper.VehicleStatusStruct
 			for Cars.Next() {
 				var carPlate string
 				Cars.Scan(&carPlate)
 				CarPlates = append(CarPlates, carPlate)
 			}
 
-			for _, scrapperPlate := range Scrapper.VechileStatusList {
+			for _, scrapperPlate := range Scrapper.VehicleStatusList {
 				for _, transporterPlate := range CarPlates {
 					if scrapperPlate.PlateNo == transporterPlate {
 						CarsList = append(CarsList, scrapperPlate)
@@ -1028,4 +1481,91 @@ func GetVechileMapPoints(c *fiber.Ctx) error {
 			"message": "Not Logged In.",
 		})
 	}
+}
+
+func GetLocations(c *fiber.Ctx) error {
+	Controllers.User(c)
+	if Controllers.CurrentUser.Id != 0 {
+		if Controllers.CurrentUser.Permission == 0 {
+			return c.Status(fiber.StatusForbidden).SendString("You do not have permission to access this page")
+		} else {
+			db := Database.ConnectToDB()
+
+			defer db.Close()
+			CustomerQuery, err := db.Query("SELECT DISTINCT `CustomerName` FROM `PriceList` WHERE 1;")
+
+			if err != nil {
+				log.Println(err.Error())
+			}
+
+			var Customers []string
+
+			defer CustomerQuery.Close()
+			for CustomerQuery.Next() {
+				var customer string
+				err = CustomerQuery.Scan(&customer)
+				if err != nil {
+					log.Println(err.Error())
+				}
+				Customers = append(Customers, customer)
+			}
+			TerminalQuery, err := db.Query("SELECT DISTINCT `Terminal` FROM `PriceList` WHERE 1;")
+
+			if err != nil {
+				log.Println(err.Error())
+			}
+
+			var Terminals []string
+
+			defer TerminalQuery.Close()
+			for TerminalQuery.Next() {
+				var terminal string
+				err = TerminalQuery.Scan(&terminal)
+				if err != nil {
+					log.Println(err.Error())
+				}
+				Terminals = append(Terminals, terminal)
+			}
+			return c.JSON(fiber.Map{
+				"Customers": Customers,
+				"Terminals": Terminals,
+			})
+		}
+	} else {
+		return c.JSON(fiber.Map{
+			"message": "Not Logged In.",
+		})
+	}
+}
+
+func GetTransportFee(CustomerNames []string, Terminal string) (int, int) {
+	db := Database.ConnectToDB()
+	defer db.Close()
+	var Distance int
+	var TransportFee int
+
+	for _, Customer := range CustomerNames {
+		fmt.Println(Customer)
+		query, err := db.Query("SELECT `Distance`, `TransportFee` FROM `PriceList` WHERE `CustomerName` = ? AND `Terminal` = ?;", Customer, Terminal)
+		if err != nil {
+			log.Println(err.Error())
+		}
+		defer query.Close()
+		var response struct {
+			Distance     int `json:"Distance"`
+			TransportFee int `json:"TransportFee"`
+		}
+		for query.Next() {
+			err = query.Scan(&response.Distance, &response.TransportFee)
+			if err != nil {
+				log.Println(err.Error())
+			}
+		}
+		Distance += response.Distance
+		if response.TransportFee > TransportFee {
+			TransportFee = response.TransportFee
+		}
+	}
+
+	return Distance, TransportFee
 }

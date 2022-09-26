@@ -4,24 +4,12 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:falcon_1/DetailScreens/CarProgressDetail.dart';
-import 'package:falcon_1/Forms/AddCar.dart';
-import 'package:falcon_1/Forms/AddTransporter.dart';
-import 'package:falcon_1/Forms/AddTrip.dart';
-import 'package:falcon_1/Screens/AllCars.dart';
-import 'package:falcon_1/Screens/AllDrivers.dart';
-import 'package:falcon_1/Screens/AllTransporters.dart';
-import 'package:falcon_1/Screens/ApproveRequest.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:grouped_list/grouped_list.dart';
-import 'package:http/http.dart' as http;
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:lottie/lottie.dart';
-
 import '../main.dart';
-import '../Forms/AddDriver.dart';
-import 'Login.dart';
-import 'PermissionScreen.dart';
 
 class CarProgressScreen extends StatefulWidget {
   const CarProgressScreen({Key? key, required this.jwt}) : super(key: key);
@@ -33,7 +21,7 @@ class CarProgressScreen extends StatefulWidget {
 class _CarProgressScreenState extends State<CarProgressScreen> {
   // This is the SERVER_IP for the web API
   List<dynamic> CarList = [];
-  // Make a map of dates and Carlists
+
   Map<String, dynamic> CarMap = {};
   bool isLoaded = false;
   //Current Date In YYYY--MM--DD Format
@@ -48,55 +36,63 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
 
   Future<String> loadData(String jwt) async {
     if (!isLoaded) {
-      var GetCars = await dio.post(
-        "$SERVER_IP/GetProgressOfCars",
-        data: jsonEncode({
-          "DateFrom": DateFrom,
-          "DateTo": DateTo,
-        }),
-      );
-      if (GetCars.statusCode != 204) {
-        var jsonResponse = GetCars.data;
-        for (var i = 0; i < jsonResponse.length; i++) {
-          CarList.add(jsonResponse[i]);
-          if (CarMap[(jsonResponse)[i]["Date"]] == null) {
-            CarMap[(jsonResponse[i]["Date"])] = [];
+      try {
+        var GetCars = await dio.post(
+          "$SERVER_IP/GetProgressOfCars",
+          data: jsonEncode({
+            "DateFrom": DateFrom,
+            "DateTo": DateTo,
+          }),
+        );
+        if (GetCars.statusCode != 204) {
+          var jsonResponse = GetCars.data;
+          for (var i = 0; i < jsonResponse.length; i++) {
+            CarList.add(jsonResponse[i]);
+            if (CarMap[(jsonResponse)[i]["Date"]] == null) {
+              CarMap[(jsonResponse[i]["Date"])] = [];
+            }
+            await CarMap[(jsonResponse[i]["Date"])]!.add(jsonResponse[i]);
           }
-          await CarMap[(jsonResponse[i]["Date"])]!.add(jsonResponse[i]);
         }
+        isLoaded = true;
+        setState(() {});
+      } catch (e) {
+        return "Error";
       }
-      isLoaded = true;
     }
-    setState(() {});
     return "";
   }
 
-  Future<void> reloadData() async {
+  Future<String> reloadData() async {
     CarList.clear();
     CarMap.clear();
     isLoaded = false;
     if (!isLoaded) {
-      var GetCars = await dio.post(
-        "$SERVER_IP/GetProgressOfCars",
-        data: jsonEncode({
-          "DateFrom": DateFrom,
-          "DateTo": DateTo,
-        }),
-      );
-      if (GetCars.statusCode != 204) {
-        var jsonResponse = GetCars.data;
-        for (var i = 0; i < jsonResponse.length; i++) {
-          CarList.add(jsonResponse[i]);
-          if (CarMap[(jsonResponse)[i]["Date"]] == null) {
-            CarMap[(jsonResponse[i]["Date"])] = [];
+      try {
+        var GetCars = await dio.post(
+          "$SERVER_IP/GetProgressOfCars",
+          data: jsonEncode({
+            "DateFrom": DateFrom,
+            "DateTo": DateTo,
+          }),
+        );
+        if (GetCars.statusCode != 204) {
+          var jsonResponse = GetCars.data;
+          for (var i = 0; i < jsonResponse.length; i++) {
+            CarList.add(jsonResponse[i]);
+            if (CarMap[(jsonResponse)[i]["Date"]] == null) {
+              CarMap[(jsonResponse[i]["Date"])] = [];
+            }
+            await CarMap[(jsonResponse[i]["Date"])]!.add(jsonResponse[i]);
           }
-          await CarMap[(jsonResponse[i]["Date"])]!.add(jsonResponse[i]);
         }
+        isLoaded = true;
+        setState(() {});
+      } catch (e) {
+        return "Error";
       }
-      isLoaded = true;
     }
-    setState(() {});
-    return;
+    return "";
   }
 
   //Make post request and store body response in this variable
@@ -107,52 +103,38 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
     super.initState();
   }
 
-  Widget buildDrawerItem({
-    // required IconData icon,
-    required String title,
-    required void Function() onTap,
-  }) {
-    const color = Colors.white;
-    return Padding(
-      padding: const EdgeInsets.only(top: 2.5, bottom: 2.5),
-      child: ListTile(
-        onTap: onTap,
-        title: Text(
-          title,
-          style: GoogleFonts.josefinSans(
-            textStyle: const TextStyle(
-              color: color,
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     // Return Scaffold with ListView builder from CarList and CarListItem has image and text
     return Scaffold(
+      // bottomNavigationBar: BottomNavigationBar(
+      //   currentIndex: CurrentIndex!,
+      //   onTap: (value) => setState(() {
+      //     if (CurrentIndex != value) {
+      //       CurrentIndex = value;
+      //       Navigator.pushReplacement(
+      //           context,
+      //           MaterialPageRoute(
+      //               builder: (_) => ApproveRequestScreen(jwt: widget.jwt)));
+      //     }
+      //   }),
+      //   items: const <BottomNavigationBarItem>[
+      //     BottomNavigationBarItem(
+      //       icon: Icon(
+      //         Icons.home,
+      //       ),
+      //       label: "Trip Status",
+      //     ),
+      //     BottomNavigationBarItem(
+      //       icon: Icon(Icons.request_page),
+      //       label: "Requests",
+      //     ),
+      //   ],
+      // ),
       appBar: AppBar(
         centerTitle: true,
         backgroundColor: Theme.of(context).primaryColor,
         // Hamburger Menu
-        leading: InkWell(
-          // onTap: _onTapped,
-          child: Builder(
-            builder: (context) {
-              return IconButton(
-                icon: const Icon(Icons.list),
-                onPressed: () {
-                  Scaffold.of(context).openDrawer();
-                },
-              );
-            },
-          ),
-        ),
-
         title: Text(
           'النقلات',
           style: GoogleFonts.josefinSans(
@@ -162,184 +144,8 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
           ),
         ),
       ),
-      drawer: Drawer(
-        backgroundColor: Theme.of(context).primaryColor,
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            const SizedBox(
-              height: 65,
-            ),
-            ListTile(
-              leading: const CircleAvatar(
-                backgroundImage: AssetImage(
-                  "images/user.png",
-                ),
-                radius: 25,
-              ),
-              trailing: Padding(
-                padding: const EdgeInsets.only(
-                  right: 5,
-                ),
-                child: IconButton(
-                  icon: const Icon(
-                    Icons.logout,
-                    color: Colors.white,
-                    size: 28,
-                  ),
-                  onPressed: () {
-                    http.post(Uri.parse("$SERVER_IP/api/logout"), headers: {
-                      "Content-Type": "application/json",
-                      "Cookie": "jwt=${widget.jwt}",
-                    });
-                    storage.delete(key: "jwt");
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const LoginScreen(),
-                      ),
-                    );
-                  },
-                ),
-              ),
-              title: Text(
-                name,
-                style: GoogleFonts.josefinSans(
-                  textStyle: const TextStyle(
-                    fontSize: 18,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(
-              width: 10,
-            ),
-            const SizedBox(
-              height: 15,
-            ),
-            int.parse(permission) >= 3
-                ? buildDrawerItem(
-                    title: "Current System Requests",
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => ApproveRequestScreen(
-                            jwt: widget.jwt,
-                          ),
-                        ),
-                      );
-                    })
-                : Container(),
-            buildDrawerItem(
-              title: "Current Trips",
-              onTap: () => Navigator.pop(context),
-            ),
-            buildDrawerItem(
-                title: "Add Driver",
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => AddDriver(
-                        jwt: widget.jwt.toString(),
-                      ),
-                    ),
-                  );
-                }),
-            buildDrawerItem(
-                title: "Add Car",
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => AddCar(jwt: widget.jwt.toString()),
-                    ),
-                  );
-                }),
-            int.parse(permission) > 1
-                ? buildDrawerItem(
-                    title: "Add Transporter",
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => AddTransporter(
-                            jwt: widget.jwt,
-                          ),
-                        ),
-                      );
-                    },
-                  )
-                : Container(),
-            int.parse(permission) > 1
-                ? buildDrawerItem(
-                    title: "Add Trip",
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              NewCarTripScreen(widget.jwt.toString()),
-                        ),
-                      );
-                    },
-                  )
-                : Container(),
-            buildDrawerItem(
-              title: int.parse(permission) > 1 ? "All Cars" : "My Cars",
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => AllCars(jwt: widget.jwt.toString()),
-                  ),
-                );
-              },
-            ),
-            buildDrawerItem(
-              title: int.parse(permission) > 1 ? "All Drivers" : "My Drivers",
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => AllDrivers(jwt: widget.jwt.toString()),
-                  ),
-                );
-              },
-            ),
-            int.parse(permission) > 1
-                ? buildDrawerItem(
-                    title: "All Transporters",
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              AllTransporters(jwt: widget.jwt.toString()),
-                        ),
-                      );
-                    },
-                  )
-                : Container(),
-            int.parse(permission) > 3
-                ? buildDrawerItem(
-                    title: "Permissions",
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              PermissionScreen(jwt: widget.jwt.toString()),
-                        ),
-                      );
-                    },
-                  )
-                : Container(),
-          ],
-        ),
+      endDrawer: AppDrawer(
+        jwt: widget.jwt,
       ),
       body: FutureBuilder(
         future: loadData(widget.jwt),
@@ -353,9 +159,45 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
                 width: 200,
               ),
             );
+          } else if (snapshot.data.toString() == "Error") {
+            return Scaffold(
+              body: Padding(
+                padding: const EdgeInsets.only(bottom: 100.0),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: double.infinity,
+                        child: Center(
+                          // Display lottie animation
+                          child: Lottie.asset(
+                            "lottie/Error.json",
+                            height: 300,
+                            width: 300,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => CarProgressScreen(
+                                jwt: widget.jwt,
+                              ),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.refresh),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
           }
           if (CarMap.isEmpty) {
-            print(snapshot.data);
             return const Center(
               child: Text('No Current Trips Found'),
             );
@@ -371,7 +213,7 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
                   GroupedListView<dynamic, String>(
                     physics: const BouncingScrollPhysics(),
                     shrinkWrap: true,
-                    useStickyGroupSeparators: true,
+                    // useStickyGroupSeparators: true,
                     scrollDirection: Axis.vertical,
                     groupBy: (element) => element["Date"],
                     sort: false,

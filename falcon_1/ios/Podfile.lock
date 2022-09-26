@@ -33,6 +33,8 @@ PODS:
   - file_picker (0.0.1):
     - DKImagePickerController/PhotoGallery
     - Flutter
+  - file_saver (0.0.1):
+    - Flutter
   - Flutter (1.0.0)
   - flutter_image_compress (1.0.0):
     - Flutter
@@ -40,6 +42,8 @@ PODS:
     - SDWebImage
     - SDWebImageWebPCoder
   - flutter_secure_storage (3.3.1):
+    - Flutter
+  - geolocator_apple (1.2.0):
     - Flutter
   - google_maps_flutter_ios (0.0.1):
     - Flutter
@@ -63,6 +67,8 @@ PODS:
   - Mantle/extobjc (2.2.0)
   - path_provider_ios (0.0.1):
     - Flutter
+  - permission_handler_apple (9.0.4):
+    - Flutter
   - SDWebImage (5.13.2):
     - SDWebImage/Core (= 5.13.2)
   - SDWebImage/Core (5.13.2)
@@ -77,11 +83,14 @@ PODS:
 
 DEPENDENCIES:
   - file_picker (from `.symlinks/plugins/file_picker/ios`)
+  - file_saver (from `.symlinks/plugins/file_saver/ios`)
   - Flutter (from `Flutter`)
   - flutter_image_compress (from `.symlinks/plugins/flutter_image_compress/ios`)
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
+  - geolocator_apple (from `.symlinks/plugins/geolocator_apple/ios`)
   - google_maps_flutter_ios (from `.symlinks/plugins/google_maps_flutter_ios/ios`)
   - path_provider_ios (from `.symlinks/plugins/path_provider_ios/ios`)
+  - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
   - wc_flutter_share (from `.symlinks/plugins/wc_flutter_share/ios`)
 
@@ -99,16 +108,22 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   file_picker:
     :path: ".symlinks/plugins/file_picker/ios"
+  file_saver:
+    :path: ".symlinks/plugins/file_saver/ios"
   Flutter:
     :path: Flutter
   flutter_image_compress:
     :path: ".symlinks/plugins/flutter_image_compress/ios"
   flutter_secure_storage:
     :path: ".symlinks/plugins/flutter_secure_storage/ios"
+  geolocator_apple:
+    :path: ".symlinks/plugins/geolocator_apple/ios"
   google_maps_flutter_ios:
     :path: ".symlinks/plugins/google_maps_flutter_ios/ios"
   path_provider_ios:
     :path: ".symlinks/plugins/path_provider_ios/ios"
+  permission_handler_apple:
+    :path: ".symlinks/plugins/permission_handler_apple/ios"
   url_launcher_ios:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
   wc_flutter_share:
@@ -118,20 +133,23 @@ SPEC CHECKSUMS:
   DKImagePickerController: b512c28220a2b8ac7419f21c491fc8534b7601ac
   DKPhotoGallery: fdfad5125a9fdda9cc57df834d49df790dbb4179
   file_picker: 817ab1d8cd2da9d2da412a417162deee3500fc95
-  Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
+  file_saver: 503e386464dbe118f630e17b4c2e1190fa0cf808
+  Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
   flutter_image_compress: 5a5e9aee05b6553048b8df1c3bc456d0afaac433
   flutter_secure_storage: 7953c38a04c3fdbb00571bcd87d8e3b5ceb9daec
+  geolocator_apple: cc556e6844d508c95df1e87e3ea6fa4e58c50401
   google_maps_flutter_ios: 66201f392bf62d500f07670a30488a247b9bb5b9
   GoogleMaps: 20d7b12be49a14287f797e88e0e31bc4156aaeb4
   libwebp: 60305b2e989864154bd9be3d772730f08fc6a59c
   Mantle: c5aa8794a29a022dfbbfc9799af95f477a69b62d
   path_provider_ios: 14f3d2fd28c4fdb42f44e0f751d12861c43cee02
+  permission_handler_apple: 44366e37eaf29454a1e7b1b7d736c2cceaeb17ce
   SDWebImage: 72f86271a6f3139cc7e4a89220946489d4b9a866
   SDWebImageWebPCoder: 3dc350894112feab5375cfba9ce0986544a66a69
   SwiftyGif: 6c3eafd0ce693cad58bb63d2b2fb9bacb8552780
   url_launcher_ios: 839c58cdb4279282219f5e248c3321761ff3c4de
   wc_flutter_share: b974e046b82a78e409cc65b3550059b5263cd741
 
-PODFILE CHECKSUM: aafe91acc616949ddb318b77800a7f51bffa2a4c
+PODFILE CHECKSUM: ef19549a9bc3046e7bb7d2fab4d021637c0c58a3
 
 COCOAPODS: 1.11.3

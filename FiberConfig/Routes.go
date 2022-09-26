@@ -6,6 +6,7 @@ import (
 	"Falcon/Controllers"
 	"Falcon/ManipulateData"
 	"Falcon/PreviewData"
+	"Falcon/Scrapper"
 	"fmt"
 
 	// "log"
@@ -34,7 +35,9 @@ func FiberConfig() {
 	app.Get("/ShowAllServiceEvents", adaptor.HTTPHandlerFunc(PreviewData.ShowAllServiceEvents))
 	app.Post("/api/removedata", (ManipulateData.DeleteData))
 	app.Post("/api/editdata", (ManipulateData.EditData))
-	app.Post("/api/CreateCarTrip", Controllers.CreateCarTrip)
+	app.Post("/api/CreateCarTrip", Apis.CreateCarTrip)
+	app.Post("/api/EditCarTrip", Apis.EditCarTrip)
+	app.Post("/api/GenerateCSVTable", Apis.GenerateCSVTable)
 	app.Post("/api/GetDriverTrip", Controllers.GetDriverTrip)
 	app.Post("/api/NextStep", Controllers.NextStep)
 	app.Post("/api/PreviousStep", Controllers.PreviousStep)
@@ -58,7 +61,9 @@ func FiberConfig() {
 	app.Use("/api/GetNonDriverUsers", Apis.GetNonDriverUsers)
 	app.Use("/AddServiceEvent", adaptor.HTTPHandlerFunc(AddEvent.AddServiceEventTmpl))
 	app.Use("/api/GetVehicleStatus", Apis.GetVehicleStatus)
-	app.Use("/api/GetVehicleMapPoints", Apis.GetVechileMapPoints)
+	app.Use("/api/GetVehicleMapPoints", Apis.GetVehicleMapPoints)
+	app.Use("/api/GetVehicleMilage", Scrapper.GetVehicleMilageHistory)
+	app.Get("/api/GetLocations", Apis.GetLocations)
 	// app.Use("/api/AddCar", AddEvent.AddCarHandler)
 	// app.Use("/api/AddServiceEvent", AddEvent.AddCarHandler)
 	app.Use("/AddDailyDelivery", adaptor.HTTPHandlerFunc(AddEvent.AddDeliveryTmpl))

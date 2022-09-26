@@ -40,86 +40,89 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        child: SizedBox(
-          height: MediaQuery.of(context).size.height,
-          width: double.infinity,
-          child: Stack(
-            children: [
-              Positioned(
-                top: 200,
-                left: -100,
-                child: Container(
-                  width: 300,
-                  height: 300,
-                  decoration: const BoxDecoration(
-                    color: Color(0x304599ff),
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(150),
+      body: ListView(
+        children: [
+          SizedBox(
+            // height: MediaQuery.of(context).size.height,
+            width: double.infinity,
+            child: Stack(
+              children: [
+                Positioned(
+                  top: 200,
+                  left: -100,
+                  child: Container(
+                    width: 300,
+                    height: 300,
+                    decoration: const BoxDecoration(
+                      color: Color(0x304599ff),
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(150),
+                      ),
                     ),
                   ),
                 ),
-              ),
-              Positioned(
-                bottom: 10,
-                right: -10,
-                child: Container(
-                  width: 200,
-                  height: 200,
-                  decoration: const BoxDecoration(
-                    color: Color(0x30cc33ff),
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(100),
+                Positioned(
+                  bottom: 10,
+                  right: -10,
+                  child: Container(
+                    width: 200,
+                    height: 200,
+                    decoration: const BoxDecoration(
+                      color: Color(0x30cc33ff),
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(100),
+                      ),
                     ),
                   ),
                 ),
-              ),
-              Positioned(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(
-                    sigmaX: 80,
-                    sigmaY: 80,
-                  ),
-                  child: Container(),
-                ),
-              ),
-              SizedBox(
-                width: double.infinity,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 40),
-                  child: Column(
-                    children: [
-                      const SizedBox(
-                        height: 50,
-                      ),
-                      _logo(),
-                      const SizedBox(
-                        height: 70,
-                      ),
-                      _loginLabel(),
-                      const SizedBox(
-                        height: 70,
-                      ),
-                      _labelTextInput(
-                          "البريد الالكتروني", "yourname@example.com", false),
-                      const SizedBox(
-                        height: 50,
-                      ),
-                      _labelTextInput("كلمة السر", "yourpassword", true),
-                      const SizedBox(
-                        height: 90,
-                      ),
-                      _loginBtn(context),
-                      const SizedBox(
-                        height: 90,
-                      ),
-                    ],
+                Positioned(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(
+                      sigmaX: 80,
+                      sigmaY: 80,
+                    ),
+                    child: Container(),
                   ),
                 ),
-              ),
-            ],
+                SizedBox(
+                  width: double.infinity,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 40),
+                    child: Column(
+                      children: [
+                        const SizedBox(
+                          height: 50,
+                        ),
+                        _logo(),
+                        const SizedBox(
+                          height: 70,
+                        ),
+                        Align(
+                            alignment: Alignment.center, child: _loginLabel()),
+                        const SizedBox(
+                          height: 70,
+                        ),
+                        _labelTextInput(
+                            "البريد الالكتروني", "yourname@example.com", false),
+                        const SizedBox(
+                          height: 50,
+                        ),
+                        _labelTextInput("كلمة السر", "yourpassword", true),
+                        const SizedBox(
+                          height: 90,
+                        ),
+                        _loginBtn(context),
+                        const SizedBox(
+                          height: 90,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -160,15 +163,54 @@ Widget _loginBtn(BuildContext context) {
             });
         var jwt =
             await attemptLogIn(_emailController.text, _passwordController.text);
-        if (jwt != null) {
-          storage.write(key: "jwt", value: jwt);
-          Navigator.pop(dialogContext);
-          Navigator.pushReplacement(context,
-              MaterialPageRoute(builder: (context) => const MainWidget()));
+        if (jwt == "Error") {
+          Navigator.pop(context);
+          showDialog(
+              context: context,
+              builder: (context) {
+                return Dialog(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                  child: SizedBox(
+                    height: 400,
+                    child: Column(
+                      children: [
+                        Center(
+                          // Display lottie animation
+                          child: Lottie.asset(
+                            "lottie/Error.json",
+                            height: 300,
+                            width: 300,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const LoginScreen(),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.refresh),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              });
         } else {
-          Navigator.pop(dialogContext);
-          displayDialog(context, "An Error Occurred",
-              "No account was found matching that username and password");
+          if (jwt != null) {
+            storage.write(key: "jwt", value: jwt);
+            Navigator.pop(dialogContext);
+            Navigator.pushReplacement(context,
+                MaterialPageRoute(builder: (context) => const MainWidget()));
+          } else {
+            Navigator.pop(dialogContext);
+            displayDialog(context, "An Error Occurred",
+                "No account was found matching that username and password");
+          }
         }
       },
       child: Text(
@@ -233,7 +275,7 @@ Widget _loginLabel() {
         textStyle: const TextStyle(
           color: Color(0xff164276),
           fontWeight: FontWeight.w900,
-          fontSize: 34,
+          fontSize: 28,
         ),
       ),
     ),
@@ -260,19 +302,24 @@ void displayDialog(BuildContext context, String title, String text) =>
           AlertDialog(title: Text(title), content: Text(text)),
     );
 Future attemptLogIn(String email, String password) async {
-  var res = await http.post(
-    Uri.parse("$SERVER_IP/api/login"), headers: {"Content-Type": "application/json"},
-    body: jsonEncode({
-      "email": email,
-      "password": password,
-    }),
-  );
-  var jsonData = jsonDecode(res.body);
-  if (res.statusCode == 200 && jsonData["permission"] >= 1) {
-        return res.body;
-      } else {
-        return null;
-      }
+  try {
+    var res = await http.post(
+      Uri.parse("$SERVER_IP/api/login"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "email": email,
+        "password": password,
+      }),
+    );
+    var jsonData = jsonDecode(res.body);
+    if (res.statusCode == 200 && jsonData["permission"] >= 1) {
+      return res.body;
+    } else {
+      return null;
+    }
+  } catch (e) {
+    return "Error";
+  }
   // Dio dio = Dio();
   // dio.options.headers['content-Type'] = 'application/json';
   //   var res = await dio.post("$SERVER_IP/api/Login",
@@ -288,6 +335,5 @@ Future attemptLogIn(String email, String password) async {
   //     return null;
   //   }
 
-    // print(res.body);
-
+  // print(res.body);
 }

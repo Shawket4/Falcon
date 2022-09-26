@@ -215,7 +215,7 @@ class _EditCarScreenState extends State<EditCarScreen> {
               const SizedBox(height: 20),
               Center(
                 // ignore: deprecated_member_use
-                child: FlatButton(
+                child: TextButton(
                   onPressed: () async => {
                     if (_carPlateNoController.text.isEmpty ||
                         _compartment1Controller.text.isEmpty ||

@@ -1,9 +1,10 @@
-import 'dart:typed_data';
+// ignore_for_file: file_names, unused_local_variable
 import 'dart:ui' as ui;
 import 'package:dio/dio.dart';
 import 'package:falcon_1/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:lottie/lottie.dart' as lottie;
@@ -266,6 +267,46 @@ class MapUtils {
   }
 }
 
+Position? pos;
+
+Future<Position> _determinePosition() async {
+  bool serviceEnabled;
+  LocationPermission permission;
+
+  // Test if location services are enabled.
+  serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) {
+    // Location services are not enabled don't continue
+    // accessing the position and request users of the
+    // App to enable the location services.
+    return Future.error('Location services are disabled.');
+  }
+
+  permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) {
+      // Permissions are denied, next time you could try
+      // requesting permissions again (this is also where
+      // Android's shouldShowRequestPermissionRationale
+      // returned true. According to Android guidelines
+      // your App should show an explanatory UI now.
+      return Future.error('Location permissions are denied');
+    }
+  }
+
+  if (permission == LocationPermission.deniedForever) {
+    // Permissions are denied forever, handle appropriately.
+    return Future.error(
+        'Location permissions are permanently denied, we cannot request permissions.');
+  }
+
+  // When we reach here, permissions are granted and we can
+  // continue accessing the position of the device.
+  pos = await Geolocator.getCurrentPosition();
+  return await Geolocator.getCurrentPosition();
+}
+
 Set<Marker> _markers = {};
 LatLng? firstMarker;
 BitmapDescriptor? mapMarker;
@@ -282,6 +323,8 @@ Future<Uint8List> getBytesFromAsset(String path, int width) async {
 
 Future<String> loadMapData(String jwt, BuildContext context) async {
   _markers.clear();
+  await _determinePosition();
+
   Dio dio = Dio();
   dio.options.headers["Cookie"] = "jwt=$jwt";
   dio.options.headers["Content-Type"] = "application/json";
@@ -308,8 +351,9 @@ Future<String> loadMapData(String jwt, BuildContext context) async {
                   builder: (context) {
                     return SizedBox(
                       height: MediaQuery.of(context).size.height / 2,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                      child: ListView(
+                        physics: const BouncingScrollPhysics(),
+                        // crossAxisAlignment: CrossAxisAlignment.end,
                         children: <Widget>[
                           const SizedBox(
                             height: 20,
@@ -367,7 +411,9 @@ Future<String> loadMapData(String jwt, BuildContext context) async {
                               ),
                             ),
                           ),
-                          const Spacer(),
+                          const SizedBox(
+                            height: 40,
+                          ),
                           Padding(
                             padding: const EdgeInsets.all(50.0),
                             child: Center(
@@ -409,8 +455,10 @@ Future<String> loadMapData(String jwt, BuildContext context) async {
         icon: mapMarker!,
       ));
     });
-    firstMarker = LatLng(
-        double.parse(str[0]["Latitude"]), double.parse(str[0]["Longitude"]));
+    firstMarker = pos != null
+        ? LatLng(pos!.latitude, pos!.longitude)
+        : LatLng(double.parse(str[0]["Latitude"]),
+            double.parse(str[0]["Longitude"]));
   });
   return "";
 }
@@ -462,7 +510,7 @@ class _MapScreenState extends State<MapScreen> {
               return GoogleMap(
                 myLocationEnabled: true,
                 mapToolbarEnabled: true,
-                myLocationButtonEnabled: false,
+                myLocationButtonEnabled: true,
                 onMapCreated: _onMapCreated,
                 markers: _markers,
                 initialCameraPosition: CameraPosition(

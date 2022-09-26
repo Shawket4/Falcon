@@ -2,6 +2,8 @@ PODS:
   - flutter_secure_storage_macos (3.3.1):
     - FlutterMacOS
   - FlutterMacOS (1.0.0)
+  - geolocator_apple (1.2.0):
+    - FlutterMacOS
   - path_provider_macos (0.0.1):
     - FlutterMacOS
   - url_launcher_macos (0.0.1):
@@ -10,6 +12,7 @@ PODS:
 DEPENDENCIES:
   - flutter_secure_storage_macos (from `Flutter/ephemeral/.symlinks/plugins/flutter_secure_storage_macos/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
+  - geolocator_apple (from `Flutter/ephemeral/.symlinks/plugins/geolocator_apple/macos`)
   - path_provider_macos (from `Flutter/ephemeral/.symlinks/plugins/path_provider_macos/macos`)
   - url_launcher_macos (from `Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos`)
 
@@ -18,6 +21,8 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/flutter_secure_storage_macos/macos
   FlutterMacOS:
     :path: Flutter/ephemeral
+  geolocator_apple:
+    :path: Flutter/ephemeral/.symlinks/plugins/geolocator_apple/macos
   path_provider_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/path_provider_macos/macos
   url_launcher_macos:
@@ -26,6 +31,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   flutter_secure_storage_macos: 6ceee8fbc7f484553ad17f79361b556259df89aa
   FlutterMacOS: 57701585bf7de1b3fc2bb61f6378d73bbdea8424
+  geolocator_apple: 72a78ae3f3e4ec0db62117bd93e34523f5011d58
   path_provider_macos: 3c0c3b4b0d4a76d2bf989a913c2de869c5641a19
   url_launcher_macos: 597e05b8e514239626bcf4a850fcf9ef5c856ec3
 
