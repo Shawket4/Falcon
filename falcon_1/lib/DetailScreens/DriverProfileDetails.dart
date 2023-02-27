@@ -31,73 +31,77 @@ class _DriverProfileDetailsState extends State<DriverProfileDetails> {
   Map<String, Uint8List> imageBytes = {};
 
   Future<Object> get loadImages async {
-    if (widget.driver["DriverLicenseImageName"] == "") {
-      return "";
-    }
-
-    if (widget.driver["DriverLicenseImageName"] != "") {
-      http.Response driverLicenseFront = await http.get(
-        Uri.parse(
-            "$SERVER_IP/DriverLicenses/${widget.driver["DriverLicenseImageName"]}"),
-      );
-      if (driverLicenseFront.statusCode == HttpStatus.ok) {
-        final Uint8List driverLicenseBytes = driverLicenseFront.bodyBytes;
-        imageBytes["صورة وجه رخصة القيادة"] = driverLicenseBytes;
+    try {
+      if (widget.driver["driver_license_image_name"] == "") {
+        return "";
       }
-    }
 
-    if (widget.driver["DriverLicenseImageNameBack"] != "") {
-      http.Response driverLicenseBack = await http.get(
-        Uri.parse(
-            "$SERVER_IP/DriverLicenses/${widget.driver["DriverLicenseImageNameBack"]}"),
-      );
-      if (driverLicenseBack.statusCode == HttpStatus.ok) {
-        final Uint8List driverLicenseBytesBack = driverLicenseBack.bodyBytes;
-        imageBytes["صورة خلف رخصة القيادة"] = driverLicenseBytesBack;
+      if (widget.driver["id_license_image_name"] != "") {
+        http.Response driverLicenseFront = await http.get(
+          Uri.parse(
+              "$SERVER_IP/IDLicenses/${widget.driver["id_license_image_name"]}"),
+        );
+        if (driverLicenseFront.statusCode == HttpStatus.ok) {
+          final Uint8List driverLicenseBytes = driverLicenseFront.bodyBytes;
+          imageBytes["صورة وجه بطاقة السائق"] = driverLicenseBytes;
+        }
       }
-    }
 
-    if (widget.driver["SafetyLicenseImageName"] != "") {
-      http.Response safetyLicenseFront = await http.get(
-        Uri.parse(
-            "$SERVER_IP/SafetyLicenses/${widget.driver["SafetyLicenseImageName"]}"),
-      );
-      if (safetyLicenseFront.statusCode == HttpStatus.ok) {
-        final Uint8List safetyLicenceBytes = safetyLicenseFront.bodyBytes;
-        imageBytes["صورة وجه رخصة القيادة الامنة"] = safetyLicenceBytes;
+      if (widget.driver["id_license_image_name_back"] != "") {
+        http.Response driverLicenseBack = await http.get(
+          Uri.parse(
+              "$SERVER_IP/IDLicensesBack/${widget.driver["id_license_image_name_back"]}"),
+        );
+        if (driverLicenseBack.statusCode == HttpStatus.ok) {
+          final Uint8List driverLicenseBytesBack = driverLicenseBack.bodyBytes;
+          imageBytes["صورة خلف بطاقة السائق"] = driverLicenseBytesBack;
+        }
       }
-    }
 
-    if (widget.driver["SafetyLicenseImageNameBack"] != "") {
-      http.Response safetyLicenseBack = await http.get(
-        Uri.parse(
-            "$SERVER_IP/SafetyLicenses/${widget.driver["SafetyLicenseImageNameBack"]}"),
-      );
-      if (safetyLicenseBack.statusCode == HttpStatus.ok) {
-        final Uint8List safetyLicenceBytesBack = safetyLicenseBack.bodyBytes;
-        imageBytes["صورة خلف رخصة القيادة الامنة"] = safetyLicenceBytesBack;
+      if (widget.driver["driver_license_image_name"] != "") {
+        http.Response driverLicenseFront = await http.get(
+          Uri.parse(
+              "$SERVER_IP/DriverLicenses/${widget.driver["driver_license_image_name"]}"),
+        );
+        if (driverLicenseFront.statusCode == HttpStatus.ok) {
+          final Uint8List driverLicenseBytes = driverLicenseFront.bodyBytes;
+          imageBytes["صورة وجه رخصة القيادة"] = driverLicenseBytes;
+        }
       }
-    }
 
-    if (widget.driver["DrugTestImageName"] != "") {
-      http.Response drugTestFront = await http.get(
-        Uri.parse("$SERVER_IP/DrugTests/${widget.driver["DrugTestImageName"]}"),
-      );
-      if (drugTestFront.statusCode == HttpStatus.ok) {
-        final Uint8List drugTestBytes = drugTestFront.bodyBytes;
-        imageBytes["صورة وجه شهادة المخدرات"] = drugTestBytes;
+      if (widget.driver["safety_license_image_name"] != "") {
+        http.Response safetyLicenseFront = await http.get(
+          Uri.parse(
+              "$SERVER_IP/SafetyLicenses/${widget.driver["safety_license_image_name"]}"),
+        );
+        if (safetyLicenseFront.statusCode == HttpStatus.ok) {
+          final Uint8List safetyLicenceBytes = safetyLicenseFront.bodyBytes;
+          imageBytes["صورة رخصة القيادة الامنة"] = safetyLicenceBytes;
+        }
       }
-    }
 
-    if (widget.driver["DrugTestImageNameBack"] != "") {
-      http.Response drugTestBack = await http.get(
-        Uri.parse(
-            "$SERVER_IP/DrugTests/${widget.driver["DrugTestImageNameBack"]}"),
-      );
-      if (drugTestBack.statusCode == HttpStatus.ok) {
-        final Uint8List drugTestBytesBack = drugTestBack.bodyBytes;
-        imageBytes["صورة خلف شهادة المخدرات"] = drugTestBytesBack;
+      if (widget.driver["drug_test_image_name"] != "") {
+        http.Response drugTestFront = await http.get(
+          Uri.parse(
+              "$SERVER_IP/DrugTests/${widget.driver["drug_test_image_name"]}"),
+        );
+        if (drugTestFront.statusCode == HttpStatus.ok) {
+          final Uint8List drugTestBytes = drugTestFront.bodyBytes;
+          imageBytes["صورة شهادة المخضرات"] = drugTestBytes;
+        }
       }
+      if (widget.driver["criminal_record_image_name"] != "") {
+        http.Response drugTestFront = await http.get(
+          Uri.parse(
+              "$SERVER_IP/CriminalRecords/${widget.driver["criminal_record_image_name"]}"),
+        );
+        if (drugTestFront.statusCode == HttpStatus.ok) {
+          final Uint8List drugTestBytes = drugTestFront.bodyBytes;
+          imageBytes["صورة فيش"] = drugTestBytes;
+        }
+      }
+    } catch (e) {
+      return "Error";
     }
 
     return {
@@ -111,7 +115,7 @@ class _DriverProfileDetailsState extends State<DriverProfileDetails> {
     dio.options.headers["Content-Type"] = "application/json";
     driverDetails.add(
       Text(
-        "أسم السائق: ${widget.driver["Name"]}",
+        "أسم السائق: ${widget.driver["name"]}",
         style: const TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w600,
@@ -120,16 +124,7 @@ class _DriverProfileDetailsState extends State<DriverProfileDetails> {
     );
     driverDetails.add(
       Text(
-        "البريد الالكتروني: ${widget.driver["Email"]}",
-        style: const TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-    driverDetails.add(
-      Text(
-        "رقم هاتف السائق: ${widget.driver["MobileNumber"]}",
+        "رقم هاتف السائق: ${widget.driver["mobile_number"]}",
         style: const TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w600,
@@ -137,13 +132,14 @@ class _DriverProfileDetailsState extends State<DriverProfileDetails> {
         ),
       ),
     );
+
     driverDetails.add(
       Text(
-        "رخصة القيادة ساريه حتي: ${widget.driver["LicenseExpirationDate"]}",
+        "بطاقة السائق ساريه حتي: ${widget.driver["id_license_expiration_date"]}",
         style: TextStyle(
           color: !DateTime.now()
-                  .difference(
-                      DateTime.parse(widget.driver["LicenseExpirationDate"]))
+                  .difference(DateTime.parse(
+                      widget.driver["id_license_expiration_date"]))
                   .isNegative
               ? Colors.red
               : Colors.black,
@@ -153,13 +149,31 @@ class _DriverProfileDetailsState extends State<DriverProfileDetails> {
         ),
       ),
     );
+
     driverDetails.add(
       Text(
-        "رخصة القيادة الأمنة ساريه حتي: ${widget.driver["SafetyExpirationDate"]}",
+        "رخصة القيادة ساريه حتي: ${widget.driver["driver_license_expiration_date"]}",
         style: TextStyle(
           color: !DateTime.now()
-                  .difference(
-                      DateTime.parse(widget.driver["SafetyExpirationDate"]))
+                  .difference(DateTime.parse(
+                      widget.driver["driver_license_expiration_date"]))
+                  .isNegative
+              ? Colors.red
+              : Colors.black,
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+          overflow: TextOverflow.clip,
+        ),
+      ),
+    );
+
+    driverDetails.add(
+      Text(
+        "رخصة القيادة الأمنة ساريه حتي: ${widget.driver["safety_license_expiration_date"]}",
+        style: TextStyle(
+          color: !DateTime.now()
+                  .difference(DateTime.parse(
+                      widget.driver["safety_license_expiration_date"]))
                   .isNegative
               ? Colors.red
               : Colors.black,
@@ -170,11 +184,11 @@ class _DriverProfileDetailsState extends State<DriverProfileDetails> {
     );
     driverDetails.add(
       Text(
-        "شهادة المخضرات ساريه حتي: ${widget.driver["DrugTestExpirationDate"]}",
+        "شهادة المخضرات ساريه حتي: ${widget.driver["drug_test_expiration_date"]}",
         style: TextStyle(
           color: !DateTime.now()
-                  .difference(
-                      DateTime.parse(widget.driver["DrugTestExpirationDate"]))
+                  .difference(DateTime.parse(
+                      widget.driver["drug_test_expiration_date"]))
                   .isNegative
               ? Colors.red
               : Colors.black,
@@ -224,9 +238,14 @@ class _DriverProfileDetailsState extends State<DriverProfileDetails> {
                       IconButton(
                         onPressed: () {
                           Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) => const MainWidget()));
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => DriverProfileDetails(
+                                jwt: widget.jwt,
+                                driver: widget.driver,
+                              ),
+                            ),
+                          );
                         },
                         icon: const Icon(Icons.refresh),
                       ),
@@ -242,11 +261,14 @@ class _DriverProfileDetailsState extends State<DriverProfileDetails> {
                 actions: <IconButton>[
                   IconButton(
                     onPressed: () {
-                      Navigator.pushReplacement(
+                      Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (_) => EditDriverScreen(
-                              jwt: widget.jwt, driver: widget.driver),
+                            jwt: widget.jwt,
+                            driver: widget.driver,
+                            imageBytes: imageBytes,
+                          ),
                         ),
                       );
                     },
@@ -285,7 +307,7 @@ class _DriverProfileDetailsState extends State<DriverProfileDetails> {
                         "$SERVER_IP/api/DeleteDriver",
                         data: jsonEncode(
                           {
-                            "Name": widget.driver["Name"],
+                            "ID": widget.driver["ID"],
                           },
                         ),
                       )
@@ -299,7 +321,9 @@ class _DriverProfileDetailsState extends State<DriverProfileDetails> {
                             ),
                           ),
                         );
-                      });
+                      }).timeout(
+                        const Duration(seconds: 4),
+                      );
                     },
                     icon: const Icon(
                       Icons.delete,
@@ -310,7 +334,7 @@ class _DriverProfileDetailsState extends State<DriverProfileDetails> {
                 backgroundColor: Theme.of(context).primaryColor,
                 title: Center(
                   child: Text(
-                    'تفاصيل السائق: ${widget.driver["Name"]}',
+                    'تفاصيل السائق: ${widget.driver["name"]}',
                     textDirection: TextDirection.rtl,
                   ),
                 ),
@@ -322,7 +346,7 @@ class _DriverProfileDetailsState extends State<DriverProfileDetails> {
                     width: double.infinity,
                     height: 250,
                     child: Hero(
-                      tag: "Driver ${widget.driver["DriverId"].toString()}",
+                      tag: "Driver ${widget.driver["ID"].toString()}",
                       child: const Image(
                         fit: BoxFit.cover,
                         image: AssetImage('images/driver.png'),
@@ -351,7 +375,7 @@ class _DriverProfileDetailsState extends State<DriverProfileDetails> {
                       ),
                     ),
                   ),
-                  widget.driver["DriverLicenseImageName"] == ""
+                  widget.driver["driver_license_image_name"] == ""
                       ? Container()
                       : Padding(
                           padding:
@@ -363,7 +387,9 @@ class _DriverProfileDetailsState extends State<DriverProfileDetails> {
                                 MaterialPageRoute(
                                   builder: (_) => ImageView(
                                     images: imageBytes,
-                                    name: widget.driver["Name"],
+                                    name: widget.driver["name"],
+                                    type: "Driver",
+                                    id: widget.driver["ID"],
                                   ),
                                 ),
                               );
@@ -390,7 +416,7 @@ class _DriverProfileDetailsState extends State<DriverProfileDetails> {
                   const SizedBox(
                     height: 15,
                   ),
-                  widget.driver["IsApproved"] == 0
+                  widget.driver["is_approved"] == 0
                       ? Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
@@ -420,14 +446,18 @@ class _DriverProfileDetailsState extends State<DriverProfileDetails> {
                                         ),
                                       );
                                     });
-                                var res = await dio.post(
-                                  "$SERVER_IP/api/RejectRequest",
-                                  data: jsonEncode({
-                                    "TableName": "users",
-                                    "ColumnIdName": "id",
-                                    "Id": widget.driver["DriverId"],
-                                  }),
-                                );
+                                var res = await dio
+                                    .post(
+                                      "$SERVER_IP/api/RejectRequest",
+                                      data: jsonEncode({
+                                        "TableName": "users",
+                                        "ColumnIdName": "id",
+                                        "Id": widget.driver["ID"],
+                                      }),
+                                    )
+                                    .timeout(
+                                      const Duration(seconds: 4),
+                                    );
                                 setState(() {
                                   Navigator.pop(dialogContext);
                                   // Rebuild Whole Page
@@ -485,14 +515,18 @@ class _DriverProfileDetailsState extends State<DriverProfileDetails> {
                                         ),
                                       );
                                     });
-                                var res = await dio.post(
-                                  "$SERVER_IP/api/ApproveRequest",
-                                  data: jsonEncode({
-                                    "TableName": "users",
-                                    "ColumnIdName": "id",
-                                    "Id": widget.driver["DriverId"],
-                                  }),
-                                );
+                                var res = await dio
+                                    .post(
+                                      "$SERVER_IP/api/ApproveRequest",
+                                      data: jsonEncode({
+                                        "TableName": "users",
+                                        "ColumnIdName": "id",
+                                        "Id": widget.driver["ID"],
+                                      }),
+                                    )
+                                    .timeout(
+                                      const Duration(seconds: 4),
+                                    );
                                 setState(() {
                                   Navigator.pop(dialogContext);
                                   // Rebuild Whole Page

@@ -1,4 +1,4 @@
-// ignore_for_file: use_key_in_widget_constructors, file_names, unused_element, use_build_context_synchronously, non_constant_identifier_names, unused_field, unused_local_variable
+// ignore_for_file: use_key_in_widget_constructors, file_names, unused_element, use_build_context_synchronously, non_constant_identifier_names, unused_field, unused_local_variable, must_be_immutable, deprecated_member_use
 
 import 'dart:convert';
 import 'package:dropdown_search/dropdown_search.dart';
@@ -7,6 +7,7 @@ import 'package:falcon_1/main.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart' as intl;
 import 'package:dio/dio.dart';
 import 'package:lottie/lottie.dart';
 
@@ -16,7 +17,7 @@ class EditCarTripScreen extends StatefulWidget {
   final dynamic carTripDetails;
   final int carTripId;
   // Current Date in the format of YYYY-MM-DD
-  final String currentDate = DateTime.now().toString().substring(0, 10);
+  late String currentDate;
   @override
   State<EditCarTripScreen> createState() => _EditCarTripScreenState();
 }
@@ -29,17 +30,21 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
   int index = 0;
   final List<TextEditingController> _dropOffPointControllers = [];
   final List<TextEditingController> _gasTypeControllers = [];
+  final TextEditingController _driverNameController = TextEditingController();
   var noOfDropOfPoints = 0;
   var DropOffPoints = [];
-  List<String> CarNoPlates = [];
+  List<dynamic> Cars = [];
+  List<String> CarNoList = [];
+  List<dynamic> Drivers = [];
+  List<String> DriverNameList = [];
   var Compartments = [];
-  List<String> Drivers = [];
   List<String> Terminals = [];
   List<String> Customers = [];
   List<Widget> CustomerWidgets = [];
   String? selectedCarNoPlate;
   int selectedCompartmentIndex = 0;
-  String? selectedDriver;
+  dynamic selectedCar;
+  dynamic selectedDriver;
   String? selectedTerminal;
   String? selectedCustomer;
   String? selectedGasType;
@@ -52,105 +57,115 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
     "Gas 95",
     "Diesel",
     "Mazoot",
+    "Empty",
   ];
 
   bool isLoaded = false;
 
   Future<Object> get loadData async {
-    // var jwtString = jsonDecode(widget.jwt)["jwt"];
-    // selectedCarNoPlate = null;
-    // selectedDriver = null;
-    // CarNoPlates = [];
-    // Drivers = [];
-    if (!isLoaded) {
-      CarNoPlates.clear();
-      Drivers.clear();
-      try {
+    try {
+      if (selectedCar == null) {
         var CarReq = await dio
-            .post(
-          "$SERVER_IP/api/GetCars",
-          data: jsonEncode(
-            {
-              "Include": widget.carTripDetails["CarNoPlate"],
-            },
-          ),
-        )
+            .post("$SERVER_IP/api/GetCars",
+                data: jsonEncode({
+                  "Include": "",
+                }))
             .then((response) {
-          var str = response.data;
-          var cars = str["CarNoPlates"];
-          var carCompartments = str["Compartments"];
-          selectedCarNoPlate = widget.carTripDetails["CarNoPlate"];
-          // CarNoPlates.add(selectedCarNoPlate!);
-          for (var car in cars) {
-            CarNoPlates.add(car);
+          Cars = response.data;
+          // print(Cars.toList().toString());
+          for (var car in Cars) {
+            CarNoList.add(car["car_no_plate"]);
           }
-          selectedCompartmentIndex = CarNoPlates.indexOf(selectedCarNoPlate!);
-          // List<int> currentCompartments = [];
-          // for (var compartment in widget.carTripDetails["Compartments"]) {
-          //   currentCompartments.add(compartment[0]);
+          // var carCompartments = str["Compartments"];
+          selectedCar = Cars.firstWhere((element) =>
+              element["car_no_plate"] == widget.carTripDetails["car_no_plate"]);
+          // print(selectedCar.toString());
+          // var isInTripList = str["IsInTripList"];
+          // IsInTripList.clear();
+          // for (var car in Cars) {
+          //   CarNoPlates[car] = false;
           // }
-          // // Compartments.add(currentCompartments);
-          for (var compartment in carCompartments) {
-            Compartments.add(compartment);
+          // for (var compartment in carCompartments) {
+          //   Compartments.add(compartment);
+          // }
+          // for (var isInTrip in isInTripList) {
+          //   CarNoPlates[CarNoPlates.keys.toList()[i]] = isInTrip;
+          //   i++;
+          // }
+          // Loop 6 times
+          for (var i = 0; i < 6; i++) {
+            _dropOffPointControllers.add(TextEditingController());
+            _gasTypeControllers.add(TextEditingController());
           }
-
-          // _feeRateController.text = widget.carTripDetails["FeeRate"].toString();
-          // selectedCarNoPlate = CarNoPlates[0];
-          // selectedCompartmentIndex = 0;
         });
+        Drivers.add("غير محدد");
         var DriverReq =
             await dio.post("$SERVER_IP/api/GetDrivers").then((response) {
-          var str = response.data;
-          Drivers.add(widget.carTripDetails["DriverName"]);
-          for (var driver in str) {
-            Drivers.add(driver);
+          Drivers = response.data;
+          for (var driver in Drivers) {
+            DriverNameList.add(driver["name"]);
           }
-          selectedDriver = widget.carTripDetails["DriverName"];
-          // selectedDriver = Drivers[0];
+          selectedDriver = Drivers.firstWhere((element) =>
+              element["name"] == widget.carTripDetails["driver_name"]);
         });
-        var LocationsReq = await dio.get("$SERVER_IP/api/GetLocations").then(
-          (response) {
-            var str = response.data;
-            for (var terminal in str["Terminals"]) {
-              Terminals.add(terminal);
-            }
-            for (var customer in str["Customers"]) {
-              Customers.add(customer);
-            }
-          },
-        );
-        isLoaded = true;
-      } catch (e) {
-        return "Error";
+        var LocationsReq =
+            await dio.get("$SERVER_IP/api/GetLocations").then((response) {
+          var str = response.data;
+          for (var terminal in str["Terminals"]) {
+            Terminals.add(terminal);
+          }
+
+          for (var customer in str["Customers"]) {
+            Customers.add(customer);
+          }
+          selectedCustomer = Customers[0];
+          for (var i = 0; i < 6; i++) {
+            _dropOffPointControllers[i].text = selectedCustomer!;
+            _gasTypeControllers[i].text = selectedGasType!;
+          }
+        });
       }
+    } catch (e) {
+      return "Error";
     }
     return {
-      "CarNoPlates": CarNoPlates,
+      "Cars": Cars,
       "Drivers": Drivers,
+      "Terminals": Terminals,
+      "Customers": Customers,
     };
   }
 
   @override
   void initState() {
+    dio.options.headers["Cookie"] = "jwt=${widget.jwt}";
+    dio.options.headers["Content-Type"] = "application/json";
+    selectedGasType = gasTypes[0];
+    selectedCar = null;
+    selectedDriver = null;
+    widget.currentDate = widget.carTripDetails["date"];
     for (var i = 0; i < 6; i++) {
       _dropOffPointControllers.add(TextEditingController());
       _gasTypeControllers.add(TextEditingController());
     }
-    for (var i = 0; i < widget.carTripDetails["Compartments"].length; i++) {
-      _dropOffPointControllers[i].text =
-          widget.carTripDetails["Compartments"][i][1];
-      _gasTypeControllers[i].text = widget.carTripDetails["Compartments"][i][2];
-    }
-    _pickUpPointController.text =
-        jsonDecode(widget.carTripDetails["StepCompleteTime"])["TruckLoad"][1];
-    selectedTerminal =
-        jsonDecode(widget.carTripDetails["StepCompleteTime"])["TruckLoad"][1];
+
+    // for (var i = 0; i < selectedCar["json_compartments"].length; i++) {
+    //   _dropOffPointControllers[i].text =
+    //       widget.carTripDetails["Compartments"][i][1];
+    //   _gasTypeControllers[i].text = widget.carTripDetails["Compartments"][i][2];
+    // }
+    // _pickUpPointController.text =
+    //     jsonDecode(widget.carTripDetails["StepCompleteTime"])["TruckLoad"][1];
+    selectedTerminal = widget.carTripDetails["step_complete_time_db"]
+            ["terminal"]["terminal_name"]
+        .toString();
     selectedGasType = gasTypes[0];
-    dio.options.headers["Cookie"] = "jwt=${widget.jwt}";
-    dio.options.headers["Content-Type"] = "application/json";
-    selectedCarNoPlate = null;
-    selectedDriver = null;
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -278,8 +293,46 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
                         dropdownSearchTextAlign: TextAlign.left,
                         searchFieldProps: TextFieldProps(
                           autocorrect: false,
-                          cursorColor: Theme.of(context).primaryColor,
+                          cursorColor: Theme.of(context).accentColor,
                         ),
+                        popupItemBuilder: (context, item, isSelected) {
+                          // dynamic Car = Cars.where(
+                          //   (element) => element["car_no_plate"] == item,
+                          // ).toList()[0];
+                          return SizedBox(
+                            height: 50,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Row(
+                                  children: [
+                                    Center(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(10.0),
+                                        child: Text(
+                                          item,
+                                          style: TextStyle(
+                                            color: isSelected
+                                                ? Theme.of(context).accentColor
+                                                : Cars.where((element) =>
+                                                                element[
+                                                                    "car_no_plate"] ==
+                                                                item).toList()[
+                                                            0]["is_in_trip"] ==
+                                                        true
+                                                    ? Colors.grey
+                                                    : Colors.black,
+                                            fontSize: 17,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          );
+                        },
                         dropdownSearchDecoration: const InputDecoration(
                           border: OutlineInputBorder(
                             borderSide: BorderSide(),
@@ -290,25 +343,66 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
                         showSelectedItems: true,
                         showSearchBox: true,
                         enabled: true,
-                        items: CarNoPlates,
-                        selectedItem: selectedCarNoPlate,
+                        items: CarNoList,
+                        selectedItem: selectedCar["car_no_plate"],
                         onChanged: (item) => setState(() {
-                          // _pickUpPointController.clear();
+                          _pickUpPointController.clear();
                           // for (var i = 0;
                           //     i < Compartments[selectedCompartmentIndex].length;
                           //     i++) {
                           //   _dropOffPointControllers[i].clear();
                           // }
-                          selectedCarNoPlate = item;
+                          dynamic Car = Cars.where(
+                                  (element) => element["car_no_plate"] == item)
+                              .toList()[0];
+                          selectedCar = Car;
                           // Set the selected compartment index to item index
-                          selectedCompartmentIndex =
-                              CarNoPlates.indexOf(item as String);
                         }),
                       ),
                       const SizedBox(
                         height: 15,
                       ),
                       DropdownSearch<String>(
+                        dropdownSearchTextAlign: TextAlign.left,
+                        searchFieldProps: TextFieldProps(
+                          autocorrect: false,
+                          cursorColor: Theme.of(context).accentColor,
+                        ),
+                        popupItemBuilder: (context, item, isSelected) {
+                          return SizedBox(
+                            height: 50,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Row(
+                                  children: [
+                                    Center(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(10.0),
+                                        child: Text(
+                                          item,
+                                          style: TextStyle(
+                                            color: isSelected
+                                                ? Theme.of(context).accentColor
+                                                : Drivers.where((element) =>
+                                                                element[
+                                                                    "name"] ==
+                                                                item).toList()[
+                                                            0]["is_in_trip"] ==
+                                                        true
+                                                    ? Colors.grey
+                                                    : Colors.black,
+                                            fontSize: 17,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          );
+                        },
                         dropdownSearchDecoration: const InputDecoration(
                           border: OutlineInputBorder(
                             borderSide: BorderSide(),
@@ -319,12 +413,47 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
                         showSelectedItems: true,
                         showSearchBox: true,
                         enabled: true,
-                        items: Drivers,
-                        selectedItem: selectedDriver,
+                        items: DriverNameList,
+                        selectedItem: selectedDriver["name"],
                         onChanged: (item) => setState(() {
-                          selectedDriver = item as String;
+                          _pickUpPointController.clear();
+                          // for (var i = 0;
+                          //     i < Compartments[selectedCompartmentIndex].length;
+                          //     i++) {
+                          //   _dropOffPointControllers[i].clear();
+                          // }
+                          dynamic Driver = Drivers.where(
+                              (element) => element["name"] == item).toList()[0];
+                          selectedDriver = Driver;
+                          // Set the selected compartment index to item index
                         }),
                       ),
+                      // DropdownSearch<String>(
+
+                      //   dropdownSearchDecoration: const InputDecoration(
+                      //     border: OutlineInputBorder(
+                      //       borderSide: BorderSide(),
+                      //     ),
+                      //     labelText: "Driver Name*",
+                      //   ),
+                      //   mode: Mode.MENU,
+                      //   showSelectedItems: true,
+                      //   showSearchBox: true,
+                      //   enabled: true,
+                      //   items: Drivers,
+                      //   selectedItem: selectedDriver,
+                      //   onChanged: (item) => setState(() {
+                      //     selectedDriver = item as String;
+                      //   }),
+                      // ),
+                      // TextField(
+                      //   cursorColor: Theme.of(context).accentColor,
+                      //   controller: _driverNameController,
+                      //   decoration: const InputDecoration(
+                      //     label: Text("Driver Name*"),
+                      //     border: OutlineInputBorder(),
+                      //   ),
+                      // ),
                       const SizedBox(
                         height: 15,
                       ),
@@ -336,8 +465,39 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
                           labelText: "Terminal*",
                         ),
                         mode: Mode.MENU,
+                        popupItemBuilder: (context, item, isSelected) =>
+                            SizedBox(
+                          height: 50,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Row(
+                                children: [
+                                  Center(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(10.0),
+                                      child: Text(
+                                        item,
+                                        style: TextStyle(
+                                          color: isSelected
+                                              ? Theme.of(context).accentColor
+                                              : Colors.black,
+                                          fontSize: 17,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
                         showSelectedItems: true,
                         showSearchBox: true,
+                        searchFieldProps: TextFieldProps(
+                          autocorrect: false,
+                          cursorColor: Theme.of(context).accentColor,
+                        ),
                         enabled: true,
                         items: Terminals,
                         selectedItem: selectedTerminal,
@@ -345,8 +505,9 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
                           selectedTerminal = item as String;
                         }),
                       ),
+
                       for (var i = 1;
-                          i < Compartments[selectedCompartmentIndex].length + 1;
+                          i < selectedCar["json_compartments"].length + 1;
                           i++)
                         Padding(
                           padding: const EdgeInsets.only(top: 15.0),
@@ -356,12 +517,47 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
                                 child: Padding(
                                   padding: const EdgeInsets.only(right: 8.0),
                                   child: DropdownSearch<String>(
+                                    searchFieldProps: TextFieldProps(
+                                      autocorrect: false,
+                                      cursorColor:
+                                          Theme.of(context).accentColor,
+                                    ),
+                                    popupItemBuilder:
+                                        (context, item, isSelected) => SizedBox(
+                                      height: 50,
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Center(
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(
+                                                      10.0),
+                                                  child: Text(
+                                                    item,
+                                                    style: TextStyle(
+                                                      color: isSelected
+                                                          ? Theme.of(context)
+                                                              .accentColor
+                                                          : Colors.black,
+                                                      fontSize: 17,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                     dropdownSearchDecoration: InputDecoration(
                                       border: const OutlineInputBorder(
                                         borderSide: BorderSide(),
                                       ),
                                       labelText:
-                                          "Customer $i ${Compartments[selectedCompartmentIndex][i - 1]}*",
+                                          "Customer $i ${selectedCar["json_compartments"][i - 1]}*",
                                     ),
                                     mode: Mode.MENU,
                                     showSelectedItems: true,
@@ -387,6 +583,40 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
                               ),
                               Expanded(
                                 child: DropdownSearch<String>(
+                                  searchFieldProps: TextFieldProps(
+                                    autocorrect: false,
+                                    cursorColor: Theme.of(context).accentColor,
+                                  ),
+                                  popupItemBuilder:
+                                      (context, item, isSelected) => SizedBox(
+                                    height: 50,
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Center(
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(10.0),
+                                                child: Text(
+                                                  item,
+                                                  style: TextStyle(
+                                                    color: isSelected
+                                                        ? Theme.of(context)
+                                                            .accentColor
+                                                        : Colors.black,
+                                                    fontSize: 17,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                   dropdownSearchDecoration: InputDecoration(
                                     border: const OutlineInputBorder(
                                       borderSide: BorderSide(),
@@ -410,23 +640,39 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
                                   onChanged: (item) => setState(() {
                                     _gasTypeControllers[i - 1].text =
                                         item as String;
+                                    if (item == "Empty") {
+                                      _dropOffPointControllers[i - 1].text =
+                                          item;
+                                    }
                                   }),
                                 ),
                               ),
                             ],
                           ),
                         ),
+                      IconButton(
+                        onPressed: () async {
+                          DateTime? pickDate = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime(2099),
+                          );
+                          if (pickDate != null) {
+                            widget.currentDate =
+                                intl.DateFormat("yyyy-MM-dd").format(pickDate);
+                          }
+                        },
+                        icon: const Icon(Icons.calendar_today),
+                      ),
                       const SizedBox(
                         height: 15,
                       ),
                       Center(
-                        // ignore: deprecated_member_use
                         child: TextButton(
                           onPressed: () async {
                             for (var i = 0;
-                                i <
-                                    Compartments[selectedCompartmentIndex]
-                                        .length;
+                                i < selectedCar["json_compartments"].length;
                                 i++) {
                               index++;
                             }
@@ -496,17 +742,25 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
                             //     : {},
                             else {
                               for (var i = 0;
-                                  i <
-                                      Compartments[selectedCompartmentIndex]
-                                          .length;
-                                  i++)
+                                  i < selectedCar["json_compartments"].length;
+                                  i++) {
                                 _dropOffPointControllers[i].text != ""
                                     ? {
-                                        DropOffPoints.add(
-                                            _dropOffPointControllers[i].text),
+                                        DropOffPoints.add({
+                                          "time_stamp": "",
+                                          "location_name":
+                                              _dropOffPointControllers[i].text,
+                                          "capacity":
+                                              selectedCar["json_compartments"]
+                                                  [i],
+                                          "gas_type":
+                                              _gasTypeControllers[i].text,
+                                          "status": false,
+                                        }),
                                         noOfDropOfPoints++
                                       }
                                     : {};
+                              }
                               showDialog(
                                   context: context,
                                   barrierDismissible: false,
@@ -532,14 +786,12 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
                                     );
                                   });
                               for (var i = 0;
-                                  i <
-                                      Compartments[selectedCompartmentIndex]
-                                          .length;
+                                  i < selectedCar["json_compartments"].length;
                                   i++) {
                                 if (_dropOffPointControllers[i].text != "") {
                                   formattedCompartments.add(
                                     <dynamic>[
-                                      Compartments[selectedCompartmentIndex][i],
+                                      selectedCar["json_compartments"][i],
                                       _dropOffPointControllers[i].text,
                                       _gasTypeControllers[i].text,
                                     ],
@@ -556,14 +808,21 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
                                   },
                                   body: jsonEncode(
                                     {
-                                      "Date": widget.currentDate,
-                                      "CarNoPlate": selectedCarNoPlate,
-                                      "DriverName": selectedDriver,
-                                      "PickUpPoint": selectedTerminal,
-                                      "NoOfDropOffPoints": noOfDropOfPoints,
+                                      "ID": widget.carTripDetails["ID"],
+                                      "date": widget.currentDate,
+                                      "car_id": selectedCar["ID"],
+                                      "driver_id": selectedDriver["ID"],
+                                      "pick_up_point": selectedTerminal,
+                                      "no_of_drop_off_points": noOfDropOfPoints,
                                       "Compartments": formattedCompartments,
-                                      "DropOffPoints": DropOffPoints,
-                                      "TripId": widget.carTripId,
+                                      "step_complete_time": {
+                                        "terminal": {
+                                          "time_stamp": "",
+                                          "terminal_name": selectedTerminal,
+                                          "status": false,
+                                        },
+                                        "drop_off_points": DropOffPoints
+                                      },
                                       // "FeeRate":
                                       //     double.parse(_feeRateController.text),
                                     },
@@ -574,14 +833,14 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
                                     noOfDropOfPoints = 0;
                                     DropOffPoints = [];
                                     //Clear all the fields
-                                    for (var i = 0;
-                                        i <
-                                            Compartments[
-                                                    selectedCompartmentIndex]
-                                                .length;
-                                        i++) {
-                                      _dropOffPointControllers[i].clear();
-                                    }
+                                    // for (var i = 0;
+                                    //     i <
+                                    //         Compartments[
+                                    //                 selectedCompartmentIndex]
+                                    //             .length;
+                                    //     i++) {
+                                    //   _dropOffPointControllers[i].clear();
+                                    // }
                                     _pickUpPointController.clear();
                                     // Navigator.pop(dialogContext);
                                     // Navigator.pushReplacement(
@@ -712,7 +971,7 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
                                 }).timeout(
                                   const Duration(seconds: 4),
                                 );
-                              } catch (_) {
+                              } catch (e) {
                                 showDialog(
                                     context: context,
                                     barrierDismissible: false,
@@ -745,12 +1004,16 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
                                                   setState(() {
                                                     Navigator.pop(
                                                         dialogContext);
+                                                    Navigator.pop(
+                                                        dialogContext);
                                                   });
                                                   Navigator.pushReplacement(
                                                     context,
                                                     MaterialPageRoute(
                                                       builder: (_) =>
-                                                          const MainWidget(),
+                                                          CarProgressScreen(
+                                                        jwt: widget.jwt,
+                                                      ),
                                                     ),
                                                   );
                                                 },

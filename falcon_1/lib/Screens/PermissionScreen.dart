@@ -15,7 +15,9 @@ Future<Object> loadData(String jwt) async {
     var res =
         await dio.post("$SERVER_IP/api/GetNonDriverUsers").then((response) {
       users = response.data["Users"];
-    });
+    }).timeout(
+      const Duration(seconds: 4),
+    );
   } catch (e) {
     return "Error";
   }
@@ -170,18 +172,23 @@ class _PermissionScreenState extends State<PermissionScreen> {
                                 );
                               });
 
-                          await http.post(
-                            Uri.parse("$SERVER_IP/api/UpdateTempPermission"),
-                            headers: {
-                              "Content-Type": "application/json",
-                              "Cookie": "jwt=${widget.jwt}",
-                            },
-                            body: jsonEncode(
-                              {
-                                "Id": users[index]["Id"],
-                              },
-                            ),
-                          );
+                          await http
+                              .post(
+                                Uri.parse(
+                                    "$SERVER_IP/api/UpdateTempPermission"),
+                                headers: {
+                                  "Content-Type": "application/json",
+                                  "Cookie": "jwt=${widget.jwt}",
+                                },
+                                body: jsonEncode(
+                                  {
+                                    "Id": users[index]["Id"],
+                                  },
+                                ),
+                              )
+                              .timeout(
+                                const Duration(seconds: 4),
+                              );
                           setState(() {
                             Navigator.pop(dialogContext);
                             Navigator.pushReplacement(

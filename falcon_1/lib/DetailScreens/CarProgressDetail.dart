@@ -2,7 +2,9 @@
 
 import 'dart:convert';
 
+import 'package:falcon_1/DetailScreens/CloseTripConfirmationScreen.dart';
 import 'package:falcon_1/EditScreens/EditTrip.dart';
+import 'package:falcon_1/Maps/MapHistory.dart';
 import 'package:falcon_1/Screens/CarProgressScreen.dart';
 import 'package:falcon_1/main.dart';
 import 'package:flutter/material.dart';
@@ -13,9 +15,9 @@ import 'package:dio/dio.dart';
 import 'package:intl/intl.dart' as intl;
 
 class CarProgressDetailScreen extends StatefulWidget {
-  const CarProgressDetailScreen({Key? key, this.car, required this.jwt})
+  const CarProgressDetailScreen({Key? key, this.trip, required this.jwt})
       : super(key: key);
-  final dynamic car;
+  final dynamic trip;
   final String jwt;
   @override
   State<CarProgressDetailScreen> createState() =>
@@ -24,26 +26,9 @@ class CarProgressDetailScreen extends StatefulWidget {
 
 late BuildContext dialogContext;
 var isCompleted = false;
-final String currentTime = intl.DateFormat('hh:mm a').format(DateTime.now());
-late int Speed;
+// final String currentTime = intl.DateFormat('hh:mm a').format(DateTime.now());
+// int TotalVolume = 0;
 Dio dio = Dio();
-
-Future<String> loadData(String CarNoPlate) async {
-  try {
-    await dio
-        .post("$SERVER_IP/api/GetVehicleStatus",
-            data: jsonEncode({
-              "CarNoPlate": CarNoPlate,
-            }))
-        .then((value) {
-      // var jsonResponse = json.decode(utf8.decode(value.data));
-      Speed = value.data["Speed"];
-    });
-  } catch (e) {
-    return "Error";
-  }
-  return "";
-}
 
 class _CarProgressDetailScreenState extends State<CarProgressDetailScreen>
     with TickerProviderStateMixin {
@@ -52,15 +37,22 @@ class _CarProgressDetailScreenState extends State<CarProgressDetailScreen>
 
   @override
   void initState() {
-    isCompleted = false;
+    isCompleted = widget.trip["is_closed"];
     dio.options.headers["Cookie"] = "jwt=${widget.jwt}";
     dio.options.headers["Content-Type"] = "application/json";
-    var StepsJson = jsonDecode(widget.car["StepCompleteTime"]);
-    if (StepsJson["DropOffPoints"][widget.car["NoOfDropOffPoints"] - 1][2] ==
+
+    var StepsJson = widget.trip["step_complete_time_db"];
+    if (StepsJson["drop_off_points"][widget.trip["no_of_drop_off_points"] - 1]
+            ["status"] ==
         true) {
       isCompleted = true;
     }
-    if (StepsJson["TruckLoad"][2] != false) {
+    // if (StepsJson["DropOffPoints"][widget.trip["NoOfDropOffPoints"] - 1][2] ==
+    //     true) {
+    //   isCompleted = true;
+    // }
+
+    if (StepsJson["terminal"]["status"] == true) {
       steps.add(
         step.Step(
           shimmer: false,
@@ -71,7 +63,7 @@ class _CarProgressDetailScreenState extends State<CarProgressDetailScreen>
             child: Align(
               alignment: Alignment.centerRight,
               child: Text(
-                "${StepsJson["TruckLoad"][0]} تم تحميل الشاحنة من مستودع ${StepsJson["TruckLoad"][1]} الساعة",
+                "${StepsJson["terminal"]["time_stamp"]} الساعة ${StepsJson["terminal"]["terminal_name"]} تم تحميل الشاحنة من مستودع",
                 style: const TextStyle(
                   fontSize: 15.0,
                   fontWeight: FontWeight.w500,
@@ -93,7 +85,7 @@ class _CarProgressDetailScreenState extends State<CarProgressDetailScreen>
             child: Align(
               alignment: Alignment.centerRight,
               child: Text(
-                "تحميل الشاحنة من مستودع ${StepsJson["TruckLoad"][1]}",
+                "${StepsJson["terminal"]["terminal_name"]} تحميل الشاحنة من مستودع",
                 style: const TextStyle(
                   fontSize: 15.0,
                   fontWeight: FontWeight.w500,
@@ -106,12 +98,12 @@ class _CarProgressDetailScreenState extends State<CarProgressDetailScreen>
       );
     }
     // Loop through the steps and add them to the list.
-    for (int i = 0; i < widget.car["NoOfDropOffPoints"]; i++) {
-      if (StepsJson["DropOffPoints"][i][2] != false) {
+    for (int i = 0; i < StepsJson["drop_off_points"].length; i++) {
+      if (StepsJson["drop_off_points"][i]["status"] == true) {
         steps.add(
           step.Step(
             shimmer: false,
-            title: "تفريغ ${StepsJson["DropOffPoints"][i][1]}",
+            title: "تفريغ ${StepsJson["drop_off_points"][i]["location_name"]}",
             iconStyle: Colors.green,
             content: Padding(
               padding: const EdgeInsets.only(right: 18.0),
@@ -119,9 +111,9 @@ class _CarProgressDetailScreenState extends State<CarProgressDetailScreen>
                 alignment: Alignment.centerRight,
                 child: Text(
                   // "${StepsJson["DropOffPoints"][i][0]} تم تفريغ في ${StepsJson["DropOffPoints"][i][1]} الساعة",
-                  "${StepsJson["DropOffPoints"][i][0]} في ${StepsJson["DropOffPoints"][i][1]} الساعة (${widget.car["Compartments"][i][2].toString()}) تم تفريغ ${widget.car["Compartments"][i][0].toString()}",
+                  "${StepsJson["drop_off_points"][i]["time_stamp"]} الساعة (${StepsJson["drop_off_points"][i]["gas_type"]}) (${StepsJson["drop_off_points"][i]["capacity"]}) ${StepsJson["drop_off_points"][i]["location_name"]} تم التفريغ في ",
                   // "9:40 A.M في اكتوبر الساعة Gas 92 تم تفريغ 13500",
-                  // "في ${StepsJson["DropOffPoints"][i][1]} الساعة ${StepsJson["DropOffPoints"][i][0]} (${widget.car["Compartments"][i][2]}) تم تفريغ ${widget.car["Compartments"][i][0]}",
+                  // "في ${StepsJson["DropOffPoints"][i][1]} الساعة ${StepsJson["DropOffPoints"][i][0]} (${widget.trip["Compartments"][i][2]}) تم تفريغ ${widget.trip["Compartments"][i][0]}",
                   style: const TextStyle(
                     fontSize: 15.0,
                     fontWeight: FontWeight.w500,
@@ -136,14 +128,15 @@ class _CarProgressDetailScreenState extends State<CarProgressDetailScreen>
         steps.add(
           step.Step(
             shimmer: false,
-            title: "تفريغ ${StepsJson["DropOffPoints"][i][1]}",
+            title: "تفريغ ${StepsJson["drop_off_points"][i]["location_name"]}",
             iconStyle: Colors.grey,
             content: Padding(
               padding: const EdgeInsets.only(right: 18.0),
               child: Align(
                 alignment: Alignment.centerRight,
                 child: Text(
-                  "(${widget.car["Compartments"][i][2]}) تفريغ ${StepsJson["DropOffPoints"][i][1]} ${widget.car["Compartments"][i][0]}",
+                  // "(${StepsJson["drop_off_points"][i]["gas_type"]}) تفريغ ${StepsJson["drop_off_points"][i]["location_name"]} ${StepsJson["drop_off_points"][i]["capacity"]}",
+                  "(${StepsJson["drop_off_points"][i]["gas_type"]}) (${StepsJson["drop_off_points"][i]["capacity"]}) ${StepsJson["drop_off_points"][i]["location_name"]} تفريغ",
                   style: const TextStyle(
                     fontSize: 15.0,
                     fontWeight: FontWeight.w500,
@@ -156,157 +149,108 @@ class _CarProgressDetailScreenState extends State<CarProgressDetailScreen>
         );
       }
     }
+
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    // print(widget.car["StepCompleteTime"]);
+    // print(widget.trip["StepCompleteTime"]);
 
-    // Return Scaffold with 3 part linear progress bar filled green based on car.ProgressIndex int
-    // Make timeline with car["ProgressIndex"] int
-    return FutureBuilder(
-        future: loadData(widget.car["CarNoPlate"]),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return Scaffold(
-              body: Center(
-                // Display lottie animation
-                child: Lottie.asset(
-                  "lottie/SplashScreen.json",
-                  height: 200,
-                  width: 200,
+    // Return Scaffold with 3 part linear progress bar filled green based on trip.ProgressIndex int
+    // Make timeline with trip["ProgressIndex"] int
+    return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        backgroundColor: Theme.of(context).primaryColor,
+        actions: <IconButton>[
+          IconButton(
+            onPressed: () async {
+              // await getTripData;
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => EditCarTripScreen(
+                    widget.jwt,
+                    widget.trip["ID"],
+                    widget.trip,
+                  ),
                 ),
-              ),
-            );
-          } else if (snapshot.data.toString() == "Error") {
-            return Scaffold(
-              body: Padding(
-                padding: const EdgeInsets.only(bottom: 100.0),
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(
+              );
+            },
+            icon: const Icon(
+              Icons.edit,
+              color: Colors.white,
+            ),
+          ),
+          IconButton(
+            onPressed: () async {
+              showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (context) {
+                    dialogContext = context;
+                    return Dialog(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      child: SizedBox(
+                        height: 400,
                         width: double.infinity,
                         child: Center(
                           // Display lottie animation
                           child: Lottie.asset(
-                            "lottie/Error.json",
-                            height: 300,
-                            width: 300,
+                            "lottie/SplashScreen.json",
+                            height: 200,
+                            width: 200,
                           ),
                         ),
                       ),
-                      IconButton(
-                        onPressed: () {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => CarProgressDetailScreen(
-                                jwt: widget.jwt,
-                                car: widget.car,
-                              ),
-                            ),
-                          );
-                        },
-                        icon: const Icon(Icons.refresh),
-                      ),
-                    ],
-                  ),
+                    );
+                  });
+              var res = await dio
+                  .post(
+                "$SERVER_IP/api/DeleteCarTrip",
+                data: jsonEncode(
+                  {
+                    "TripId": widget.trip["ID"],
+                  },
                 ),
-              ),
-            );
-          } else {
-            return Scaffold(
-              appBar: AppBar(
-                centerTitle: true,
-                backgroundColor: Theme.of(context).primaryColor,
-                actions: <IconButton>[
-                  IconButton(
-                    onPressed: () async {
-                      // await getTripData;
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => EditCarTripScreen(widget.jwt,
-                                  widget.car["CardID"], widget.car)));
-                    },
-                    icon: const Icon(
-                      Icons.edit,
-                      color: Colors.white,
+              )
+                  .then((value) {
+                Navigator.pop(dialogContext);
+                // setState(() {
+                //   Navigator.pop(context);
+                // });
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => CarProgressScreen(
+                      jwt: widget.jwt.toString(),
                     ),
                   ),
-                  IconButton(
-                    onPressed: () async {
-                      showDialog(
-                          context: context,
-                          barrierDismissible: false,
-                          builder: (context) {
-                            dialogContext = context;
-                            return Dialog(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12.0),
-                              ),
-                              child: SizedBox(
-                                height: 400,
-                                width: double.infinity,
-                                child: Center(
-                                  // Display lottie animation
-                                  child: Lottie.asset(
-                                    "lottie/SplashScreen.json",
-                                    height: 200,
-                                    width: 200,
-                                  ),
-                                ),
-                              ),
-                            );
-                          });
-                      var res = await dio
-                          .post(
-                        "$SERVER_IP/api/DeleteCarTrip",
-                        data: jsonEncode(
-                          {
-                            "TripId": widget.car["CardID"],
-                            "CarNoPlate": widget.car["CarNoPlate"],
-                            "DriverName": widget.car["DriverName"],
-                          },
-                        ),
-                      )
-                          .then((value) {
-                        Navigator.pop(dialogContext);
-                        // setState(() {
-                        //   Navigator.pop(context);
-                        // });
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => CarProgressScreen(
-                              jwt: widget.jwt.toString(),
-                            ),
-                          ),
-                        );
-                      });
-                    },
-                    icon: const Icon(Icons.delete),
-                    color: Colors.red,
-                  ),
-                ],
-                title: Center(
-                  child: Text(
-                    'تفاصيل النقلة',
-                    style: GoogleFonts.josefinSans(
-                      textStyle: const TextStyle(
-                        fontSize: 22,
-                      ),
-                    ),
-                  ),
-                ),
+                );
+              }).timeout(
+                const Duration(seconds: 4),
+              );
+            },
+            icon: const Icon(Icons.delete),
+            color: Colors.red,
+          ),
+        ],
+        title: Center(
+          child: Text(
+            'تفاصيل النقلة',
+            style: GoogleFonts.josefinSans(
+              textStyle: const TextStyle(
+                fontSize: 22,
               ),
-              body: content(),
-            );
-          }
-        });
+            ),
+          ),
+        ),
+      ),
+      body: content(),
+    );
   }
 
   Widget content() {
@@ -341,7 +285,8 @@ class _CarProgressDetailScreenState extends State<CarProgressDetailScreen>
                     height: 15.0,
                   ),
                   Text(
-                    widget.car["CarNoPlate"],
+                    widget.trip["car_no_plate"] +
+                        " (${widget.trip["tank_capacity"]})",
                     style: GoogleFonts.josefinSans(
                       textStyle: const TextStyle(
                         fontSize: 22.0,
@@ -353,7 +298,7 @@ class _CarProgressDetailScreenState extends State<CarProgressDetailScreen>
                     height: 15.0,
                   ),
                   Text(
-                    "اسم السائق: ${widget.car['DriverName']} ",
+                    "اسم السائق: ${widget.trip['driver_name']} ",
                     style: GoogleFonts.josefinSans(
                       textStyle: const TextStyle(
                         fontSize: 20.0,
@@ -375,7 +320,7 @@ class _CarProgressDetailScreenState extends State<CarProgressDetailScreen>
             children: [
               Center(
                 child: Text(
-                  "الفئة: ${widget.car["FeeRate"]}",
+                  "الفئة: ${widget.trip["fee_rate"]}",
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -387,13 +332,25 @@ class _CarProgressDetailScreenState extends State<CarProgressDetailScreen>
               ),
               Center(
                 child: Text(
-                  "السرعة الحالية: ${Speed.toString()}",
+                  "المسافة: ${widget.trip["mileage"].toString()}",
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
+              widget.trip['is_closed']
+                  ? IconButton(
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => MapHistory(
+                                    tripID: widget.trip["ID"], jwt: jwt)));
+                      },
+                      icon: const Icon(Icons.map_rounded),
+                    )
+                  : Container(),
             ],
           ),
         ),
@@ -444,10 +401,20 @@ class _CarProgressDetailScreenState extends State<CarProgressDetailScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
-              isCompleted != true
+              isCompleted == false
                   ? GestureDetector(
+                      onLongPress: () async {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => CloseTripConfirmation(
+                              trip: widget.trip,
+                              jwt: widget.jwt,
+                            ),
+                          ),
+                        );
+                      },
                       onTap: () async {
-                        // Show Loading Screen Until http Request is Completed.
                         showDialog(
                             context: context,
                             barrierDismissible: false,
@@ -472,17 +439,27 @@ class _CarProgressDetailScreenState extends State<CarProgressDetailScreen>
                               );
                             });
                         setState(() {});
-                        var res = await dio.post(
-                          "$SERVER_IP/api/NextStep",
-                          data: jsonEncode(
-                            {
-                              "Date":
-                                  DateTime.now().toString().substring(0, 10),
-                              "Time": currentTime,
-                              "TripId": widget.car["CardID"],
-                            },
-                          ),
-                        );
+                        var res = await dio
+                            .post(
+                              "$SERVER_IP/api/NextStep",
+                              data: jsonEncode(
+                                {
+                                  "Date": DateTime.now()
+                                      .toString()
+                                      .substring(0, 10),
+                                  "DateFormatted": intl.DateFormat("MM/dd/yyyy")
+                                      .format(DateTime.now()),
+                                  "Time": intl.DateFormat('hh:mm a')
+                                      .format(DateTime.now()),
+                                  "TimeFormatted": intl.DateFormat('HH:mm:ss')
+                                      .format(DateTime.now()),
+                                  "TripId": widget.trip["ID"],
+                                },
+                              ),
+                            )
+                            .timeout(
+                              const Duration(seconds: 4),
+                            );
                         setState(() {
                           Navigator.pop(dialogContext);
                           // Rebuild Whole Page
@@ -517,53 +494,71 @@ class _CarProgressDetailScreenState extends State<CarProgressDetailScreen>
                     )
                   : GestureDetector(
                       onTap: () async {
-                        showDialog(
-                            context: context,
-                            barrierDismissible: false,
-                            builder: (context) {
-                              dialogContext = context;
-                              return Dialog(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12.0),
-                                ),
-                                child: SizedBox(
-                                  height: 400,
-                                  width: double.infinity,
-                                  child: Center(
-                                    // Display lottie animation
-                                    child: Lottie.asset(
-                                      "lottie/SplashScreen.json",
-                                      height: 200,
-                                      width: 200,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            });
-                        var res = await dio.post(
-                          "$SERVER_IP/api/CompleteTrip",
-                          data: jsonEncode(
-                            {
-                              "Date":
-                                  DateTime.now().toString().substring(0, 10),
-                              "CarNoPlate": widget.car["CarNoPlate"],
-                              "TripId": widget.car["CardID"],
-                              "DriverName": widget.car["DriverName"],
-                            },
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => CloseTripConfirmation(
+                              trip: widget.trip,
+                              jwt: widget.jwt,
+                            ),
                           ),
                         );
-                        setState(() {
-                          Navigator.pop(dialogContext);
-                          // Rebuild Whole Page
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => CarProgressScreen(
-                                jwt: widget.jwt,
-                              ),
-                            ),
-                          );
-                        });
+                        // showDialog(
+                        //     context: context,
+                        //     barrierDismissible: false,
+                        //     builder: (context) {
+                        //       dialogContext = context;
+                        //       return Dialog(
+                        //         shape: RoundedRectangleBorder(
+                        //           borderRadius: BorderRadius.circular(12.0),
+                        //         ),
+                        //         child: SizedBox(
+                        //           height: 400,
+                        //           width: double.infinity,
+                        //           child: Center(
+                        //             // Display lottie animation
+                        //             child: Lottie.asset(
+                        //               "lottie/SplashScreen.json",
+                        //               height: 200,
+                        //               width: 200,
+                        //             ),
+                        //           ),
+                        //         ),
+                        //       );
+                        //     });
+                        // var res = await dio
+                        //     .post(
+                        //       "$SERVER_IP/api/CompleteTrip",
+                        //       data: jsonEncode(
+                        //         {
+                        //           "Date": DateTime.now()
+                        //               .toString()
+                        //               .substring(0, 10),
+                        //           "CarNoPlate": widget.trip["CarNoPlate"],
+                        //           "TimeFormatted": intl.DateFormat('HH:mm:ss')
+                        //               .format(DateTime.now()),
+                        //           "DateFormatted": intl.DateFormat("MM/dd/yyyy")
+                        //               .format(DateTime.now()),
+                        //           "TripId": widget.trip["CardID"],
+                        //           "DriverName": widget.trip["DriverName"],
+                        //         },
+                        //       ),
+                        //     )
+                        //     .timeout(
+                        //       const Duration(seconds: 4),
+                        //     );
+                        // setState(() {
+                        //   Navigator.pop(dialogContext);
+                        //   // Rebuild Whole Page
+                        //   Navigator.pushReplacement(
+                        //     context,
+                        //     MaterialPageRoute(
+                        //       builder: (_) => CarProgressScreen(
+                        //         jwt: widget.jwt,
+                        //       ),
+                        //     ),
+                        //   );
+                        // });
                       },
                       child: Container(
                         width: 160,
@@ -609,15 +604,18 @@ class _CarProgressDetailScreenState extends State<CarProgressDetailScreen>
                           ),
                         );
                       });
-                  var res = await dio.post(
-                    "$SERVER_IP/api/PreviousStep",
-                    data: jsonEncode(
-                      {
-                        "Date": DateTime.now().toString().substring(0, 10),
-                        "TripId": widget.car["CardID"],
-                      },
-                    ),
-                  );
+                  var res = await dio
+                      .post(
+                        "$SERVER_IP/api/PreviousStep",
+                        data: jsonEncode(
+                          {
+                            "TripId": widget.trip["ID"],
+                          },
+                        ),
+                      )
+                      .timeout(
+                        const Duration(seconds: 4),
+                      );
                   setState(() {
                     Navigator.pop(dialogContext);
                     // Rebuild Whole Page

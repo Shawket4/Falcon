@@ -29,7 +29,9 @@ class _AllTransportersState extends State<AllTransporters> {
           }
           TransporterList.sort(
               (a, b) => a['TransporterName'].compareTo(b['TransporterName']));
-        });
+        }).timeout(
+          const Duration(seconds: 4),
+        );
       } catch (e) {
         return "Error";
       }
@@ -49,7 +51,9 @@ class _AllTransportersState extends State<AllTransporters> {
       }
       TransporterList.sort(
           (a, b) => a['TransporterName'].compareTo(b['TransporterName']));
-    });
+    }).timeout(
+      const Duration(seconds: 4),
+    );
     setState(() {});
     return;
   }
@@ -67,6 +71,26 @@ class _AllTransportersState extends State<AllTransporters> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: SizedBox(
+              width: 50,
+              height: 50,
+              child: CircleAvatar(
+                backgroundColor: Colors.white,
+                child: Text(
+                  TransporterList.length.toString(),
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
         centerTitle: true,
         backgroundColor: Theme.of(context).primaryColor,
         title: const Text('المقاولين'),
@@ -121,66 +145,72 @@ class _AllTransportersState extends State<AllTransporters> {
                 ),
               );
             } else {
-              return LiquidPullToRefresh(
-                onRefresh: reloadData,
-                animSpeedFactor: 1.5,
-                backgroundColor: Colors.grey[300],
-                color: Theme.of(context).primaryColor,
-                height: 200,
-                child: ListView(
-                  children: [
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const BouncingScrollPhysics(),
-                      itemBuilder: (context, index) {
-                        return GestureDetector(
-                          onTap: () {
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //     builder: (context) =>
-                            //         TransporterProfileDetails(),
-                            //   ),
-                            // );
-                          },
-                          child: Card(
-                            elevation: 4,
-                            child: Row(
-                              children: <Widget>[
-                                Padding(
-                                  padding: const EdgeInsets.all(14),
-                                  child: Hero(
-                                    tag:
-                                        "Transporter ${TransporterList[index]["TransporterId"].toString()}",
-                                    child: const CircleAvatar(
-                                      backgroundImage:
-                                          AssetImage('images/truck.jpg'),
-                                      radius: 35,
-                                    ),
-                                  ),
-                                ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      TransporterList[index]['TransporterName'],
-                                      style: GoogleFonts.josefinSans(
-                                        textStyle: const TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.w600,
-                                        ),
+              return Scrollbar(
+                scrollbarOrientation: ScrollbarOrientation.left,
+                thickness: 8,
+                child: LiquidPullToRefresh(
+                  onRefresh: reloadData,
+                  animSpeedFactor: 1.5,
+                  backgroundColor: Colors.grey[300],
+                  color: Theme.of(context).primaryColor,
+                  height: 200,
+                  child: ListView(
+                    children: [
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: const BouncingScrollPhysics(),
+                        itemBuilder: (context, index) {
+                          return GestureDetector(
+                            onTap: () {
+                              // Navigator.push(
+                              //   context,
+                              //   MaterialPageRoute(
+                              //     builder: (context) =>
+                              //         TransporterProfileDetails(),
+                              //   ),
+                              // );
+                            },
+                            child: Card(
+                              elevation: 4,
+                              child: Row(
+                                children: <Widget>[
+                                  Padding(
+                                    padding: const EdgeInsets.all(14),
+                                    child: Hero(
+                                      tag:
+                                          "Transporter ${TransporterList[index]["TransporterId"].toString()}",
+                                      child: const CircleAvatar(
+                                        backgroundImage:
+                                            AssetImage('images/truck.jpg'),
+                                        radius: 35,
                                       ),
                                     ),
-                                  ],
-                                ),
-                              ],
+                                  ),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        TransporterList[index]
+                                            ['TransporterName'],
+                                        style: GoogleFonts.josefinSans(
+                                          textStyle: const TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        );
-                      },
-                      itemCount: TransporterList.length,
-                    ),
-                  ],
+                          );
+                        },
+                        itemCount: TransporterList.length,
+                      ),
+                    ],
+                  ),
                 ),
               );
             }

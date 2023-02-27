@@ -29,8 +29,11 @@ class _AllCarsState extends State<AllCars> {
           for (var i = 0; i < response.data.length; i++) {
             CarList.add(response.data[i]);
           }
-          CarList.sort((a, b) => a['CarNoPlate'].compareTo(b['CarNoPlate']));
-        });
+          CarList.sort(
+              (a, b) => a['car_no_plate'].compareTo(b['car_no_plate']));
+        }).timeout(
+          const Duration(seconds: 4),
+        );
       } catch (e) {
         return "Error";
       }
@@ -47,8 +50,10 @@ class _AllCarsState extends State<AllCars> {
       for (var i = 0; i < response.data.length; i++) {
         CarList.add(response.data[i]);
       }
-      CarList.sort((a, b) => a['CarNoPlate'].compareTo(b['CarNoPlate']));
-    });
+      CarList.sort((a, b) => a['car_no_plate'].compareTo(b['car_no_plate']));
+    }).timeout(
+      const Duration(seconds: 4),
+    );
 
     setState(() {});
     return;
@@ -68,6 +73,26 @@ class _AllCarsState extends State<AllCars> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: SizedBox(
+              width: 50,
+              height: 50,
+              child: CircleAvatar(
+                backgroundColor: Colors.white,
+                child: Text(
+                  CarList.length.toString(),
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
         centerTitle: true,
         backgroundColor: Theme.of(context).primaryColor,
         title: const Text('السيارات'),
@@ -126,85 +151,90 @@ class _AllCarsState extends State<AllCars> {
                   ? const Center(
                       child: Text("No Cars Found"),
                     )
-                  : LiquidPullToRefresh(
-                      onRefresh: reloadData,
-                      animSpeedFactor: 1.5,
-                      backgroundColor: Colors.grey[300],
-                      color: Theme.of(context).primaryColor,
-                      height: 200,
-                      child: GroupedListView<dynamic, String>(
-                        physics: const BouncingScrollPhysics(),
-                        useStickyGroupSeparators: true,
-                        scrollDirection: Axis.vertical,
-                        groupBy: (element) => element["Transporter"],
-                        sort: false,
-                        elements: CarList.toList(),
-                        groupSeparatorBuilder: (value) => Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(16),
-                          color: Colors.black,
-                          child: Text(
-                            value,
-                            style: GoogleFonts.josefinSans(
-                              textStyle: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w500,
+                  : Scrollbar(
+                      scrollbarOrientation: ScrollbarOrientation.left,
+                      thickness: 8,
+                      child: LiquidPullToRefresh(
+                        onRefresh: reloadData,
+                        animSpeedFactor: 1.5,
+                        backgroundColor: Colors.grey[300],
+                        color: Theme.of(context).primaryColor,
+                        height: 200,
+                        child: GroupedListView<dynamic, String>(
+                          physics: const BouncingScrollPhysics(),
+                          useStickyGroupSeparators: true,
+                          scrollDirection: Axis.vertical,
+                          groupBy: (element) => element["transporter"],
+                          sort: true,
+                          elements: CarList.toList(),
+                          groupSeparatorBuilder: (value) => Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(16),
+                            color: Colors.black,
+                            child: Text(
+                              value,
+                              style: GoogleFonts.josefinSans(
+                                textStyle: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        itemBuilder: (context, element) => GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => CarProfileDetails(
-                                  car: element,
-                                  jwt: widget.jwt,
-                                ),
-                              ),
-                            );
-                          },
-                          child: Card(
-                            elevation: 4,
-                            child: Row(
-                              children: <Widget>[
-                                Padding(
-                                  padding: const EdgeInsets.all(14),
-                                  child: Hero(
-                                    tag: "Car ${element["CarId"].toString()}",
-                                    child: const CircleAvatar(
-                                      backgroundImage:
-                                          AssetImage('images/truck.jpg'),
-                                      radius: 35,
-                                    ),
+                          itemBuilder: (context, element) => GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => CarProfileDetails(
+                                    car: element,
+                                    jwt: widget.jwt,
                                   ),
                                 ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      element['CarNoPlate'],
-                                      style: GoogleFonts.josefinSans(
-                                        textStyle: const TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.w600,
-                                        ),
+                              );
+                            },
+                            child: Card(
+                              elevation: 4,
+                              child: Row(
+                                children: <Widget>[
+                                  Padding(
+                                    padding: const EdgeInsets.all(14),
+                                    child: Hero(
+                                      tag: "Car ${element["ID"].toString()}",
+                                      child: const CircleAvatar(
+                                        backgroundImage:
+                                            AssetImage('images/truck.jpg'),
+                                        radius: 35,
                                       ),
                                     ),
-                                    Text(
-                                      element["TankCapacity"].toString(),
-                                      style: GoogleFonts.josefinSans(
-                                        textStyle: const TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w500,
+                                  ),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        element['car_no_plate'],
+                                        style: GoogleFonts.josefinSans(
+                                          textStyle: const TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                      Text(
+                                        element["tank_capacity"].toString(),
+                                        style: GoogleFonts.josefinSans(
+                                          textStyle: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),

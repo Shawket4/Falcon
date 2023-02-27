@@ -12,7 +12,6 @@ import 'package:falcon_1/main.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:http/http.dart' as http;
-import 'package:falcon_1/Maps/Map.dart';
 
 class CarProfileDetails extends StatefulWidget {
   const CarProfileDetails({Key? key, this.car, required this.jwt})
@@ -36,10 +35,10 @@ class _CarProfileDetailsState extends State<CarProfileDetails> {
   void initState() {
     dio.options.headers["Cookie"] = "jwt=${widget.jwt}";
     dio.options.headers["Content-Type"] = "application/json";
-    compartments = widget.car["Compartments"];
+    compartments = widget.car["json_compartments"];
     carDetails.add(
       Text(
-        "رقم السيارة: ${widget.car["CarNoPlate"]}",
+        "رقم السيارة: ${widget.car["car_no_plate"]}",
         style: const TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w600,
@@ -48,7 +47,7 @@ class _CarProfileDetailsState extends State<CarProfileDetails> {
     );
     carDetails.add(
       Text(
-        "حجم التانك: ${widget.car["TankCapacity"]}",
+        "حجم التانك: ${widget.car["tank_capacity"]}",
         style: const TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w600,
@@ -57,11 +56,11 @@ class _CarProfileDetailsState extends State<CarProfileDetails> {
     );
     carDetails.add(
       Text(
-        "الرخصه ساريه حتي: ${widget.car["LicenseExpirationDate"]}",
+        "الرخصه ساريه حتي: ${widget.car["license_expiration_date"]}",
         style: TextStyle(
           color: !DateTime.now()
                   .difference(
-                      DateTime.parse(widget.car["LicenseExpirationDate"]))
+                      DateTime.parse(widget.car["license_expiration_date"]))
                   .isNegative
               ? Colors.red
               : Colors.black,
@@ -73,11 +72,11 @@ class _CarProfileDetailsState extends State<CarProfileDetails> {
     );
     carDetails.add(
       Text(
-        "رخصة العيار ساريه حتي: ${widget.car["CalibrationExpirationDate"]}",
+        "رخصة العيار ساريه حتي: ${widget.car["calibration_expiration_date"]}",
         style: TextStyle(
           color: !DateTime.now()
                   .difference(
-                      DateTime.parse(widget.car["CalibrationExpirationDate"]))
+                      DateTime.parse(widget.car["calibration_expiration_date"]))
                   .isNegative
               ? Colors.red
               : Colors.black,
@@ -87,9 +86,28 @@ class _CarProfileDetailsState extends State<CarProfileDetails> {
         ),
       ),
     );
+    if (widget.car["tank_license_expiration_date"] != "") {
+      carDetails.add(
+        Text(
+          "رخصة التانك ساريه حتي: ${widget.car["tank_license_expiration_date"]}",
+          style: TextStyle(
+            color: !DateTime.now()
+                    .difference(DateTime.parse(
+                        widget.car["tank_license_expiration_date"]))
+                    .isNegative
+                ? Colors.red
+                : Colors.black,
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            overflow: TextOverflow.clip,
+          ),
+        ),
+      );
+    }
+
     carDetails.add(
       Text(
-        "عدد عيون التانك: ${widget.car["Compartments"].length}",
+        "عدد عيون التانك: ${widget.car["json_compartments"].length}",
         style: const TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w600,
@@ -114,12 +132,12 @@ class _CarProfileDetailsState extends State<CarProfileDetails> {
   bool gpsCompatible = false;
   Map<String, Uint8List> imageBytes = {};
 
-  Future<Object> loadData(String CarNoPlate) async {
+  Future<Object> loadData(String car_no_plate) async {
     try {
       await dio
           .post("$SERVER_IP/api/GetVehicleStatus",
               data: jsonEncode({
-                "CarNoPlate": CarNoPlate,
+                "car_no_plate": car_no_plate,
               }))
           .then((value) {
         // var jsonResponse = json.decode(utf8.decode(value.data));
@@ -131,15 +149,16 @@ class _CarProfileDetailsState extends State<CarProfileDetails> {
           Latitude = double.parse(value.data["Latitude"]);
           gpsCompatible = true;
         }
-      });
+      }).timeout(const Duration(seconds: 4));
 
-      if (widget.car["CarLicenseImageName"] == "") {
+      if (widget.car["car_license_image_name"] == "") {
         return "";
       }
-      if (widget.car["CarLicenseImageName"] != "") {
+
+      if (widget.car["car_license_image_name"] != "") {
         http.Response carLicenseFront = await http.get(
           Uri.parse(
-              "$SERVER_IP/CarLicenses/${widget.car["CarLicenseImageName"]}"),
+              "$SERVER_IP/CarLicenses/${widget.car["car_license_image_name"]}"),
         );
         if (carLicenseFront.statusCode == HttpStatus.ok) {
           final Uint8List carLicenceBytes = carLicenseFront.bodyBytes;
@@ -147,10 +166,10 @@ class _CarProfileDetailsState extends State<CarProfileDetails> {
         }
       }
 
-      if (widget.car["CarLicenseImageNameBack"] != "") {
+      if (widget.car["car_license_image_name_back"] != "") {
         http.Response carLicenseBack = await http.get(
           Uri.parse(
-              "$SERVER_IP/CarLicenses/${widget.car["CarLicenseImageNameBack"]}"),
+              "$SERVER_IP/CarLicensesBack/${widget.car["car_license_image_name_back"]}"),
         );
         if (carLicenseBack.statusCode == HttpStatus.ok) {
           final Uint8List carLicenceBytesBack = carLicenseBack.bodyBytes;
@@ -158,10 +177,32 @@ class _CarProfileDetailsState extends State<CarProfileDetails> {
         }
       }
 
-      if (widget.car["CalibrationLicenseImageName"] != "") {
+      if (widget.car["tank_license_image_name"] != "") {
+        http.Response tankLicenseFront = await http.get(
+          Uri.parse(
+              "$SERVER_IP/TankLicenses/${widget.car["tank_license_image_name"]}"),
+        );
+        if (tankLicenseFront.statusCode == HttpStatus.ok) {
+          final Uint8List tankLicenceBytes = tankLicenseFront.bodyBytes;
+          imageBytes["صورة وجه رخصة الديل"] = tankLicenceBytes;
+        }
+      }
+
+      if (widget.car["tank_license_image_name_back"] != "") {
+        http.Response tankLicenseBack = await http.get(
+          Uri.parse(
+              "$SERVER_IP/TankLicensesBack/${widget.car["tank_license_image_name_back"]}"),
+        );
+        if (tankLicenseBack.statusCode == HttpStatus.ok) {
+          final Uint8List tankLicenceBytesBack = tankLicenseBack.bodyBytes;
+          imageBytes["صورة ضهر رخصة الديل"] = tankLicenceBytesBack;
+        }
+      }
+
+      if (widget.car["calibration_license_image_name"] != "") {
         http.Response carCalibrationFront = await http.get(
           Uri.parse(
-              "$SERVER_IP/CalibrationLicenses/${widget.car["CalibrationLicenseImageName"]}"),
+              "$SERVER_IP/CalibrationLicenses/${widget.car["calibration_license_image_name"]}"),
         );
         if (carCalibrationFront.statusCode == HttpStatus.ok) {
           final Uint8List calibrationLicenceBytes =
@@ -170,10 +211,10 @@ class _CarProfileDetailsState extends State<CarProfileDetails> {
         }
       }
 
-      if (widget.car["CalibrationLicenseImageNameBack"] != "") {
+      if (widget.car["calibration_license_image_name_back"] != "") {
         http.Response carCalibrationBack = await http.get(
           Uri.parse(
-              "$SERVER_IP/CalibrationLicenses/${widget.car["CalibrationLicenseImageNameBack"]}"),
+              "$SERVER_IP/CalibrationLicensesBack/${widget.car["calibration_license_image_name_back"]}"),
         );
         if (carCalibrationBack.statusCode == HttpStatus.ok) {
           final Uint8List calibrationLicenceBytesBack =
@@ -193,7 +234,7 @@ class _CarProfileDetailsState extends State<CarProfileDetails> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: loadData(widget.car["CarNoPlate"]),
+      future: loadData(widget.car["car_no_plate"]),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return Scaffold(
@@ -257,6 +298,7 @@ class _CarProfileDetailsState extends State<CarProfileDetails> {
                         builder: (_) => EditCarScreen(
                           car: widget.car,
                           jwt: widget.jwt,
+                          imageBytes: imageBytes,
                         ),
                       ),
                     );
@@ -291,26 +333,73 @@ class _CarProfileDetailsState extends State<CarProfileDetails> {
                             ),
                           );
                         });
-                    var response = await dio
-                        .post(
-                      "$SERVER_IP/api/DeleteCar",
-                      data: jsonEncode(
-                        {
-                          "CarNoPlate": widget.car["CarNoPlate"],
-                        },
-                      ),
-                    )
-                        .then((value) {
-                      Navigator.pop(dialogContext);
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => CarProgressScreen(
-                            jwt: widget.jwt.toString(),
-                          ),
+                    try {
+                      var response = await dio
+                          .post(
+                        "$SERVER_IP/api/DeleteCar",
+                        data: jsonEncode(
+                          {
+                            "ID": widget.car["ID"],
+                          },
                         ),
-                      );
-                    });
+                      )
+                          .then((value) {
+                        Navigator.pop(dialogContext);
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => CarProgressScreen(
+                              jwt: widget.jwt.toString(),
+                            ),
+                          ),
+                        );
+                      }).timeout(const Duration(seconds: 4));
+                    } catch (e) {
+                      showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) {
+                            return Dialog(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              child: SizedBox(
+                                height: 400,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: Center(
+                                        // Display lottie animation
+                                        child: Lottie.asset(
+                                          "lottie/Error.json",
+                                          height: 300,
+                                          width: 300,
+                                        ),
+                                      ),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          Navigator.pop(context);
+                                          Navigator.pop(context);
+                                        });
+                                      },
+                                      child: const Text(
+                                        "Close",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 20,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          });
+                    }
                   },
                   icon: const Icon(
                     Icons.delete,
@@ -320,7 +409,7 @@ class _CarProfileDetailsState extends State<CarProfileDetails> {
               ],
               backgroundColor: Theme.of(context).primaryColor,
               title: Text(
-                'تفاصيل السيارة ${widget.car["CarNoPlate"]}',
+                'تفاصيل السيارة ${widget.car["car_no_plate"]}',
                 textDirection: TextDirection.ltr,
               ),
             ),
@@ -386,7 +475,7 @@ class _CarProfileDetailsState extends State<CarProfileDetails> {
                 //               MaterialPageRoute(
                 //                 builder: (_) => ImageView(
                 //                   images: imageBytes,
-                //                   name: widget.car["CarNoPlate"],
+                //                   name: widget.car["car_no_plate"],
                 //                 ),
                 //               ),
                 //             );
@@ -421,7 +510,9 @@ class _CarProfileDetailsState extends State<CarProfileDetails> {
                             MaterialPageRoute(
                               builder: (_) => ImageView(
                                 images: imageBytes,
-                                name: widget.car["CarNoPlate"],
+                                name: widget.car["car_no_plate"],
+                                type: "Car",
+                                id: widget.car["ID"],
                               ),
                             ),
                           );
@@ -448,7 +539,7 @@ class _CarProfileDetailsState extends State<CarProfileDetails> {
                     if (gpsCompatible)
                       GestureDetector(
                         onTap: () async {
-                          MapUtils.openMap(Latitude, Longitude);
+                          // MapUtils.openMap(Latitude, Longitude);
                         },
                         child: Container(
                           width: 160,
@@ -504,16 +595,74 @@ class _CarProfileDetailsState extends State<CarProfileDetails> {
                                       ),
                                     );
                                   });
-                              var response = await dio.post(
-                                "$SERVER_IP/api/RejectRequest",
-                                data: jsonEncode(
-                                  {
-                                    "TableName": "Cars",
-                                    "ColumnIdName": "CarId",
-                                    "Id": widget.car["CarId"],
-                                  },
-                                ),
-                              );
+                              try {
+                                var response = await dio
+                                    .post(
+                                      "$SERVER_IP/api/RejectRequest",
+                                      data: jsonEncode(
+                                        {
+                                          "TableName": "Cars",
+                                          "ColumnIdName": "CarId",
+                                          "Id": widget.car["CarId"],
+                                        },
+                                      ),
+                                    )
+                                    .timeout(const Duration(seconds: 4));
+                              } catch (e) {
+                                showDialog(
+                                    context: context,
+                                    barrierDismissible: false,
+                                    builder: (context) {
+                                      return Dialog(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12.0),
+                                        ),
+                                        child: SizedBox(
+                                          height: 400,
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              SizedBox(
+                                                width: double.infinity,
+                                                child: Center(
+                                                  // Display lottie animation
+                                                  child: Lottie.asset(
+                                                    "lottie/Error.json",
+                                                    height: 300,
+                                                    width: 300,
+                                                  ),
+                                                ),
+                                              ),
+                                              TextButton(
+                                                onPressed: () {
+                                                  setState(() {
+                                                    Navigator.pop(context);
+                                                  });
+                                                  // Navigator.pushReplacement(
+                                                  //   context,
+                                                  //   MaterialPageRoute(
+                                                  //     builder: (_) => CarProgressScreen(
+                                                  //       jwt: widget.jwt.toString(),
+                                                  //     ),
+                                                  //   ),
+                                                  // );
+                                                },
+                                                child: const Text(
+                                                  "Close",
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 20,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    });
+                              }
                               setState(() {
                                 Navigator.pop(dialogContext);
                                 // Rebuild Whole Page
@@ -571,16 +720,74 @@ class _CarProfileDetailsState extends State<CarProfileDetails> {
                                       ),
                                     );
                                   });
-                              var response = await dio.post(
-                                "$SERVER_IP/api/ApproveRequest",
-                                data: jsonEncode(
-                                  {
-                                    "TableName": "Cars",
-                                    "ColumnIdName": "CarId",
-                                    "Id": widget.car["CarId"],
-                                  },
-                                ),
-                              );
+                              try {
+                                var response = await dio
+                                    .post(
+                                      "$SERVER_IP/api/ApproveRequest",
+                                      data: jsonEncode(
+                                        {
+                                          "TableName": "Cars",
+                                          "ColumnIdName": "CarId",
+                                          "Id": widget.car["CarId"],
+                                        },
+                                      ),
+                                    )
+                                    .timeout(const Duration(seconds: 4));
+                              } catch (e) {
+                                showDialog(
+                                    context: context,
+                                    barrierDismissible: false,
+                                    builder: (context) {
+                                      return Dialog(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12.0),
+                                        ),
+                                        child: SizedBox(
+                                          height: 400,
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              SizedBox(
+                                                width: double.infinity,
+                                                child: Center(
+                                                  // Display lottie animation
+                                                  child: Lottie.asset(
+                                                    "lottie/Error.json",
+                                                    height: 300,
+                                                    width: 300,
+                                                  ),
+                                                ),
+                                              ),
+                                              TextButton(
+                                                onPressed: () {
+                                                  setState(() {
+                                                    Navigator.pop(context);
+                                                  });
+                                                  // Navigator.pushReplacement(
+                                                  //   context,
+                                                  //   MaterialPageRoute(
+                                                  //     builder: (_) => CarProgressScreen(
+                                                  //       jwt: widget.jwt.toString(),
+                                                  //     ),
+                                                  //   ),
+                                                  // );
+                                                },
+                                                child: const Text(
+                                                  "Close",
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 20,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    });
+                              }
                               setState(() {
                                 Navigator.pop(dialogContext);
                                 // Rebuild Whole Page

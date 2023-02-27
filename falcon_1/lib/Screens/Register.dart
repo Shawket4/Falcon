@@ -3,7 +3,7 @@
 import 'dart:convert';
 import 'dart:ui';
 
-import 'package:falcon_1/Screens/Register.dart';
+import 'package:falcon_1/Screens/Login.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -12,15 +12,16 @@ import 'package:lottie/lottie.dart';
 
 import '../main.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({Key? key}) : super(key: key);
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
 const storage = FlutterSecureStorage();
 late BuildContext dialogContext;
+final _nameController = TextEditingController();
 final _emailController = TextEditingController();
 final _passwordController = TextEditingController();
 
@@ -30,7 +31,7 @@ Future<String> get jwtOrEmpty async {
   return jwt;
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
   @override
   void initState() {
     storage.delete(key: "jwt");
@@ -105,25 +106,19 @@ class _LoginScreenState extends State<LoginScreen> {
                           height: 70,
                         ),
                         _labelTextInput(
-                            "البريد الالكتروني", "yourname@example.com", false),
+                            "اسم المستخدم", "yourname", false, _nameController),
                         const SizedBox(
                           height: 50,
                         ),
-                        _labelTextInput("كلمة السر", "yourpassword", true),
+                        _labelTextInput("البريد الالكتروني",
+                            "yourname@example.com", false, _emailController),
                         const SizedBox(
-                          height: 30,
+                          height: 50,
                         ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (_) => const RegisterScreen()));
-                          },
-                          child: const Text("Don't Have An Account ?"),
-                        ),
+                        _labelTextInput("كلمة السر", "yourpassword", true,
+                            _passwordController),
                         const SizedBox(
-                          height: 30,
+                          height: 50,
                         ),
                         _loginBtn(context),
                       ],
@@ -174,9 +169,9 @@ Widget _loginBtn(BuildContext context) {
                   ),
                 );
               });
-          var jwt = await attemptLogIn(
+          var status = await attemptRegister(_nameController.text,
               _emailController.text, _passwordController.text);
-          if (jwt == "Error") {
+          if (status == "Error") {
             Navigator.pop(context);
             showDialog(
                 context: context,
@@ -202,7 +197,7 @@ Widget _loginBtn(BuildContext context) {
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => const LoginScreen(),
+                                  builder: (_) => const RegisterScreen(),
                                 ),
                               );
                             },
@@ -214,20 +209,12 @@ Widget _loginBtn(BuildContext context) {
                   );
                 });
           } else {
-            if (jwt != null) {
-              storage.write(key: "jwt", value: jwt);
-              Navigator.pop(dialogContext);
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (context) => const MainWidget()));
-            } else {
-              Navigator.pop(dialogContext);
-              displayDialog(context, "An Error Occurred",
-                  "No account was found matching that username and password");
-            }
+            Navigator.pushReplacement(context,
+                MaterialPageRoute(builder: (_) => const LoginScreen()));
           }
         },
         child: Text(
-          "تسجيل الدخول",
+          "تسجيل حسابك",
           style: GoogleFonts.josefinSans(
             textStyle: const TextStyle(
               color: Colors.white,
@@ -241,7 +228,8 @@ Widget _loginBtn(BuildContext context) {
   );
 }
 
-Widget _labelTextInput(String label, String hintText, bool isPassword) {
+Widget _labelTextInput(String label, String hintText, bool isPassword,
+    TextEditingController controller) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -275,7 +263,7 @@ Widget _labelTextInput(String label, String hintText, bool isPassword) {
             borderSide: BorderSide(color: Color(0xffdfe8f3)),
           ),
         ),
-        controller: isPassword ? _passwordController : _emailController,
+        controller: controller,
       ),
     ],
   );
@@ -284,7 +272,7 @@ Widget _labelTextInput(String label, String hintText, bool isPassword) {
 Widget _loginLabel() {
   return Center(
     child: Text(
-      "تسجيل الدخول",
+      "تسجيل حسابك",
       style: GoogleFonts.josefinSans(
         textStyle: const TextStyle(
           color: Color(0xff164276),
@@ -315,13 +303,14 @@ void displayDialog(BuildContext context, String title, String text) =>
       builder: (context) =>
           AlertDialog(title: Text(title), content: Text(text)),
     );
-Future attemptLogIn(String email, String password) async {
+Future attemptRegister(String name, String email, String password) async {
   try {
     var res = await http
         .post(
-          Uri.parse("$SERVER_IP/api/login"),
+          Uri.parse("$SERVER_IP/api/RegisterUser"),
           headers: {"Content-Type": "application/json"},
           body: jsonEncode({
+            "name": name,
             "email": email,
             "password": password,
           }),
@@ -329,8 +318,7 @@ Future attemptLogIn(String email, String password) async {
         .timeout(
           const Duration(seconds: 20),
         );
-    var jsonData = jsonDecode(res.body);
-    if (res.statusCode == 200 && jsonData["permission"] >= 1) {
+    if (res.statusCode == 200) {
       return res.body;
     } else {
       return null;

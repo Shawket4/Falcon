@@ -30,8 +30,10 @@ class _AllDriversState extends State<AllDrivers> {
           for (var i = 0; i < response.data.length; i++) {
             DriverList.add(response.data[i]);
           }
-          DriverList.sort((a, b) => a['Name'].compareTo(b['Name']));
-        });
+          DriverList.sort((a, b) => a['name'].compareTo(b['name']));
+        }).timeout(
+          const Duration(seconds: 4),
+        );
       } catch (e) {
         return "Error";
       }
@@ -48,8 +50,10 @@ class _AllDriversState extends State<AllDrivers> {
       for (var i = 0; i < response.data.length; i++) {
         DriverList.add(response.data[i]);
       }
-      DriverList.sort((a, b) => a['Name'].compareTo(b['Name']));
-    });
+      DriverList.sort((a, b) => a['name'].compareTo(b['name']));
+    }).timeout(
+      const Duration(seconds: 4),
+    );
     setState(() {});
     return;
   }
@@ -66,6 +70,26 @@ class _AllDriversState extends State<AllDrivers> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: SizedBox(
+              width: 50,
+              height: 50,
+              child: CircleAvatar(
+                backgroundColor: Colors.white,
+                child: Text(
+                  DriverList.length.toString(),
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
         centerTitle: true,
         backgroundColor: Theme.of(context).primaryColor,
         title: const Text('السائقين'),
@@ -124,78 +148,82 @@ class _AllDriversState extends State<AllDrivers> {
                   ? const Center(
                       child: Text("No Drivers Found"),
                     )
-                  : LiquidPullToRefresh(
-                      onRefresh: reloadData,
-                      animSpeedFactor: 1.5,
-                      backgroundColor: Colors.grey[300],
-                      color: Theme.of(context).primaryColor,
-                      height: 200,
-                      child: GroupedListView<dynamic, String>(
-                        physics: const BouncingScrollPhysics(),
-                        useStickyGroupSeparators: true,
-                        scrollDirection: Axis.vertical,
-                        groupBy: (element) => element["Transporter"],
-                        sort: false,
-                        elements: DriverList.toList(),
-                        groupSeparatorBuilder: (value) => Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(16),
-                          color: Colors.black,
-                          child: Text(
-                            value,
-                            style: GoogleFonts.josefinSans(
-                              textStyle: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w500,
+                  : Scrollbar(
+                      scrollbarOrientation: ScrollbarOrientation.left,
+                      thickness: 8,
+                      child: LiquidPullToRefresh(
+                        onRefresh: reloadData,
+                        animSpeedFactor: 1.5,
+                        backgroundColor: Colors.grey[300],
+                        color: Theme.of(context).primaryColor,
+                        height: 200,
+                        child: GroupedListView<dynamic, String>(
+                          physics: const BouncingScrollPhysics(),
+                          useStickyGroupSeparators: true,
+                          scrollDirection: Axis.vertical,
+                          groupBy: (element) => element["transporter"],
+                          sort: true,
+                          elements: DriverList.toList(),
+                          groupSeparatorBuilder: (value) => Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(16),
+                            color: Colors.black,
+                            child: Text(
+                              value,
+                              style: GoogleFonts.josefinSans(
+                                textStyle: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        itemBuilder: (context, element) => GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => DriverProfileDetails(
-                                  driver: element,
-                                  jwt: widget.jwt,
-                                ),
-                              ),
-                            );
-                          },
-                          child: Card(
-                            elevation: 4,
-                            child: Row(
-                              children: <Widget>[
-                                Padding(
-                                  padding: const EdgeInsets.all(14),
-                                  child: Hero(
-                                    tag:
-                                        "Driver ${element["DriverId"].toString()}",
-                                    child: CircleAvatar(
-                                      backgroundImage:
-                                          const AssetImage('images/driver.png'),
-                                      backgroundColor: Colors.grey.shade300,
-                                      radius: 35,
-                                    ),
+                          itemBuilder: (context, element) => GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => DriverProfileDetails(
+                                    driver: element,
+                                    jwt: widget.jwt,
                                   ),
                                 ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      element['Name'],
-                                      style: GoogleFonts.josefinSans(
-                                        textStyle: const TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.w600,
-                                        ),
+                              );
+                            },
+                            child: Card(
+                              elevation: 4,
+                              child: Row(
+                                children: <Widget>[
+                                  Padding(
+                                    padding: const EdgeInsets.all(14),
+                                    child: Hero(
+                                      tag: "Driver ${element["ID"].toString()}",
+                                      child: CircleAvatar(
+                                        backgroundImage: const AssetImage(
+                                            'images/driver.png'),
+                                        backgroundColor: Colors.grey.shade300,
+                                        radius: 35,
                                       ),
                                     ),
-                                  ],
-                                ),
-                              ],
+                                  ),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        element['name'],
+                                        style: GoogleFonts.josefinSans(
+                                          textStyle: const TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),

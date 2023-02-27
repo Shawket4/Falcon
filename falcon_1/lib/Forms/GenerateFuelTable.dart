@@ -14,17 +14,18 @@ import 'package:http/http.dart' as http;
 import 'package:lottie/lottie.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-class GenerateTableScreen extends StatefulWidget {
-  const GenerateTableScreen({Key? key, this.jwt}) : super(key: key);
+class GenerateFuelTableScreen extends StatefulWidget {
+  const GenerateFuelTableScreen({Key? key, this.jwt}) : super(key: key);
   final String? jwt;
   @override
-  State<GenerateTableScreen> createState() => _GenerateTableScreenState();
+  State<GenerateFuelTableScreen> createState() =>
+      _GenerateFuelTableScreenState();
 }
 
 final _dateFrom = TextEditingController();
 final _dateTo = TextEditingController();
 
-class _GenerateTableScreenState extends State<GenerateTableScreen> {
+class _GenerateFuelTableScreenState extends State<GenerateFuelTableScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -149,7 +150,7 @@ class _GenerateTableScreenState extends State<GenerateTableScreen> {
                     try {
                       await http
                           .post(
-                        Uri.parse("$SERVER_IP/api/GenerateCSVTable"),
+                        Uri.parse("$SERVER_IP/api/protected/GenerateFuelTable"),
                         headers: {
                           "Content-Type": "application/json",
                           "Cookie": "jwt=${widget.jwt}",
@@ -165,11 +166,16 @@ class _GenerateTableScreenState extends State<GenerateTableScreen> {
                           bool status = await Permission.storage.isGranted;
                           if (!status) await Permission.storage.request();
                           MimeType type = MimeType.OTHER;
-                          await FileSaver.instance
-                              .saveAs("Table", bodyBytes, "xlsx", type);
+                          await FileSaver.instance.saveAs(
+                              "Fuel_Table ${_dateFrom.text}-${_dateTo.text}",
+                              bodyBytes,
+                              "xlsx",
+                              type);
                         } else {
                           String? filePath = await FilePicker.platform.saveFile(
-                              dialogTitle: "Save File", fileName: "Table.xlsx");
+                              dialogTitle: "Save File",
+                              fileName:
+                                  "Fuel_Table ${_dateFrom.text}-${_dateTo.text}.xlsx");
                           File file = File(filePath!);
                           file.writeAsBytes(bodyBytes);
                         }
