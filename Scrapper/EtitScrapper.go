@@ -1,9 +1,12 @@
 package Scrapper
 
 import (
+	"Falcon/Structs"
+	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"net/http/cookiejar"
@@ -11,6 +14,8 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+
+	// "time"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly"
@@ -37,6 +42,7 @@ type VehicleStatusStruct struct {
 
 var VehicleStatusList []VehicleStatusStruct
 var VehicleStatusListTemp []VehicleStatusStruct
+var AllCoordinates map[string][]Structs.Coordinate
 
 var Data struct {
 	Data struct {
@@ -62,8 +68,10 @@ type Project struct {
 
 func (app *App) getToken() AuthenticityToken {
 	loginURL := baseURL
-	client := app.Client
-
+	// client := app.Client
+	customTransport := http.DefaultTransport.(*http.Transport).Clone()
+	customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	client := &http.Client{Transport: customTransport}
 	response, err := client.Get(loginURL)
 
 	if err != nil {
@@ -86,9 +94,85 @@ func (app *App) getToken() AuthenticityToken {
 	return authenticityToken
 }
 
-func (app *App) login() *colly.Collector {
+func (app *App) GetVehicleHistoryData(VehicleID string, client *colly.Collector) []Structs.Coordinate {
+	//var HistoryData struct {
+	//	HistoryPoint []struct {
+	//		Points []struct {
+	//			Latitude  string `json:"a"`
+	//			Longitude string `json:"o"`
+	//		} `json:"p"`
+	//		Date string `json:"d"`
+	//	}
+	//}
+	var HistoryData Structs.TimeLineStruct
+	//var HistoryData interface{}
+	client.OnResponse(func(r *colly.Response) {
+		jsonString := string(r.Body)
+		var finalJson string
+		client2 := colly.NewCollector()
+		client2.OnResponse(func(jsonR *colly.Response) {
+			formattedJson := string(jsonR.Body)
+			var data struct {
+				Result struct {
+					Data string `json:"data"`
+				} `json:"result"`
+			}
+			//fmt.Println(formattedJson)
+			err := json.Unmarshal([]byte(formattedJson), &data)
+			if err != nil {
+				log.Println(err.Error())
+			}
+			finalJson = data.Result.Data
+			//fmt.Println(finalJson)
+			err = json.Unmarshal([]byte(finalJson), &HistoryData)
+			if err != nil {
+				log.Println(err.Error())
+			}
+		})
+		client2.Post("https://jsonformatter.curiousconcept.com/process", map[string]string{"data": jsonString, "jsontemplate": "1", "jsonfix": "yes"})
+		fmt.Println(HistoryData.History[0])
+		// jsonString = strings.Replace(jsonString, "\"{", "{", -1)
+		// jsonString = strings.Replace(jsonString, "\"}", "}", -1)
+		// fmt.Println(jsonString)
+		//fmt.Println(VehicleID)
+		//fmt.Println(HistoryData.History[0].P)
+		// fmt.Println(Data.Data.Rows[0])
+		// for i := 0; i < len(Data.Data.Rows); i++ {
+		// 	for i2 := 0; i2 < len(VehicleStatusListTemp); i2++ {
+		// 		if Data.Data.Rows[i].PlateNo == VehicleStatusListTemp[i2].PlateNo {
+		// 			VehicleStatusListTemp[i2].ID = Data.Data.Rows[i].ID
+		// 		}
+		// 	}
+		// }
+	})
+	queryString := fmt.Sprintf("https://fms-gps.etit-eg.com/WebPages/GetAllHistoryData.aspx?id=%s&time=6&from=%s&to=%s", VehicleID, "12/24/2022%2000:00:00", "12/24/2022%2023:59:59")
+	fmt.Println(queryString)
+	err := client.Request("GET", queryString, nil, nil, http.Header{"Content-Type": []string{"text/html; charset=utf-8"}})
+	if err != nil {
+		log.Println(err)
+	}
+
+	for _, s := range HistoryData.History {
+		var coordinate Structs.Coordinate
+		coordinate.Longitude = s.P[0].A
+		coordinate.Latitude = s.P[0].O
+		coordinate.DateTime = s.D
+		AllCoordinates[VehicleID] = append(AllCoordinates[VehicleID], coordinate)
+	}
+	return AllCoordinates[VehicleID]
+	// err := client.Request("POST", baseURL+"/WebPages/Transporters/List.aspx/GetAllTransporterBySearchCriteria", strings.NewReader(jsonString), nil, http.Header{"Content-Type": []string{"application/json; charset=utf-8"}})
+	// if err != nil {
+	// 	log.Println(err)
+	// }
+	//return HistoryData
+}
+
+func (app *App) Login() (*colly.Collector, error) {
 	authenticityToken := app.getToken()
 	client := colly.NewCollector()
+	client.WithTransport(&http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}})
+	// http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+
 	loginURL := baseURL + "/"
 	data := map[string]string{
 		"ScriptManager1":          "UpdatePanel1|lg_AltairLogin$LoginButton",
@@ -99,8 +183,14 @@ func (app *App) login() *colly.Collector {
 		"lg_AltairLogin$Password": password,
 	}
 
-	client.Post(loginURL, data)
+	if err := client.Post(loginURL, data); err != nil {
+		return nil, err
+	}
+	fmt.Println("Logged In.")
+	return client, nil
+}
 
+func (app *App) GetCurrentLocationData(client *colly.Collector) error {
 	client.OnHTML("#ctl00_ContentPlaceHolder1_grd_TransportersData_ctl00", func(h *colly.HTMLElement) {
 		h.ForEach("tr.rgRow", func(_ int, tr *colly.HTMLElement) {
 			var CurrentVehicleStatus VehicleStatusStruct
@@ -142,6 +232,7 @@ func (app *App) login() *colly.Collector {
 	err := client.Request("GET", "https://fms-gps.etit-eg.com/WebPages/UpdateTransportersData.aspx", nil, nil, http.Header{"Content-Type": []string{"text/html; charset=utf-8"}})
 	if err != nil {
 		log.Println(err)
+		return err
 	}
 	client.OnResponse(func(r *colly.Response) {
 		jsonString := string(r.Body)
@@ -167,8 +258,14 @@ func (app *App) login() *colly.Collector {
 	err = client.Request("POST", baseURL+"/WebPages/Transporters/List.aspx/GetAllTransporterBySearchCriteria", strings.NewReader(jsonString), nil, http.Header{"Content-Type": []string{"application/json; charset=utf-8"}})
 	if err != nil {
 		log.Println(err)
+		return err
 	}
-	return client
+
+	if len(VehicleStatusListTemp) == 0 {
+		return errors.New("Empty")
+	}
+	VehicleStatusList = VehicleStatusListTemp
+	return nil
 }
 
 var jar, _ = cookiejar.New(nil)
@@ -177,21 +274,57 @@ var app = App{
 	Client: &http.Client{Jar: jar},
 }
 
+var isLoaded bool = false
+var GlobalClient *colly.Collector
+
 func GetVehicleData() {
+	GlobalClient, err := app.Login()
+
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
 	VehicleStatusListTemp = []VehicleStatusStruct{}
-	app.login()
-	VehicleStatusList = VehicleStatusListTemp
+	app.GetCurrentLocationData(GlobalClient)
+
+	if VehicleStatusList != nil {
+		fmt.Println(isLoaded)
+		isLoaded = true
+	}
+	//AllCoordinates := app.GetVehicleHistoryData(VehicleStatusList[0].ID, client)
+	//fmt.Println(AllCoordinates[0:6])
 }
 
-type MilageStruct struct {
+// func GetVehicleHistoryData() {
+// 	if isLoaded {
+// 		for _, s := range VehicleStatusList {
+// 			client := app.Login()
+// 			fmt.Println(s.ID)
+// 			app.GetVehicleHistoryData(s.ID, client)
+// 			time.Sleep(time.Second * 20)
+// 			//fmt.Printf("%s Cooridinates %v", s.ID, AllCoordinates[s.ID][0:5])
+// 		}
+// 	}
+// }
+
+type MileageStruct struct {
 	VehiclePlateNo string `json:"VehiclePlateNo"`
-	DateFrom       string `json:"DateFrom"`
-	DateTo         string `json:"DateTo"`
+	StartTime      string `json:"StartTime"`
+	EndTime        string `json:"EndTime"`
 	VehicleID      string
 }
 
-func GetVehicleMilageHistory(c *fiber.Ctx) error {
-	var data MilageStruct
+func GetVehicleMileageHistory(c *fiber.Ctx) error {
+	if err := app.GetCurrentLocationData(GlobalClient); err != nil {
+		var loginErr error
+		GlobalClient, loginErr = app.Login()
+		if loginErr != nil {
+			log.Println(err.Error())
+			return err
+		}
+		app.GetCurrentLocationData(GlobalClient)
+	}
+	var data MileageStruct
 	err := c.BodyParser(&data)
 	if err != nil {
 		log.Println(err.Error())
@@ -203,12 +336,18 @@ func GetVehicleMilageHistory(c *fiber.Ctx) error {
 	fmt.Println(data.VehiclePlateNo)
 	for _, s := range VehicleStatusList {
 		if s.PlateNo == data.VehiclePlateNo {
-			fmt.Println("d")
 			data.VehicleID = s.ID
 		}
 	}
-	milage := app.getMilage(data)
-	return c.JSON(milage)
+	feeRate, mileage, err := GetFeeRate(data)
+	if err != nil {
+		log.Println(err.Error())
+		return err
+	}
+	return c.JSON(fiber.Map{
+		"Fee":     feeRate,
+		"mileage": mileage,
+	})
 }
 
 type Jar struct {
@@ -232,221 +371,130 @@ func (jar *Jar) Cookies(u *url.URL) []*http.Cookie {
 	return jar.cookies[u.Host]
 }
 
-func (app *App) getMilage(data MilageStruct) float64 {
-	jar := NewJar()
-	client := http.Client{Jar: jar}
-	authenticityToken := app.getToken()
-	loginURL := baseURL + "/"
-	loginData := url.Values{
-		"ScriptManager1":          {"UpdatePanel1|lg_AltairLogin$LoginButton"},
-		"__EVENTTARGET":           {"lg_AltairLogin$LoginButton"},
-		"__VIEWSTATE":             {authenticityToken.Token},
-		"__VIEWSTATEGENERATOR":    {"0C2F32F0"},
-		"lg_AltairLogin$UserName": {username},
-		"lg_AltairLogin$Password": {password},
-	}
-
-	resp, _ := client.PostForm(loginURL, loginData)
-	doc, err := goquery.NewDocumentFromReader(resp.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-	doc.Find("script").Each(func(i int, s *goquery.Selection) {
-		if i == 23 {
-			body := s.Text()
-			fmt.Println(body)
-			s.Find("document").Each(func(i int, s2 *goquery.Selection) {
-				fmt.Println(s2.Text())
-			})
+func trimLeftChars(s string, n int) string {
+	m := 0
+	for i := range s {
+		if m >= n {
+			return s[i:]
 		}
-	})
-	// fmt.Println()
-	resp.Body.Close()
-
-	resp, _ = client.Get("https://fms-gps.etit-eg.com/WebPages/GetHistoryTripSummary.ashx?from=9%2F9%2F2022+00%3A00%3A00&id=cd482774-6ba0-e811-80de-0025b500010d&time=6&to=9%2F9%2F2022+23%3A59%3A59")
-
-	b, _ := ioutil.ReadAll(resp.Body)
-	resp.Body.Close()
-
-	fmt.Println(string(b))
-	fmt.Println(jar)
-	return 2
+		m++
+	}
+	return s[:0]
 }
 
-// func (app *App) getMilage(data MilageStruct) float64 {
-// 	authenticityToken := app.getToken()
-// 	client := colly.NewCollector()
-// 	loginURL := baseURL + "/"
-// 	loginData := map[string]string{
-// 		"ScriptManager1":          "UpdatePanel1|lg_AltairLogin$LoginButton",
-// 		"__EVENTTARGET":           "lg_AltairLogin$LoginButton",
-// 		"__VIEWSTATE":             authenticityToken.Token,
-// 		"__VIEWSTATEGENERATOR":    "0C2F32F0",
-// 		"lg_AltairLogin$UserName": username,
-// 		"lg_AltairLogin$Password": password,
-// 	}
-// 	// loginData := map[string]string{
-// 	// 	"ScriptManager1":  "UpdatePanel1|lg_AltairLogin$LoginButton",
-// 	// 	"__EVENTTARGET":   "lg_AltairLogin$LoginButton",
-// 	// 	"__EVENTARGUMENT": "",
-// 	// 	"lg_AltairLogin_RadW_SendEmail_ClientState": "",
-// 	// 	"TokenWindow$C$txt_token":                   "",
-// 	// 	"TokenWindow_ClientState":                   "",
-// 	// 	"NotAuthorizedWindow_ClientState":           "",
-// 	// 	"RadWindowManager2_ClientState":             "",
-// 	// 	"__ASYNCPOST":                               "true",
-// 	// 	"RadAJAXControlID":                          "RadAjaxManager1",
-// 	// 	"__VIEWSTATE":                               authenticityToken.Token,
-// 	// 	"__VIEWSTATEGENERATOR":                      "0C2F32F0",
-// 	// 	"lg_AltairLogin$UserName":                   username,
-// 	// 	"lg_AltairLogin$Password":                   password,
-// 	// }
-// 	loginData2 := url.Values{
-// 		"ScriptManager1":          {"UpdatePanel1|lg_AltairLogin$LoginButton"},
-// 		"__EVENTTARGET":           {"lg_AltairLogin$LoginButton"},
-// 		"__VIEWSTATE":             {authenticityToken.Token},
-// 		"__VIEWSTATEGENERATOR":    {"0C2F32F0"},
-// 		"lg_AltairLogin$UserName": {username},
-// 		"lg_AltairLogin$Password": {password},
-// 	}
-// 	var siteCookies []*http.Cookie
+func GetFeeRate(data MileageStruct) (float64, float64, error) {
+	GlobalClient, _ = app.Login()
+	app.GetCurrentLocationData(GlobalClient)
+	// reqString := fmt.Sprintf("https://fms-gps.etit-eg.com/WebPages/GetHistoryTripSummary.ashx?id=%s&time=6&from=%s&to=%s", data.VehicleID, "11/1/2022%2000:00:00", "11/1/2022%2023:59:59")
+	reqString := fmt.Sprintf("https://fms-gps.etit-eg.com/WebPages/GetHistoryTripSummary.ashx?id=%s&time=6&from=%s&to=%s", data.VehicleID, data.StartTime, data.EndTime)
+	GlobalClient.Request("GET", "https://fms-gps.etit-eg.com", nil, nil, http.Header{})
+	cookies := GlobalClient.Cookies("https://fms-gps.etit-eg.com")
+	req, _ := http.NewRequest("GET", reqString, nil)
+	req.Header.Set("Cookie", fmt.Sprintf("%s;", cookies[4]))
+	res, err := app.Client.Do(req)
+	if err != nil {
+		log.Println(err.Error())
+		return 0, 0, err
+	}
+	defer res.Body.Close()
+	buf, err := io.ReadAll(res.Body)
+	if err != nil {
+		log.Println(err.Error())
+		return 0, 0, err
+	}
+	jsonData, err := json.Marshal(fmt.Sprintf("%s", buf))
+	if err != nil {
+		log.Println(err.Error())
+		return 0, 0, err
+	}
+	var jsonString string
+	err = json.Unmarshal(jsonData, &jsonString)
+	if err != nil {
+		log.Println(err.Error())
+		return 0, 0, err
+	}
+	jsonString = trimLeftChars(jsonString, 13)
+	stringLen := len(jsonString)
+	fmt.Println(stringLen)
+	if len(jsonString) > 0 {
+		jsonString = jsonString[:len(jsonString)-5]
+	} else {
+		return 0, 0, err
+	}
 
-// 	var siteCookiesString string
-// 	client.OnResponse(func(r *colly.Response) {
-// 		siteCookies = client.Cookies(r.Request.URL.String())
-// 		for i, s := range siteCookies {
-// 			if i+1 == len(siteCookies) {
-// 				siteCookiesString += fmt.Sprintf("%s=%s", s.Name, s.Value)
-// 			} else {
+	// jsonString = strings.Trim(jsonString, ", ")
+	jsonString = jsonString + "\n}"
+	fmt.Println(jsonString)
+	// fmt.Println(jsonString)
+	var unMarshalledData struct {
+		TotalMilage string `json:"TotalMileage"`
+	}
+	err = json.Unmarshal([]byte(jsonString), &unMarshalledData)
+	if err != nil {
+		log.Println(err.Error())
+		return 0, 0, err
+	}
+	// err = json.NewDecoder(res.Body).Decode(&unMarshalledData)
+	if err != nil {
+		log.Println(err.Error())
+		return 0, 0, err
+	}
+	fmt.Println(unMarshalledData.TotalMilage)
+	mileage, err := strconv.ParseFloat(unMarshalledData.TotalMilage, 64)
+	if err != nil {
+		log.Println(err.Error())
+	}
+	if mileage == 0 {
+		GlobalClient, err = app.Login()
+		if err != nil {
+			return 0, 0, err
+		}
+		return GetFeeRate(data)
+	}
+	feeRate := GetFeeFromMilage(mileage)
 
-// 				siteCookiesString += fmt.Sprintf("%s=%s; ", s.Name, s.Value)
-// 			}
-// 		}
-// 	})
-// 	client.Post(loginURL, loginData)
-// 	client.Wait()
-// 	// client.OnResponse(func(r *colly.Response) {
-// 	// 	jsonResponse := string(r.Body)
-// 	// 	fmt.Println(jsonResponse)
-// 	// })
-// 	// client.OnXML("body", func(x *colly.XMLElement) {
-// 	// 	fmt.Println(x.Response.Body)
-// 	// })
-// 	// client.OnResponse(func(r *colly.Response) {
-// 	// 	fmt.Println(string(r.Body))
-// 	// })
-// 	fmt.Println(data)
-// 	// pageUrl := fmt.Sprintf("https://fms-gps.etit-eg.com/WebPages/GetHistoryTripSummary.ashx?id=%s&time=6&from=%s&to=%s", data.VehicleID, data.DateFrom, data.DateTo)
-// 	pageUrl := "https://fms-gps.etit-eg.com/WebPages/GetHistoryTripSummary.ashx"
-// 	// pageUrl = url.QueryEscape()
-// 	fmt.Println(pageUrl)
-// 	// type ReqStruct map[string]string
-// 	// reqData := ReqStruct{
-// 	// "id":   data.VehicleID,
-// 	// "time": "6",
-// 	// "from": data.DateFrom,
-// 	// "to":   data.DateTo,
-// 	// 	// "t":    "1662460189973",
-// 	// }
-// 	reqData := url.Values{
-// 		"id":   {data.VehicleID},
-// 		"time": {"6"},
-// 		"from": {data.DateFrom},
-// 		"to":   {data.DateTo},
-// 	}
-// 	fmt.Println(pageUrl + "?" + reqData.Encode())
-// 	// jsonData, err := json.Marshal(reqData)
-// 	// if err != nil {
-// 	// 	log.Fatal(err)
-// 	// }
-// 	// reader := bytes.NewReader(jsonData)
-// 	// _ = reader
+	return feeRate, mileage, nil
+}
 
-// 	// // err = client.Request("GET", pageUrl, reader, nil, http.Header{"Content-Type": []string{"text/html; charset=utf-8"}})
-// 	// // err = client.Visit(pageUrl)
-
-// 	loginResponse, err := app.Client.PostForm(loginURL, loginData2)
-
-// 	if err != nil {
-// 		log.Fatalln(err)
-// 	}
-
-// 	defer loginResponse.Body.Close()
-
-// 	// body, err := ioutil.ReadAll(loginResponse.Body)
-// 	// fmt.Println(string(body))
-// 	// if err != nil {
-// 	// 	log.Fatalln(err)
-// 	// }
-// 	// client.Visit("https://fms-gps.etit-eg.com/WebPages/Maps.aspx")
-// 	// err := client.Post("https://fms-gps.etit-eg.com/WebPages/Maps.aspx", nil)
-// 	// if err != nil {
-// 	// 	log.Println(err)
-// 	// }
-// 	// client.Visit("https://fms-gps.etit-eg.com/WebPages/Maps.aspx")
-// 	// client.OnHTML("body", func(h *colly.HTMLElement) {
-// 	// 	fmt.Println(h.Text)
-// 	// })
-
-// 	// response, err := app.Client.Get(pageUrl)
-
-// 	// if err != nil {
-// 	// 	log.Fatalln(err)
-// 	// }
-
-// 	// defer response.Body.Close()
-
-// 	// body, err = ioutil.ReadAll(response.Body)
-// 	// fmt.Println(string(body))
-// 	// if err != nil {
-// 	// 	log.Fatalln(err)
-// 	// }
-// 	// err := client.Request("GET", pageUrl, nil, nil, nil)
-// 	// if err != nil {
-// 	// 	log.Println(err)
-// 	// }
-// 	client.OnResponse(func(r *colly.Response) {
-// 		for i, s := range siteCookies {
-// 			if i+1 == len(siteCookies) {
-// 				siteCookiesString += fmt.Sprintf("%s=%s", s.Name, s.Value)
-// 			} else {
-
-// 				siteCookiesString += fmt.Sprintf("%s=%s; ", s.Name, s.Value)
-// 			}
-// 		}
-// 	})
-// 	err = client.Request("GET", "https://fms-gps.etit-eg.com/WebPages/UpdateTransportersData.aspx", nil, nil, http.Header{"Content-Type": []string{"text/html; charset=utf-8"}})
-// 	if err != nil {
-// 		log.Println(err)
-// 	}
-// 	client.Wait()
-// 	// client.Visit("https://etit-fms.etit-eg.com/WebPages/Transporters/List.aspx")
-// 	client.OnRequest(func(r *colly.Request) {
-
-// 		// client.SetCookies(pageUrl, siteCookies)
-// 		r.Headers.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9")
-// 		r.Headers.Set("Accept-Encoding", "gzip, deflate, br")
-// 		r.Headers.Set("Accept-Language", "en-US,en;q=0.9")
-// 		r.Headers.Set("Cache-Control", "max-age=0")
-// 		r.Headers.Set("Connection", "keep-alive")
-// 		r.Headers.Set("Cookie", siteCookiesString)
-// 		fmt.Println(siteCookies)
-// 		// r.Headers.Set("SSOCookie", siteCookies[1].Value)
-// 		// r.Headers.Set("SSOPCookie", siteCookies[2].Value)
-// 		// r.Headers.Set("Token", siteCookies[3].Value)
-// 		// fmt.Println(siteCookies)
-// 		// fmt.Println(r.Headers.Values("Cookie"))
-// 	})
-
-// 	// client.Wait()
-// 	// client.OnHTML("body", func(h *colly.HTMLElement) {
-// 	// 	fmt.Println(h.Text)
-// 	// })
-// 	client.OnResponse(func(r *colly.Response) {
-// 		fmt.Println(string(r.Body))
-// 	})
-// 	client.Visit(pageUrl)
-// 	client.Wait()
-
-// 	return 2
-// }
+func GetFeeFromMilage(mileage float64) float64 {
+	if mileage > 0 {
+		if mileage <= 100 {
+			return 76
+		} else if mileage <= 150 {
+			return 91
+		} else if mileage <= 200 {
+			return 107
+		} else if mileage <= 250 {
+			return 122
+		} else if mileage <= 300 {
+			return 138
+		} else if mileage <= 350 {
+			return 154
+		} else if mileage <= 400 {
+			return 169
+		} else if mileage <= 450 {
+			return 185
+		} else if mileage <= 500 {
+			return 200
+		} else if mileage <= 550 {
+			return 216
+		} else if mileage <= 600 {
+			return 268
+		} else if mileage <= 650 {
+			return 283
+		} else if mileage <= 700 {
+			return 299
+		} else if mileage <= 750 {
+			return 350
+		} else if mileage <= 800 {
+			return 366
+		} else if mileage <= 850 {
+			return 418
+		} else if mileage <= 900 {
+			return 433
+		} else {
+			return 485
+		}
+	}
+	return 0
+}

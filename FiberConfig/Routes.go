@@ -5,9 +5,12 @@ import (
 	"Falcon/Apis"
 	"Falcon/Controllers"
 	"Falcon/ManipulateData"
+	"Falcon/Notifications"
 	"Falcon/PreviewData"
 	"Falcon/Scrapper"
+	"Falcon/middleware"
 	"fmt"
+	"time"
 
 	// "log"
 
@@ -19,7 +22,7 @@ import (
 )
 
 func FiberConfig() {
-	fmt.Println("Server Up!")
+	fmt.Println("Server Up...")
 	engine := html.New("./Templates", ".html")
 	// Html Template engine
 	app := fiber.New(fiber.Config{
@@ -32,13 +35,13 @@ func FiberConfig() {
 	app.Post("/api/Login", Controllers.Login)
 	app.Use("/api/User", Controllers.User)
 	app.Use("/api/Logout", Controllers.Logout)
-	app.Get("/ShowAllServiceEvents", adaptor.HTTPHandlerFunc(PreviewData.ShowAllServiceEvents))
+	// app.Get("/ShowAllServiceEvents", adaptor.HTTPHandlerFunc(PreviewData.ShowAllServiceEvents))
 	app.Post("/api/removedata", (ManipulateData.DeleteData))
 	app.Post("/api/editdata", (ManipulateData.EditData))
 	app.Post("/api/CreateCarTrip", Apis.CreateCarTrip)
 	app.Post("/api/EditCarTrip", Apis.EditCarTrip)
-	app.Post("/api/GenerateCSVTable", Apis.GenerateCSVTable)
-	app.Post("/api/GetDriverTrip", Controllers.GetDriverTrip)
+	app.Post("/api/GenerateCSVTable", Apis.GenerateTripsExcelTable)
+	//app.Post("/api/GetDriverTrip", Controllers.GetDriverTrip)
 	app.Post("/api/NextStep", Controllers.NextStep)
 	app.Post("/api/PreviousStep", Controllers.PreviousStep)
 	app.Post("/api/CompleteTrip", Controllers.CompleteTrip)
@@ -50,8 +53,7 @@ func FiberConfig() {
 	app.Use("/api/GetTransporterProfileData", Apis.GetTransporterProfileData)
 	app.Post("/api/DeleteDriver", Apis.DeleteDriver)
 	app.Post("/api/DeleteCar", Apis.DeleteCar)
-	app.Post("/api/EditCar", Apis.EditCar)
-	app.Post("/api/EditDriver", Apis.EditDriver)
+	app.Post("/api/UpdateCar", Apis.UpdateCar)
 	app.Post("/api/EditTransporter", Apis.EditTransporter)
 	app.Post("/api/DeleteCarTrip", Apis.DeleteCarTrip)
 	app.Use("/api/GetPendingRequests", Apis.GetPendingRequests)
@@ -59,22 +61,50 @@ func FiberConfig() {
 	app.Post("/api/RejectRequest", Apis.RejectRequest)
 	app.Post("/api/UpdateTempPermission", Apis.UpdateTempPermission)
 	app.Use("/api/GetNonDriverUsers", Apis.GetNonDriverUsers)
-	app.Use("/AddServiceEvent", adaptor.HTTPHandlerFunc(AddEvent.AddServiceEventTmpl))
+	// app.Use("/AddServiceEvent", adaptor.HTTPHandlerFunc(AddEvent.AddServiceEventTmpl))
+	app.Post("/api/CreateServiceEvent", Apis.CreateServiceEvent)
+	app.Post("/api/EditServiceEvent", Apis.EditServiceEvent)
+	app.Post("/api/DeleteServiceEvent", Apis.DeleteServiceEvent)
+	app.Get("/api/GetAllServiceEvents", Apis.GetAllServiceEvents)
 	app.Use("/api/GetVehicleStatus", Apis.GetVehicleStatus)
 	app.Use("/api/GetVehicleMapPoints", Apis.GetVehicleMapPoints)
-	app.Use("/api/GetVehicleMilage", Scrapper.GetVehicleMilageHistory)
+	app.Use("/api/GetVehicleMilage", Scrapper.GetVehicleMileageHistory)
 	app.Get("/api/GetLocations", Apis.GetLocations)
+
+	app.Use("/api/GetNotifications", Notifications.ReturnNotifications)
+	protectedApis := app.Group("/api/protected/", middleware.Verify)
+	protectedApis.Post("/GetRouteHistory", Scrapper.GetVehicleRouteHistory)
+	protectedApis.Post("/GetTripRouteHistory", Scrapper.GetTripRouteHistory)
+	protectedApis.Post("/GetPhotoAlbum", Apis.GetPhotoAlbum)
+	protectedApis.Post("/RegisterDriver", Controllers.RegisterDriver)
+	protectedApis.Post("/UpdateDriver", Controllers.UpdateDriver)
+	//protectedApis.Use(middleware.Verify)
+	protectedApis.Post("/AddFuelEvent", Apis.AddFuelEvent)
+	protectedApis.Post("/EditFuelEvent", Apis.EditFuelEvent)
+	protectedApis.Post("/DeleteFuelEvent", Apis.DeleteFuelEvent)
+	protectedApis.Get("/GetFuelEvents", Apis.GetFuelEvents)
+	protectedApis.Post("/GenerateFuelTable", Apis.GenerateFuelEventsExcelTable)
+	protectedApis.Post("/GenerateReceipt", Apis.GenerateReceipt)
+	// app.Post("/api/GenerateReceipt", Apis.GenerateCSVReceipt)
 	// app.Use("/api/AddCar", AddEvent.AddCarHandler)
 	// app.Use("/api/AddServiceEvent", AddEvent.AddCarHandler)
 	app.Use("/AddDailyDelivery", adaptor.HTTPHandlerFunc(AddEvent.AddDeliveryTmpl))
 	app.Use("/ShowAllDeliveries", PreviewData.ShowAllDailyDeliveries)
 	app.Use("/GetProgressOfCars", Apis.GetProgressOfCars)
 	// Serve Static Images
-	app.Static("/CarLicenses", "./CarLicenses")
-	app.Static("/CalibrationLicenses", "./CalibrationLicenses")
-	app.Static("/DriverLicenses", "./DriverLicenses")
-	app.Static("/SafetyLicenses", "./SafetyLicenses")
-	app.Static("/DrugTests", "./DrugTests")
+	app.Static("/CarLicenses", "./CarLicenses", fiber.Static{Compress: true, CacheDuration: time.Second * 10})
+	app.Static("/CarLicensesBack", "./CarLicensesBack", fiber.Static{Compress: true, CacheDuration: time.Second * 10})
+	app.Static("/CalibrationLicenses", "./CalibrationLicenses", fiber.Static{Compress: true, CacheDuration: time.Second * 10})
+	app.Static("/CalibrationLicensesBack", "./CalibrationLicensesBack", fiber.Static{Compress: true, CacheDuration: time.Second * 10})
+	app.Static("/DriverLicenses", "./DriverLicenses", fiber.Static{Compress: true, CacheDuration: time.Second * 10})
+	app.Static("/SafetyLicenses", "./SafetyLicenses", fiber.Static{Compress: true, CacheDuration: time.Second * 10})
+	app.Static("/DrugTests", "./DrugTests", fiber.Static{Compress: true, CacheDuration: time.Second * 10})
+	app.Static("/CriminalRecords", "./CriminalRecords", fiber.Static{Compress: true, CacheDuration: time.Second * 10})
+	app.Static("/IDLicenses", "./IDLicenses", fiber.Static{Compress: true, CacheDuration: time.Second * 10})
+	app.Static("/IDLicensesBack", "./IDLicensesBack", fiber.Static{Compress: true, CacheDuration: time.Second * 10})
+	app.Static("/TankLicenses", "./TankLicenses", fiber.Static{Compress: true, CacheDuration: time.Second * 10})
+	app.Static("/TankLicensesBack", "./TankLicensesBack", fiber.Static{Compress: true, CacheDuration: time.Second * 10})
+	app.Static("/ServiceProofs", "./ServiceProofs", fiber.Static{Compress: true, CacheDuration: time.Second * 10})
 	// WebSocket
 	// app.Use("/ws", func(c *fiber.Ctx) error {
 	// 	// IsWebSocketUpgrade returns true if the client
@@ -111,5 +141,5 @@ func FiberConfig() {
 	// 	}
 
 	// }))
-	app.Listen(":3001")
+	app.ListenTLS(":3001", "selfsigned.crt", "selfsigned.key")
 }

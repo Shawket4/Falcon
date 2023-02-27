@@ -1,8 +1,9 @@
 package main
 
 import (
-	"Falcon/Database"
 	"Falcon/FiberConfig"
+	"Falcon/Models"
+	"Falcon/Notifications"
 	"Falcon/Scrapper"
 	"time"
 
@@ -15,10 +16,21 @@ func main() {
 		for {
 			Scrapper.GetVehicleData()
 			// AbstractFunctions.DetectServiceMilage()
-			time.Sleep(time.Second * 10)
+			time.Sleep(time.Minute * 10)
 		}
 	}()
-	Database.Connect()
-	// Database.ConnectAdmin()
+	go func() {
+		for {
+			Notifications.GetExpiringDocuments()
+			time.Sleep(time.Hour)
+		}
+	}()
+	//go func() {
+	//	for {
+	//		Scrapper.GetVehicleHistoryData()
+	//		time.Sleep(time.Second * 30)
+	//	}
+	//}()
+	Models.Connect()
 	FiberConfig.FiberConfig()
 }

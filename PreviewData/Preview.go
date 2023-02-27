@@ -4,88 +4,82 @@ import (
 	"Falcon/Database"
 	"Falcon/Structs"
 	"log"
-	"net/http"
-	"text/template"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-var (
-	tmplShowServiceEvent = template.Must(template.ParseFiles("./Templates/all-service-events.html"))
-)
-
 // Display All Service Events
 
-func ShowAllServiceEvents(w http.ResponseWriter, r *http.Request) {
-	db := Database.ConnectToDB()
-	query, err := db.Query("SELECT * FROM `ServiceEvents`")
-	if err != nil {
-		log.Println(err)
-	}
-	defer query.Close()
-	var data []Structs.Service
-	for query.Next() {
-		var queryData Structs.Service
-		var IsAlerted int64
-		err = query.Scan(&queryData.EventId, &IsAlerted, &queryData.CarNoPlate, &queryData.ServiceType, &queryData.DateOfService, &queryData.ServiceCenter, &queryData.ServiceOdometerReading, &queryData.CurrentOdometerReading, &queryData.AlertAfter)
-		if err != nil {
-			log.Println(err)
-		}
-		data = append(data, queryData)
-	}
-	// Make an array for each property
-	var serviceId []string
-	var carNoPlate []string
-	var serviceType []string
-	var dateOfService []string
-	var serviceCenter []string
-	var serviceOdometerReading []string
-	var currentOdometerReading []string
-	var alertAfter []string
-	// Loop through the data and append the properties to the array
-	for _, v := range data {
-		serviceId = append(serviceId, v.EventId+",")
-		carNoPlate = append(carNoPlate, v.CarNoPlate+",")
-		serviceType = append(serviceType, v.ServiceType+",")
-		dateOfService = append(dateOfService, v.DateOfService+",")
-		serviceCenter = append(serviceCenter, v.ServiceCenter+",")
-		serviceOdometerReading = append(serviceOdometerReading, v.ServiceOdometerReading+",")
-		currentOdometerReading = append(currentOdometerReading, v.CurrentOdometerReading+",")
-		alertAfter = append(alertAfter, v.AlertAfter+",")
-	}
-	// Remove the last character of the last element in each array
-	// Check if array is empty
-	if len(serviceId) > 0 {
-		serviceId[len(serviceId)-1] = serviceId[len(serviceId)-1][:len(serviceId[len(serviceId)-1])-1]
-		carNoPlate[len(carNoPlate)-1] = carNoPlate[len(carNoPlate)-1][:len(carNoPlate[len(carNoPlate)-1])-1]
-		serviceType[len(serviceType)-1] = serviceType[len(serviceType)-1][:len(serviceType[len(serviceType)-1])-1]
-		dateOfService[len(dateOfService)-1] = dateOfService[len(dateOfService)-1][:len(dateOfService[len(dateOfService)-1])-1]
-		serviceCenter[len(serviceCenter)-1] = serviceCenter[len(serviceCenter)-1][:len(serviceCenter[len(serviceCenter)-1])-1]
-		serviceOdometerReading[len(serviceOdometerReading)-1] = serviceOdometerReading[len(serviceOdometerReading)-1][:len(serviceOdometerReading[len(serviceOdometerReading)-1])-1]
-		currentOdometerReading[len(currentOdometerReading)-1] = currentOdometerReading[len(currentOdometerReading)-1][:len(currentOdometerReading[len(currentOdometerReading)-1])-1]
-		alertAfter[len(alertAfter)-1] = alertAfter[len(alertAfter)-1][:len(alertAfter[len(alertAfter)-1])-1]
-	}
-	// Pass the arrays to the template
-	tmplShowServiceEvent.Execute(w, struct {
-		ServiceEventId         []string
-		CarNoPlate             []string
-		ServiceType            []string
-		DateOfService          []string
-		ServiceCenter          []string
-		ServiceOdometerReading []string
-		CurrentOdometerReading []string
-		AlertAfter             []string
-	}{
-		ServiceEventId:         serviceId,
-		CarNoPlate:             carNoPlate,
-		ServiceType:            serviceType,
-		DateOfService:          dateOfService,
-		ServiceCenter:          serviceCenter,
-		ServiceOdometerReading: serviceOdometerReading,
-		CurrentOdometerReading: currentOdometerReading,
-		AlertAfter:             alertAfter,
-	})
-}
+// func ShowAllServiceEvents(w http.ResponseWriter, r *http.Request) {
+// 	db := Database.ConnectToDB()
+// 	query, err := db.Query("SELECT * FROM `ServiceEvents`")
+// 	if err != nil {
+// 		log.Println(err)
+// 	}
+// 	defer query.Close()
+// 	var data []Structs.Service
+// 	for query.Next() {
+// 		var queryData Structs.Service
+// 		var IsAlerted int64
+// 		err = query.Scan(&queryData.EventId, &IsAlerted, &queryData.CarNoPlate, &queryData.ServiceType, &queryData.DateOfService, &queryData.ServiceCenter, &queryData.ServiceOdometerReading, &queryData.CurrentOdometerReading, &queryData.AlertAfter)
+// 		if err != nil {
+// 			log.Println(err)
+// 		}
+// 		data = append(data, queryData)
+// 	}
+// 	// Make an array for each property
+// 	var serviceId []string
+// 	var carNoPlate []string
+// 	var serviceType []string
+// 	var dateOfService []string
+// 	var serviceCenter []string
+// 	var serviceOdometerReading []string
+// 	var currentOdometerReading []string
+// 	var alertAfter []string
+// 	// Loop through the data and append the properties to the array
+// 	for _, v := range data {
+// 		serviceId = append(serviceId, v.EventId+",")
+// 		carNoPlate = append(carNoPlate, v.CarNoPlate+",")
+// 		serviceType = append(serviceType, v.ServiceType+",")
+// 		dateOfService = append(dateOfService, v.DateOfService+",")
+// 		serviceCenter = append(serviceCenter, v.ServiceCenter+",")
+// 		serviceOdometerReading = append(serviceOdometerReading, v.ServiceOdometerReading+",")
+// 		currentOdometerReading = append(currentOdometerReading, v.CurrentOdometerReading+",")
+// 		alertAfter = append(alertAfter, v.AlertAfter+",")
+// 	}
+// 	// Remove the last character of the last element in each array
+// 	// Check if array is empty
+// 	if len(serviceId) > 0 {
+// 		serviceId[len(serviceId)-1] = serviceId[len(serviceId)-1][:len(serviceId[len(serviceId)-1])-1]
+// 		carNoPlate[len(carNoPlate)-1] = carNoPlate[len(carNoPlate)-1][:len(carNoPlate[len(carNoPlate)-1])-1]
+// 		serviceType[len(serviceType)-1] = serviceType[len(serviceType)-1][:len(serviceType[len(serviceType)-1])-1]
+// 		dateOfService[len(dateOfService)-1] = dateOfService[len(dateOfService)-1][:len(dateOfService[len(dateOfService)-1])-1]
+// 		serviceCenter[len(serviceCenter)-1] = serviceCenter[len(serviceCenter)-1][:len(serviceCenter[len(serviceCenter)-1])-1]
+// 		serviceOdometerReading[len(serviceOdometerReading)-1] = serviceOdometerReading[len(serviceOdometerReading)-1][:len(serviceOdometerReading[len(serviceOdometerReading)-1])-1]
+// 		currentOdometerReading[len(currentOdometerReading)-1] = currentOdometerReading[len(currentOdometerReading)-1][:len(currentOdometerReading[len(currentOdometerReading)-1])-1]
+// 		alertAfter[len(alertAfter)-1] = alertAfter[len(alertAfter)-1][:len(alertAfter[len(alertAfter)-1])-1]
+// 	}
+// 	// Pass the arrays to the template
+// 	tmplShowServiceEvent.Execute(w, struct {
+// 		ServiceEventId         []string
+// 		CarNoPlate             []string
+// 		ServiceType            []string
+// 		DateOfService          []string
+// 		ServiceCenter          []string
+// 		ServiceOdometerReading []string
+// 		CurrentOdometerReading []string
+// 		AlertAfter             []string
+// 	}{
+// 		ServiceEventId:         serviceId,
+// 		CarNoPlate:             carNoPlate,
+// 		ServiceType:            serviceType,
+// 		DateOfService:          dateOfService,
+// 		ServiceCenter:          serviceCenter,
+// 		ServiceOdometerReading: serviceOdometerReading,
+// 		CurrentOdometerReading: currentOdometerReading,
+// 		AlertAfter:             alertAfter,
+// 	})
+// }
 
 // Display All Daily Deliveries
 func ShowAllDailyDeliveries(c *fiber.Ctx) error {
