@@ -25,7 +25,7 @@ import 'Screens/AllDrivers.dart';
 import 'Screens/Login.dart';
 import 'package:http/http.dart' as http;
 
-const String SERVER_IP = 'http://92.205.60.182/Falcon';
+const String SERVER_IP = 'http://144.126.234.206:3001';
 // const String SERVER_IP = 'http://localhost:3001';
 // const SERVER_IP = 'http://localhost:3001/api';
 // const SERVER_IP = 'http://92.205.60.182:3001/api';
