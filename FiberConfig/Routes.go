@@ -35,6 +35,8 @@ func FiberConfig() {
 	app.Post("/api/Login", Controllers.Login)
 	app.Use("/api/User", Controllers.User)
 	app.Use("/api/Logout", Controllers.Logout)
+	app.Post("/api/CreateLocation/", Apis.CreateLocation)
+	app.Post("/api/CreateTerminal/", Apis.CreateTerminal)
 	// app.Get("/ShowAllServiceEvents", adaptor.HTTPHandlerFunc(PreviewData.ShowAllServiceEvents))
 	app.Post("/api/removedata", (ManipulateData.DeleteData))
 	app.Post("/api/editdata", (ManipulateData.EditData))
@@ -141,5 +143,6 @@ func FiberConfig() {
 	// 	}
 
 	// }))
-	app.ListenTLS(":3001", "selfsigned.crt", "selfsigned.key")
+	// app.ListenTLS(":3001", "selfsigned.crt", "selfsigned.key")
+	app.Listen(":3001")
 }

@@ -92,12 +92,12 @@ func GetProgressOfCars(c *fiber.Ctx) error {
 			// var Cars []TripStruct
 
 			// Make Days variable to store the number of days between the two dates
-			var Days int = DaysBetweenDates(Data.DateFrom, Data.DateTo)
-
+			// var Days int = DaysBetweenDates(Data.DateFrom, Data.DateTo)
+			Days := 30
 			var Cars []Models.TripStruct
 			//var trips *sql.Rows
-			if Controllers.CurrentUser.Permission >= 1 && Controllers.CurrentUser.Permission != 4 {
-				if err := Models.DB.Model(&Models.TripStruct{}).Where("date BETWEEN DATE_SUB(?, INTERVAL ? DAY) AND ?", Data.DateTo, Days, Data.DateTo).Where("transporter = ?", Controllers.CurrentUser.Name).Find(&Cars).Error; err != nil {
+			if Controllers.CurrentUser.Permission != 0 && Controllers.CurrentUser.Permission != 4 {
+				if err := Models.DB.Model(&Models.TripStruct{}).Find(&Cars).Error; err != nil {
 					log.Println(err.Error())
 					return err
 				}
@@ -109,6 +109,7 @@ func GetProgressOfCars(c *fiber.Ctx) error {
 				}
 				//trips, err = db.Query("SELECT `CarProgressBarID`, `Car No Plate`, `CarProgressIndex`, `Driver Name`, `StepCompleteTime`, `NoOfDropOffPoints`, `Date`, `Compartments`, `FeeRate`, `Milage`, `start_time`, `end_time`, `IsInTrip` FROM CarProgressBars WHERE Date BETWEEN DATE_SUB(?, INTERVAL ? DAY) AND ? ORDER BY `Date` DESC;", Data.DateTo, Days, Data.DateTo)
 			}
+
 			return c.JSON(Cars)
 		}
 	} else {
@@ -238,7 +239,7 @@ func GetDrivers(c *fiber.Ctx) error {
 
 		var drivers []Models.Driver
 
-		if Controllers.CurrentUser.Permission >= 1 && Controllers.CurrentUser.Permission != 4 {
+		if Controllers.CurrentUser.Permission != 0 && Controllers.CurrentUser.Permission != 4 {
 			if err := Models.DB.Model(&Models.Driver{}).Where("transporter = ?", Controllers.CurrentUser.Name).Find(&drivers).Error; err != nil {
 				log.Println(err.Error())
 				return err
@@ -675,7 +676,7 @@ func RegisterTransporter(c *fiber.Ctx) error {
 				log.Println(err.Error())
 				return c.Status(fiber.StatusBadRequest).SendString("Invalid request body")
 			}
-
+			//
 			return c.JSON(
 				fiber.Map{
 					"Message": "Transporter added successfully",
@@ -1618,47 +1619,117 @@ func GetLocations(c *fiber.Ctx) error {
 		if Controllers.CurrentUser.Permission == 0 {
 			return c.Status(fiber.StatusForbidden).SendString("You do not have permission to access this page")
 		} else {
-			db := Database.ConnectToDB()
+			// db := Database.ConnectToDB()
 
-			defer db.Close()
-			CustomerQuery, err := db.Query("SELECT `CustomerName` FROM `Customers` WHERE 1;")
+			// defer db.Close()
+			// CustomerQuery, err := db.Query("SELECT `CustomerName` FROM `Customers` WHERE 1;")
 
-			if err != nil {
-				log.Println(err.Error())
+			// if err != nil {
+			// 	log.Println(err.Error())
+			// }
+
+			// var Customers []string
+
+			// defer CustomerQuery.Close()
+			// for CustomerQuery.Next() {
+			// 	var customer string
+			// 	err = CustomerQuery.Scan(&customer)
+			// 	if err != nil {
+			// 		log.Println(err.Error())
+			// 	}
+			// 	Customers = append(Customers, customer)
+			// }
+			// TerminalQuery, err := db.Query("SELECT `TerminalName` FROM `Terminals` WHERE 1;")
+
+			// if err != nil {
+			// 	log.Println(err.Error())
+			// }
+
+			// var Terminals []string
+
+			// defer TerminalQuery.Close()
+			// for TerminalQuery.Next() {
+			// 	var terminal string
+			// 	err = TerminalQuery.Scan(&terminal)
+			// 	if err != nil {
+			// 		log.Println(err.Error())
+			// 	}
+			// 	Terminals = append(Terminals, terminal)
+			// }
+			var locations []Models.Location
+
+			if err := Models.DB.Model(&Models.Location{}).Find(&locations).Error; err != nil {
+				log.Println(err)
+				return err
 			}
 
-			var Customers []string
+			var terminals []Models.Terminal
 
-			defer CustomerQuery.Close()
-			for CustomerQuery.Next() {
-				var customer string
-				err = CustomerQuery.Scan(&customer)
-				if err != nil {
-					log.Println(err.Error())
-				}
-				Customers = append(Customers, customer)
-			}
-			TerminalQuery, err := db.Query("SELECT `TerminalName` FROM `Terminals` WHERE 1;")
-
-			if err != nil {
-				log.Println(err.Error())
+			if err := Models.DB.Model(&Models.Terminal{}).Find(&terminals).Error; err != nil {
+				log.Println(err)
+				return err
 			}
 
-			var Terminals []string
-
-			defer TerminalQuery.Close()
-			for TerminalQuery.Next() {
-				var terminal string
-				err = TerminalQuery.Scan(&terminal)
-				if err != nil {
-					log.Println(err.Error())
-				}
-				Terminals = append(Terminals, terminal)
-			}
 			return c.JSON(fiber.Map{
-				"Customers": Customers,
-				"Terminals": Terminals,
+				"Customers": locations,
+				"Terminals": terminals,
 			})
+		}
+	} else {
+		return c.JSON(fiber.Map{
+			"message": "Not Logged In.",
+		})
+	}
+}
+
+func CreateLocation(c *fiber.Ctx) error {
+	Controllers.User(c)
+	if Controllers.CurrentUser.Id != 0 {
+		if Controllers.CurrentUser.Permission == 0 {
+			return c.Status(fiber.StatusForbidden).SendString("You do not have permission to access this page")
+		} else {
+			var input struct {
+				Name string `json:"name"`
+			}
+			if err := c.BodyParser(&input); err != nil {
+				log.Println(err)
+				return err
+			}
+			var location Models.Location
+			location.Name = input.Name
+			if err := Models.DB.Create(&location).Error; err != nil {
+				log.Println(err)
+				return c.JSON(err)
+			}
+			return c.JSON(fiber.Map{"message": "Success"})
+		}
+	} else {
+		return c.JSON(fiber.Map{
+			"message": "Not Logged In.",
+		})
+	}
+}
+
+func CreateTerminal(c *fiber.Ctx) error {
+	Controllers.User(c)
+	if Controllers.CurrentUser.Id != 0 {
+		if Controllers.CurrentUser.Permission == 0 {
+			return c.Status(fiber.StatusForbidden).SendString("You do not have permission to access this page")
+		} else {
+			var input struct {
+				Name string `json:"name"`
+			}
+			if err := c.BodyParser(&input); err != nil {
+				log.Println(err)
+				return err
+			}
+			var terminal Models.Terminal
+			terminal.Name = input.Name
+			if err := Models.DB.Create(&terminal).Error; err != nil {
+				log.Println(err)
+				return c.JSON(err)
+			}
+			return c.JSON(fiber.Map{"message": "Success"})
 		}
 	} else {
 		return c.JSON(fiber.Map{

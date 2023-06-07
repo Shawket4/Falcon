@@ -5,8 +5,9 @@ import (
 	"Falcon/Scrapper"
 	"encoding/json"
 	"fmt"
-	"github.com/gofiber/fiber/v2"
 	"log"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 //type DriverStruct struct {
@@ -16,67 +17,66 @@ import (
 //	TripStruct   Models.TripStruct `json:"Trip"`
 //}
 
-//func GetDriverTrip(c *fiber.Ctx) error {
-//	User(c)
-//	if CurrentUser.Id != 0 {
-//		db := Database.ConnectToDB()
-//		var data DriverStruct
+//	func GetDriverTrip(c *fiber.Ctx) error {
+//		User(c)
+//		if CurrentUser.Id != 0 {
+//			db := Database.ConnectToDB()
+//			var data DriverStruct
 //
-//		data.DriverName = CurrentUser.Name
-//		var TripID int
-//		// Get the trip of the driver
-//		Trip, err := db.Query("SELECT `CarProgressBarID`, `Car No Plate`, `CarProgressIndex`, `StepCompleteTime`, `NoOfDropOffPoints`, `Driver Name`, `Compartments` FROM CarProgressBars WHERE `Driver Name` = ? AND `IsInTrip` = ?", data.DriverName, "true")
-//
-//		if err != nil {
-//			return err
-//		}
-//
-//		defer Trip.Close()
-//		var jsonCompartments string
-//
-//		for Trip.Next() {
-//			err = Trip.Scan(&TripID, &data.TripStruct.CarNoPlate, &data.TripStruct.ProgressIndex, &data.TripStruct.StepCompleteTime, &data.TripStruct.NoOfDropOffPoints, &data.TripStruct.DriverName, &jsonCompartments)
-//			if err != nil {
-//				return c.JSON(err)
-//			}
-//
-//			err = json.Unmarshal([]byte(jsonCompartments), &data.Compartments)
+//			data.DriverName = CurrentUser.Name
+//			var TripID int
+//			// Get the trip of the driver
+//			Trip, err := db.Query("SELECT `CarProgressBarID`, `Car No Plate`, `CarProgressIndex`, `StepCompleteTime`, `NoOfDropOffPoints`, `Driver Name`, `Compartments` FROM CarProgressBars WHERE `Driver Name` = ? AND `IsInTrip` = ?", data.DriverName, "true")
 //
 //			if err != nil {
-//				log.Println(err.Error())
 //				return err
 //			}
-//			data.IsInTrip = true
-//		}
-//		// Get Car Details
-//		CarDetails, err := db.Query("SELECT `CarId`, `TankCapacity` FROM Cars WHERE `CarNoPlate` = ?", data.TripStruct.CarNoPlate)
-//		if err != nil {
-//			return c.JSON(err)
-//		}
-//		defer CarDetails.Close()
-//		for CarDetails.Next() {
-//			err = CarDetails.Scan(&data.TripStruct.CarID, &data.TripStruct.TankCapacity)
+//
+//			defer Trip.Close()
+//			var jsonCompartments string
+//
+//			for Trip.Next() {
+//				err = Trip.Scan(&TripID, &data.TripStruct.CarNoPlate, &data.TripStruct.ProgressIndex, &data.TripStruct.StepCompleteTime, &data.TripStruct.NoOfDropOffPoints, &data.TripStruct.DriverName, &jsonCompartments)
+//				if err != nil {
+//					return c.JSON(err)
+//				}
+//
+//				err = json.Unmarshal([]byte(jsonCompartments), &data.Compartments)
+//
+//				if err != nil {
+//					log.Println(err.Error())
+//					return err
+//				}
+//				data.IsInTrip = true
+//			}
+//			// Get Car Details
+//			CarDetails, err := db.Query("SELECT `CarId`, `TankCapacity` FROM Cars WHERE `CarNoPlate` = ?", data.TripStruct.CarNoPlate)
 //			if err != nil {
 //				return c.JSON(err)
 //			}
+//			defer CarDetails.Close()
+//			for CarDetails.Next() {
+//				err = CarDetails.Scan(&data.TripStruct.CarID, &data.TripStruct.TankCapacity)
+//				if err != nil {
+//					return c.JSON(err)
+//				}
+//			}
+//			data.TripStruct.DriverName = CurrentUser.Name
+//			// Get the trip id
+//
+//			// Return the trip of the driver
+//			return c.JSON(fiber.Map{
+//				"IsInTrip":     data.IsInTrip,
+//				"TripID":       TripID,
+//				"Compartments": data.Compartments,
+//				"Trip":         data.TripStruct,
+//			})
+//		} else {
+//			return c.JSON(fiber.Map{
+//				"IsInTrip": false,
+//			})
 //		}
-//		data.TripStruct.DriverName = CurrentUser.Name
-//		// Get the trip id
-//
-//		// Return the trip of the driver
-//		return c.JSON(fiber.Map{
-//			"IsInTrip":     data.IsInTrip,
-//			"TripID":       TripID,
-//			"Compartments": data.Compartments,
-//			"Trip":         data.TripStruct,
-//		})
-//	} else {
-//		return c.JSON(fiber.Map{
-//			"IsInTrip": false,
-//		})
 //	}
-//}
-//
 func NextStep(c *fiber.Ctx) error {
 	User(c)
 	if CurrentUser.Id != 0 {
@@ -199,101 +199,99 @@ func PreviousStep(c *fiber.Ctx) error {
 	}
 }
 
+//	func PreviousStep(c *fiber.Ctx) error {
+//		User(c)
+//		if CurrentUser.Id != 0 {
+//			db := Database.ConnectToDB()
+//			var data DriverStruct
+//			// Get Date From body parser
+//			var bodyData struct {
+//				Date   string `json:"Date"`
+//				TripId int    `json:"TripId"`
+//			}
+//			// Get Date From body parser
+//			err := c.BodyParser(&bodyData)
+//			if err != nil {
+//				return err
+//			}
+//			data.DriverName = CurrentUser.Name
+//			// Get the trip of the driver
+//			Trip, err := db.Query("SELECT `StepCompleteTime` FROM CarProgressBars WHERE `CarProgressBarID` = ?", bodyData.TripId)
 //
-//func PreviousStep(c *fiber.Ctx) error {
-//	User(c)
-//	if CurrentUser.Id != 0 {
-//		db := Database.ConnectToDB()
-//		var data DriverStruct
-//		// Get Date From body parser
-//		var bodyData struct {
-//			Date   string `json:"Date"`
-//			TripId int    `json:"TripId"`
-//		}
-//		// Get Date From body parser
-//		err := c.BodyParser(&bodyData)
-//		if err != nil {
-//			return err
-//		}
-//		data.DriverName = CurrentUser.Name
-//		// Get the trip of the driver
-//		Trip, err := db.Query("SELECT `StepCompleteTime` FROM CarProgressBars WHERE `CarProgressBarID` = ?", bodyData.TripId)
+//			if err != nil {
+//				return err
+//			}
 //
-//		if err != nil {
-//			return err
-//		}
+//			defer Trip.Close()
+//			for Trip.Next() {
+//				err = Trip.Scan(&data.TripStruct.StepCompleteTime)
+//				if err != nil {
+//					return c.JSON(err)
+//				}
+//				data.IsInTrip = true
+//			}
+//			data.TripStruct.DriverName = CurrentUser.Name
+//			// Get the trip id
+//			// Marshall Trip Step Complete Time to JSON
+//			jsonData, err := json.Marshal(data.TripStruct.StepCompleteTime)
+//			if err != nil {
+//				fmt.Println(err.Error())
+//				return c.JSON(err)
+//			}
+//			_ = jsonData
+//			// Convert json to map
+//			var mapData struct {
+//				TruckLoad     []interface{}   `json:"TruckLoad"`
+//				DropOffPoints [][]interface{} `json:"DropOffPoints"`
+//			}
 //
-//		defer Trip.Close()
-//		for Trip.Next() {
-//			err = Trip.Scan(&data.TripStruct.StepCompleteTime)
+//			err = json.Unmarshal([]byte(data.TripStruct.StepCompleteTime), &mapData)
+//
+//			if err != nil {
+//				fmt.Println(err.Error())
+//				return c.JSON(err)
+//			}
+//			// Check the last true bool
+//			if mapData.TruckLoad[2] == true {
+//
+//				var lastTrue int = -1
+//
+//				for _, v := range mapData.DropOffPoints {
+//					if v[2] == true {
+//						lastTrue++
+//					}
+//				}
+//
+//				if lastTrue == -1 {
+//					lastTrue = 4
+//				}
+//				if lastTrue == 4 {
+//					mapData.TruckLoad[2] = false
+//				} else if lastTrue < len(mapData.DropOffPoints) {
+//					mapData.DropOffPoints[lastTrue][2] = false
+//				}
+//				// Return the trip of the driver
+//			}
+//			// Marshall map to json
+//			jsonData, err = json.Marshal(mapData)
+//			if err != nil {
+//				fmt.Println(err.Error())
+//				return c.JSON(err)
+//			}
+//			// Update the trip of the driver
+//			_, err = db.Exec("UPDATE CarProgressBars SET `StepCompleteTime` = ? WHERE `CarProgressBarID` = ?", string(jsonData), bodyData.TripId)
 //			if err != nil {
 //				return c.JSON(err)
 //			}
-//			data.IsInTrip = true
+//			return c.JSON(fiber.Map{
+//				"message": "Previous Step",
+//			})
+//		} else {
+//			return c.JSON(fiber.Map{
+//				"IsInTrip": false,
+//			})
 //		}
-//		data.TripStruct.DriverName = CurrentUser.Name
-//		// Get the trip id
-//		// Marshall Trip Step Complete Time to JSON
-//		jsonData, err := json.Marshal(data.TripStruct.StepCompleteTime)
-//		if err != nil {
-//			fmt.Println(err.Error())
-//			return c.JSON(err)
-//		}
-//		_ = jsonData
-//		// Convert json to map
-//		var mapData struct {
-//			TruckLoad     []interface{}   `json:"TruckLoad"`
-//			DropOffPoints [][]interface{} `json:"DropOffPoints"`
-//		}
-//
-//		err = json.Unmarshal([]byte(data.TripStruct.StepCompleteTime), &mapData)
-//
-//		if err != nil {
-//			fmt.Println(err.Error())
-//			return c.JSON(err)
-//		}
-//		// Check the last true bool
-//		if mapData.TruckLoad[2] == true {
-//
-//			var lastTrue int = -1
-//
-//			for _, v := range mapData.DropOffPoints {
-//				if v[2] == true {
-//					lastTrue++
-//				}
-//			}
-//
-//			if lastTrue == -1 {
-//				lastTrue = 4
-//			}
-//			if lastTrue == 4 {
-//				mapData.TruckLoad[2] = false
-//			} else if lastTrue < len(mapData.DropOffPoints) {
-//				mapData.DropOffPoints[lastTrue][2] = false
-//			}
-//			// Return the trip of the driver
-//		}
-//		// Marshall map to json
-//		jsonData, err = json.Marshal(mapData)
-//		if err != nil {
-//			fmt.Println(err.Error())
-//			return c.JSON(err)
-//		}
-//		// Update the trip of the driver
-//		_, err = db.Exec("UPDATE CarProgressBars SET `StepCompleteTime` = ? WHERE `CarProgressBarID` = ?", string(jsonData), bodyData.TripId)
-//		if err != nil {
-//			return c.JSON(err)
-//		}
-//		return c.JSON(fiber.Map{
-//			"message": "Previous Step",
-//		})
-//	} else {
-//		return c.JSON(fiber.Map{
-//			"IsInTrip": false,
-//		})
 //	}
-//}
-//
 func CompleteTrip(c *fiber.Ctx) error {
 	User(c)
 	if CurrentUser.Id != 0 {
@@ -346,7 +344,6 @@ func CompleteTrip(c *fiber.Ctx) error {
 		feeRate, mileage, err := Scrapper.GetFeeRate(Scrapper.MileageStruct{VehiclePlateNo: car.CarNoPlate, StartTime: trip.StartTime, EndTime: trip.EndTime, VehicleID: truckID})
 		if err != nil {
 			log.Println(err.Error())
-			return err
 		}
 		if err := json.Unmarshal(trip.StepCompleteTimeDB, &trip.StepCompleteTime); err != nil {
 			log.Println(err.Error())
@@ -356,7 +353,7 @@ func CompleteTrip(c *fiber.Ctx) error {
 			trip.StepCompleteTime.Terminal.Status = true
 			trip.StepCompleteTime.Terminal.TimeStamp = bodyData.CurrentTime
 		}
-		for i, _ := range trip.StepCompleteTime.DropOffPoints {
+		for i := range trip.StepCompleteTime.DropOffPoints {
 			if !trip.StepCompleteTime.DropOffPoints[i].Status {
 				trip.StepCompleteTime.DropOffPoints[i].Status = true
 				trip.StepCompleteTime.DropOffPoints[i].TimeStamp = bodyData.CurrentTime
