@@ -504,7 +504,6 @@ func Login(c *fiber.Ctx) error {
 	if err := c.BodyParser(&data); err != nil {
 		return err
 	}
-	Models.Connect()
 
 	var user Models.User
 	Models.DB.Where("email = ?", data["email"]).First(&user)
@@ -569,7 +568,6 @@ func User(c *fiber.Ctx) error {
 	var user Models.User
 	user.Id = 0
 	CurrentUser = &user
-	Models.Connect()
 	cookie := c.Cookies("jwt")
 
 	token, err := jwt.ParseWithClaims(cookie, &jwt.RegisteredClaims{}, func(t *jwt.Token) (interface{}, error) {
@@ -594,7 +592,6 @@ func User(c *fiber.Ctx) error {
 func Logout(c *fiber.Ctx) error {
 	// Remove cookie
 	// -time.Hour = expires before one hour
-	Models.Connect()
 	cookie := fiber.Cookie{
 		Name:     "jwt",
 		Value:    "",

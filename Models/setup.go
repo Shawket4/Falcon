@@ -35,14 +35,6 @@ func Connect() {
 	// if isAdmin {
 	// connection.AutoMigrate(&Models.AdminUser{})
 	// } else {
-	connection.AutoMigrate(&User{})
-	connection.AutoMigrate(&FuelEvent{})
-	connection.AutoMigrate(&Driver{})
-	connection.AutoMigrate(&Service{})
-	connection.AutoMigrate(&Car{})
-	connection.AutoMigrate(&TripStruct{})
-	connection.AutoMigrate(&Location{})
-	connection.AutoMigrate(&Terminal{})
+	connection.AutoMigrate(&User{}, &FuelEvent{}, &Driver{}, &Service{}, Car{}, &TripStruct{}, &Location{}, &Terminal{})
 	// }
-
 }

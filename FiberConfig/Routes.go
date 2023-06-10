@@ -1,7 +1,6 @@
 package FiberConfig
 
 import (
-	"Falcon/AddEvent"
 	"Falcon/Apis"
 	"Falcon/Controllers"
 	"Falcon/ManipulateData"
@@ -14,7 +13,6 @@ import (
 
 	// "log"
 
-	"github.com/gofiber/adaptor/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/template/html"
@@ -90,7 +88,6 @@ func FiberConfig() {
 	// app.Post("/api/GenerateReceipt", Apis.GenerateCSVReceipt)
 	// app.Use("/api/AddCar", AddEvent.AddCarHandler)
 	// app.Use("/api/AddServiceEvent", AddEvent.AddCarHandler)
-	app.Use("/AddDailyDelivery", adaptor.HTTPHandlerFunc(AddEvent.AddDeliveryTmpl))
 	app.Use("/ShowAllDeliveries", PreviewData.ShowAllDailyDeliveries)
 	app.Use("/GetProgressOfCars", Apis.GetProgressOfCars)
 	// Serve Static Images
