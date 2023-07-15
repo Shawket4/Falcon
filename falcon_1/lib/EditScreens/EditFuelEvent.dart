@@ -142,7 +142,7 @@ class _EditFuelEventState extends State<EditFuelEvent> {
                           dropdownSearchTextAlign: TextAlign.left,
                           searchFieldProps: TextFieldProps(
                             autocorrect: false,
-                            cursorColor: Theme.of(context).accentColor,
+                            cursorColor: Theme.of(context).primaryColor,
                           ),
                           popupItemBuilder: (context, item, isSelected) {
                             // dynamic Car = Cars.where(

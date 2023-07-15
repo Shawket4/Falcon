@@ -1,6 +1,7 @@
 // ignore_for_file: constant_identifier_names, non_constant_identifier_names, unused_local_variable, deprecated_member_use
 
 import 'dart:convert';
+import 'dart:ffi';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:falcon_1/Forms/AddFuelEvent.dart';
@@ -9,6 +10,7 @@ import 'package:falcon_1/Forms/GenerateFuelTable.dart';
 import 'package:falcon_1/Screens/AllFuelEvents.dart';
 import 'package:falcon_1/Screens/AllServiceEvents.dart';
 import 'package:falcon_1/Screens/CarProgressScreen.dart';
+import 'package:falcon_1/bridge_generated.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -24,9 +26,10 @@ import 'Screens/AllCars.dart';
 import 'Screens/AllDrivers.dart';
 import 'Screens/Login.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_rust_bridge/flutter_rust_bridge.dart' as bridge;
 
-const String SERVER_IP = 'http://144.126.234.206:3001';
-// const String SERVER_IP = 'http://localhost:3001';
+// const String SERVER_IP = 'http://192.168.1.8:3001';
+const String SERVER_IP = 'https://dentex.app:3001';
 // const SERVER_IP = 'http://localhost:3001/api';
 // const SERVER_IP = 'http://92.205.60.182:3001/api';
 
@@ -34,8 +37,19 @@ var jwt = "";
 
 var brightness = SchedulerBinding.instance.window.platformBrightness;
 bool isDarkMode = brightness == Brightness.dark;
-void main() {
+late DynamicLibrary lib;
+
+late ApexImpl impl;
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  if (Platform.isAndroid || Platform.isWindows) {
+    ByteData data = await rootBundle.load('cert/dentex.pem');
+    SecurityContext context = SecurityContext.defaultContext;
+    context.setTrustedCertificatesBytes(data.buffer.asUint8List());
+  }
+  lib = bridge.loadLibForFlutter("libApex.so");
+  // lib = DynamicLibrary.process();
+  impl = ApexImpl(lib);
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   runApp(const MainWidget());
@@ -145,7 +159,7 @@ class MainWidget extends StatelessWidget {
         primaryColorLight: const Color(0xFF009688),
         primaryColor:
             isDarkMode ? const Color(0xFF00796B) : const Color(0xFF009688),
-        accentColor: const Color(0xFFFF9800),
+        // accentColor: const Color(0xFFFF9800),
         textTheme: Theme.of(context).textTheme.apply(
               bodyColor: const Color(0xFF212121),
               displayColor: const Color(0xFF212121),
@@ -301,7 +315,7 @@ Widget buildDrawerItem({
         child: ListTile(
           onTap: onTap,
           title: Align(
-            alignment: Alignment.centerRight,
+            alignment: Alignment.centerLeft,
             child: Text(
               title,
               style: GoogleFonts.josefinSans(
@@ -408,7 +422,7 @@ class _AppDrawerState extends State<AppDrawer> {
             height: 2.5,
           ),
           buildDrawerItem(
-              title: "النقلات",
+              title: "Trips",
               onTap: () {
                 Navigator.pushReplacement(
                   context,
@@ -420,7 +434,7 @@ class _AppDrawerState extends State<AppDrawer> {
                 );
               }),
           buildDrawerItem(
-              title: "إضافة سائق",
+              title: "Add Driver",
               onTap: () {
                 Navigator.push(
                   context,
@@ -432,7 +446,7 @@ class _AppDrawerState extends State<AppDrawer> {
                 );
               }),
           buildDrawerItem(
-              title: "إضافة سيارة",
+              title: "Add Car",
               onTap: () {
                 Navigator.push(
                   context,
@@ -458,7 +472,7 @@ class _AppDrawerState extends State<AppDrawer> {
           //     : Container(),
           int.parse(permission) > 1
               ? buildDrawerItem(
-                  title: "إضافة نقلة",
+                  title: "Add Trip",
                   onTap: () {
                     Navigator.push(
                       context,
@@ -471,7 +485,7 @@ class _AppDrawerState extends State<AppDrawer> {
               : Container(),
           int.parse(permission) > 1
               ? buildDrawerItem(
-                  title: "تسجيل صيانة",
+                  title: "Add Service Event",
                   onTap: () {
                     Navigator.push(
                       context,
@@ -485,7 +499,7 @@ class _AppDrawerState extends State<AppDrawer> {
               : Container(),
           int.parse(permission) > 1
               ? buildDrawerItem(
-                  title: "تسجيل تفويلة",
+                  title: "Add Fuel Event",
                   onTap: () {
                     Navigator.push(
                       context,
@@ -498,9 +512,7 @@ class _AppDrawerState extends State<AppDrawer> {
                 )
               : Container(),
           buildDrawerItem(
-            title: int.parse(permission) > 1
-                ? "كل السيارات"
-                : "السيارات الخاصة بي",
+            title: int.parse(permission) > 1 ? "All Cars" : "My Cars",
             onTap: () {
               Navigator.push(
                 context,
@@ -511,9 +523,7 @@ class _AppDrawerState extends State<AppDrawer> {
             },
           ),
           buildDrawerItem(
-            title: int.parse(permission) > 1
-                ? "كل السائقين"
-                : "السائقين الخاصة بي",
+            title: int.parse(permission) > 1 ? "All Drivers" : "My Drivers",
             onTap: () {
               Navigator.push(
                 context,
@@ -524,7 +534,7 @@ class _AppDrawerState extends State<AppDrawer> {
             },
           ),
           buildDrawerItem(
-            title: "كل الصيانات",
+            title: "All Service Events",
             onTap: () {
               Navigator.push(
                 context,
@@ -535,7 +545,7 @@ class _AppDrawerState extends State<AppDrawer> {
             },
           ),
           buildDrawerItem(
-            title: "كل التفويلات",
+            title: "All Fuel Events",
             onTap: () {
               Navigator.push(
                 context,
@@ -546,7 +556,7 @@ class _AppDrawerState extends State<AppDrawer> {
             },
           ),
           buildDrawerItem(
-            title: "استخراج جدول التفويلات",
+            title: "Extract Fuel Table",
             onTap: () {
               Navigator.push(
                 context,
@@ -587,7 +597,7 @@ class _AppDrawerState extends State<AppDrawer> {
           //     : Container(),
 
           buildDrawerItem(
-            title: "Excel استخراج جدول",
+            title: "Extract Trips Table",
             onTap: () {
               Navigator.push(
                 context,

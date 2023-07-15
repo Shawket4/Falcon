@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:falcon_1/DetailScreens/CarProgressDetail.dart';
+import 'package:falcon_1/bridge_generated.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:grouped_list/grouped_list.dart';
@@ -20,7 +21,8 @@ class CarProgressScreen extends StatefulWidget {
 
 class _CarProgressScreenState extends State<CarProgressScreen> {
   // This is the SERVER_IP for the web API
-  List<dynamic> CarList = [];
+  // List<dynamic> CarList = [];
+  List<Trip> trips = [];
   List<String> SortItems = ["Date", "Car", "Driver", "Completed Trips"];
   late bool isSortAscending;
   late BuildContext dialogContext;
@@ -28,7 +30,7 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
   late String sortStringItem;
   final ScrollController scrollController = ScrollController();
   final GlobalKey<ScaffoldState> _key = GlobalKey();
-  Map<String, dynamic> CarMap = {};
+  // Map<String, dynamic> CarMap = {};
   bool isLoaded = false;
   List<dynamic> notificationList = [];
   //Current Date In YYYY--MM--DD Format
@@ -36,7 +38,7 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
       DateTime.now().add(const Duration(days: 1)).toString().substring(0, 10);
   // Date From 2 Days Before In YYYY--MM--DD Format
   String DateFrom = DateTime.now()
-      .subtract(const Duration(days: 50))
+      .subtract(const Duration(days: 30))
       .toString()
       .substring(0, 10);
   Dio dio = Dio();
@@ -51,24 +53,29 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
                 "DateFrom": DateFrom,
                 "DateTo": DateTo,
               }),
+              options: Options(
+                responseType: ResponseType.plain,
+              ),
             )
             .timeout(
               const Duration(seconds: 8),
             );
         if (GetCars.statusCode != 204) {
           var jsonResponse = GetCars.data;
-          for (var i = 0; i < jsonResponse.length; i++) {
-            CarList.add(jsonResponse[i]);
-            if (CarMap[(jsonResponse)[i]["date"]] == null) {
-              CarMap[(jsonResponse[i]["date"])] = [];
-            }
-            await CarMap[(jsonResponse[i]["date"])]!.add(jsonResponse[i]);
-          }
-          for (var trip in CarList) {
-            if (trip["date"] == DateTime.now().toString().substring(0, 10)) {
-              _tripCount++;
-            }
-          }
+          // print(jsonResponse);
+          trips = await impl.returnTrips(json: jsonResponse);
+          // for (var i = 0; i < jsonResponse.length; i++) {
+          //   CarList.add(jsonResponse[i]);
+          //   if (CarMap[(jsonResponse)[i]["date"]] == null) {
+          //     CarMap[(jsonResponse[i]["date"])] = [];
+          //   }
+          //   await CarMap[(jsonResponse[i]["date"])]!.add(jsonResponse[i]);
+          // }
+          // for (var trip in CarList) {
+          //   if (trip["date"] == DateTime.now().toString().substring(0, 10)) {
+          //     _tripCount++;
+          //   }
+          // }
         }
         var GetNotifications = await dio
             .get(
@@ -76,7 +83,9 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
         )
             .then((value) {
           setState(() {
-            notificationList = value.data;
+            if (value.data != null && value.data.isNotEmpty) {
+              notificationList = value.data;
+            }
           });
         });
         isLoaded = true;
@@ -89,8 +98,9 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
   }
 
   Future<String> reloadData() async {
-    CarList.clear();
-    CarMap.clear();
+    // CarList.clear();
+    // CarMap.clear();
+    trips.clear();
     isLoaded = false;
     if (!isLoaded) {
       try {
@@ -108,11 +118,11 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
         if (GetCars.statusCode != 204) {
           var jsonResponse = GetCars.data;
           for (var i = 0; i < jsonResponse.length; i++) {
-            CarList.add(jsonResponse[i]);
-            if (CarMap[(jsonResponse)[i]["date"]] == null) {
-              CarMap[(jsonResponse[i]["date"])] = [];
-            }
-            await CarMap[(jsonResponse[i]["date"])]!.add(jsonResponse[i]);
+            // CarList.add(jsonResponse[i]);
+            // if (CarMap[(jsonResponse)[i]["date"]] == null) {
+            //   CarMap[(jsonResponse[i]["date"])] = [];
+            // }
+            // await CarMap[(jsonResponse[i]["date"])]!.add(jsonResponse[i]);
           }
         }
         isLoaded = true;
@@ -171,37 +181,37 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
       // ),
       appBar: AppBar(
         actions: [
-          IconButton(
-            onPressed: () => _key.currentState!.openEndDrawer(),
-            icon: const Icon(
-              Icons.menu,
-              size: 30,
-            ),
-          ),
-        ],
-        leading: Padding(
-          padding: const EdgeInsets.all(10.0),
-          child: SizedBox(
-            width: 50,
-            height: 50,
-            child: CircleAvatar(
-              backgroundColor: Colors.white,
-              child: Text(
-                _tripCount.toString(),
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: SizedBox(
+              width: 50,
+              height: 50,
+              child: CircleAvatar(
+                backgroundColor: Colors.white,
+                child: Text(
+                  _tripCount.toString(),
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
+          ),
+        ],
+        leading: IconButton(
+          onPressed: () => _key.currentState!.openDrawer(),
+          icon: const Icon(
+            Icons.menu,
+            size: 30,
           ),
         ),
         centerTitle: true,
         backgroundColor: Theme.of(context).primaryColor,
         // Hamburger Menu
         title: Text(
-          'النقلات',
+          'Trips',
           style: GoogleFonts.josefinSans(
             textStyle: const TextStyle(
               fontSize: 22,
@@ -209,7 +219,7 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
           ),
         ),
       ),
-      endDrawer: AppDrawer(
+      drawer: AppDrawer(
         jwt: widget.jwt,
       ),
 
@@ -261,7 +271,7 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
               ),
             );
           }
-          if (CarMap.isEmpty) {
+          if (trips.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -339,9 +349,9 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
                       shrinkWrap: true,
                       // useStickyGroupSeparators: true,
                       scrollDirection: Axis.vertical,
-                      groupBy: (element) => element[sortStringItem].toString(),
+                      groupBy: (element) => element.date,
                       sort: true,
-                      elements: CarList.toList(),
+                      elements: trips,
                       groupSeparatorBuilder: (value) => Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(16),
@@ -390,9 +400,9 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    element['car_no_plate'],
+                                    element.carNoPlate,
                                     style: GoogleFonts.josefinSans(
-                                      textStyle: element['is_closed'] == true
+                                      textStyle: element.isClosed == true
                                           ? const TextStyle(
                                               color: Colors.green,
                                               fontSize: 20,
@@ -405,9 +415,9 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
                                     ),
                                   ),
                                   Text(
-                                    element['driver_name'].toString(),
+                                    element.driverName.toString(),
                                     style: GoogleFonts.josefinSans(
-                                      textStyle: element['is_closed'] == true
+                                      textStyle: element.isClosed == true
                                           ? const TextStyle(
                                               color: Colors.green,
                                               fontSize: 18,
@@ -420,7 +430,7 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
                                     ),
                                   ),
                                   Text(
-                                    element['is_closed'] == true
+                                    element.isClosed == true
                                         ? "Trip Has Been Completed"
                                         : "",
                                     style: const TextStyle(

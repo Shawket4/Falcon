@@ -133,7 +133,7 @@ class _AddFuelEventState extends State<AddFuelEvent> {
                           dropdownSearchTextAlign: TextAlign.left,
                           searchFieldProps: TextFieldProps(
                             autocorrect: false,
-                            cursorColor: Theme.of(context).accentColor,
+                            cursorColor: Theme.of(context).primaryColor,
                           ),
                           popupItemBuilder: (context, item, isSelected) {
                             // dynamic Car = Cars.where(
@@ -447,7 +447,8 @@ class _AddFuelEventState extends State<AddFuelEvent> {
                                         });
                                   }
                                 }).timeout(const Duration(seconds: 4));
-                              } catch (_) {
+                              } catch (e) {
+                                print(e);
                                 showDialog(
                                     context: context,
                                     barrierDismissible: false,

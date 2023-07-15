@@ -149,7 +149,7 @@ class _AllServiceEventsState extends State<AllServiceEvents> {
               appBar: AppBar(
                 centerTitle: true,
                 backgroundColor: Theme.of(context).primaryColor,
-                title: const Text("كل الصيانات"),
+                title: const Text("All Service Events"),
               ),
               body: Scrollbar(
                 scrollbarOrientation: ScrollbarOrientation.left,

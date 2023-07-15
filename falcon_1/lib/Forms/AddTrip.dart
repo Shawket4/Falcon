@@ -108,11 +108,11 @@ class _NewCarTripScreenState extends State<NewCarTripScreen> {
             await dio.get("$SERVER_IP/api/GetLocations").then((response) {
           var str = response.data;
           for (var terminal in str["Terminals"]) {
-            Terminals.add(terminal);
+            Terminals.add(terminal["name"]);
           }
           selectedTerminal = Terminals[0];
           for (var customer in str["Customers"]) {
-            Customers.add(customer);
+            Customers.add(customer["name"]);
           }
           selectedCustomer = Customers[0];
           for (var i = 0; i < 6; i++) {
@@ -267,7 +267,7 @@ class _NewCarTripScreenState extends State<NewCarTripScreen> {
                           dropdownSearchTextAlign: TextAlign.left,
                           searchFieldProps: TextFieldProps(
                             autocorrect: false,
-                            cursorColor: Theme.of(context).accentColor,
+                            cursorColor: Theme.of(context).primaryColor,
                           ),
                           popupItemBuilder: (context, item, isSelected) {
                             // dynamic Car = Cars.where(
@@ -288,7 +288,7 @@ class _NewCarTripScreenState extends State<NewCarTripScreen> {
                                             style: TextStyle(
                                               color: isSelected
                                                   ? Theme.of(context)
-                                                      .accentColor
+                                                      .primaryColor
                                                   : Cars.where((element) =>
                                                                   element[
                                                                       "car_no_plate"] ==
@@ -340,7 +340,7 @@ class _NewCarTripScreenState extends State<NewCarTripScreen> {
                           dropdownSearchTextAlign: TextAlign.left,
                           searchFieldProps: TextFieldProps(
                             autocorrect: false,
-                            cursorColor: Theme.of(context).accentColor,
+                            cursorColor: Theme.of(context).primaryColor,
                           ),
                           popupItemBuilder: (context, item, isSelected) {
                             return SizedBox(
@@ -358,7 +358,7 @@ class _NewCarTripScreenState extends State<NewCarTripScreen> {
                                             style: TextStyle(
                                               color: isSelected
                                                   ? Theme.of(context)
-                                                      .accentColor
+                                                      .primaryColor
                                                   : Drivers.where((element) =>
                                                                   element[
                                                                       "name"] ==
@@ -423,7 +423,7 @@ class _NewCarTripScreenState extends State<NewCarTripScreen> {
                         //   }),
                         // ),
                         // TextField(
-                        //   cursorColor: Theme.of(context).accentColor,
+                        //   cursorColor: Theme.of(context).primaryColor,
                         //   controller: _driverNameController,
                         //   decoration: const InputDecoration(
                         //     label: Text("Driver Name*"),
@@ -456,7 +456,7 @@ class _NewCarTripScreenState extends State<NewCarTripScreen> {
                                           item,
                                           style: TextStyle(
                                             color: isSelected
-                                                ? Theme.of(context).accentColor
+                                                ? Theme.of(context).primaryColor
                                                 : Colors.black,
                                             fontSize: 17,
                                           ),
@@ -472,7 +472,7 @@ class _NewCarTripScreenState extends State<NewCarTripScreen> {
                           showSearchBox: true,
                           searchFieldProps: TextFieldProps(
                             autocorrect: false,
-                            cursorColor: Theme.of(context).accentColor,
+                            cursorColor: Theme.of(context).primaryColor,
                           ),
                           enabled: true,
                           items: Terminals,
@@ -497,7 +497,7 @@ class _NewCarTripScreenState extends State<NewCarTripScreen> {
                                       searchFieldProps: TextFieldProps(
                                         autocorrect: false,
                                         cursorColor:
-                                            Theme.of(context).accentColor,
+                                            Theme.of(context).primaryColor,
                                       ),
                                       popupItemBuilder:
                                           (context, item, isSelected) =>
@@ -519,7 +519,7 @@ class _NewCarTripScreenState extends State<NewCarTripScreen> {
                                                       style: TextStyle(
                                                         color: isSelected
                                                             ? Theme.of(context)
-                                                                .accentColor
+                                                                .primaryColor
                                                             : Colors.black,
                                                         fontSize: 17,
                                                       ),
@@ -565,7 +565,7 @@ class _NewCarTripScreenState extends State<NewCarTripScreen> {
                                     searchFieldProps: TextFieldProps(
                                       autocorrect: false,
                                       cursorColor:
-                                          Theme.of(context).accentColor,
+                                          Theme.of(context).primaryColor,
                                     ),
                                     popupItemBuilder:
                                         (context, item, isSelected) => SizedBox(
@@ -585,7 +585,7 @@ class _NewCarTripScreenState extends State<NewCarTripScreen> {
                                                     style: TextStyle(
                                                       color: isSelected
                                                           ? Theme.of(context)
-                                                              .accentColor
+                                                              .primaryColor
                                                           : Colors.black,
                                                       fontSize: 17,
                                                     ),

@@ -97,19 +97,18 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         _logo(),
                         const SizedBox(
-                          height: 70,
+                          height: 30,
                         ),
                         Align(
                             alignment: Alignment.center, child: _loginLabel()),
                         const SizedBox(
                           height: 70,
                         ),
-                        _labelTextInput(
-                            "البريد الالكتروني", "yourname@example.com", false),
+                        _labelTextInput("Email", "yourname@example.com", false),
                         const SizedBox(
                           height: 50,
                         ),
-                        _labelTextInput("كلمة السر", "yourpassword", true),
+                        _labelTextInput("Password", "yourpassword", true),
                         const SizedBox(
                           height: 30,
                         ),
@@ -227,7 +226,7 @@ Widget _loginBtn(BuildContext context) {
           }
         },
         child: Text(
-          "تسجيل الدخول",
+          "Log In",
           style: GoogleFonts.josefinSans(
             textStyle: const TextStyle(
               color: Colors.white,
@@ -245,21 +244,17 @@ Widget _labelTextInput(String label, String hintText, bool isPassword) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Align(
-        alignment: Alignment.centerRight,
-        child: Text(
-          label,
-          style: GoogleFonts.josefinSans(
-            textStyle: const TextStyle(
-              color: Color(0xff8fa1b6),
-              fontWeight: FontWeight.w600,
-              fontSize: 20,
-            ),
+      Text(
+        label,
+        style: GoogleFonts.josefinSans(
+          textStyle: const TextStyle(
+            color: Color(0xff8fa1b6),
+            fontWeight: FontWeight.w600,
+            fontSize: 20,
           ),
         ),
       ),
       TextField(
-        textAlign: TextAlign.right,
         obscureText: isPassword,
         cursorColor: Colors.red,
         decoration: InputDecoration(
@@ -284,7 +279,7 @@ Widget _labelTextInput(String label, String hintText, bool isPassword) {
 Widget _loginLabel() {
   return Center(
     child: Text(
-      "تسجيل الدخول",
+      "Log In",
       style: GoogleFonts.josefinSans(
         textStyle: const TextStyle(
           color: Color(0xff164276),
@@ -298,12 +293,10 @@ Widget _loginLabel() {
 
 Widget _logo() {
   return const Center(
-    child: SizedBox(
-      height: 80,
-      child: Image(
-        image: AssetImage(
-          "images/login.png",
-        ),
+    child: Image(
+      width: 120,
+      image: AssetImage(
+        "images/login.png",
       ),
     ),
   );

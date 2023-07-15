@@ -12,10 +12,10 @@ import 'package:dio/dio.dart';
 import 'package:lottie/lottie.dart';
 
 class EditCarTripScreen extends StatefulWidget {
-  EditCarTripScreen(this.jwt, this.carTripId, this.carTripDetails);
+  EditCarTripScreen(this.jwt, this.trip);
   final String jwt;
-  final dynamic carTripDetails;
-  final int carTripId;
+  final dynamic trip;
+
   // Current Date in the format of YYYY-MM-DD
   late String currentDate;
   @override
@@ -77,8 +77,8 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
             CarNoList.add(car["car_no_plate"]);
           }
           // var carCompartments = str["Compartments"];
-          selectedCar = Cars.firstWhere((element) =>
-              element["car_no_plate"] == widget.carTripDetails["car_no_plate"]);
+          selectedCar = Cars.firstWhere(
+              (element) => element["car_no_plate"] == widget.trip.carNoPlate);
           // print(selectedCar.toString());
           // var isInTripList = str["IsInTripList"];
           // IsInTripList.clear();
@@ -105,8 +105,8 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
           for (var driver in Drivers) {
             DriverNameList.add(driver["name"]);
           }
-          selectedDriver = Drivers.firstWhere((element) =>
-              element["name"] == widget.carTripDetails["driver_name"]);
+          selectedDriver = Drivers.firstWhere(
+              (element) => element["name"] == widget.trip.driverName);
         });
         var LocationsReq =
             await dio.get("$SERVER_IP/api/GetLocations").then((response) {
@@ -143,7 +143,7 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
     selectedGasType = gasTypes[0];
     selectedCar = null;
     selectedDriver = null;
-    widget.currentDate = widget.carTripDetails["date"];
+    widget.currentDate = widget.trip.date;
     for (var i = 0; i < 6; i++) {
       _dropOffPointControllers.add(TextEditingController());
       _gasTypeControllers.add(TextEditingController());
@@ -156,9 +156,8 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
     // }
     // _pickUpPointController.text =
     //     jsonDecode(widget.carTripDetails["StepCompleteTime"])["TruckLoad"][1];
-    selectedTerminal = widget.carTripDetails["step_complete_time_db"]
-            ["terminal"]["terminal_name"]
-        .toString();
+    selectedTerminal =
+        widget.trip.stepCompleteTimeDb.terminal.terminalName.toString();
     selectedGasType = gasTypes[0];
     super.initState();
   }
@@ -209,8 +208,8 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => EditCarTripScreen(widget.jwt,
-                                  widget.carTripId, widget.carTripDetails),
+                              builder: (_) =>
+                                  EditCarTripScreen(widget.jwt, widget.trip),
                             ),
                           );
                         },
@@ -293,7 +292,7 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
                         dropdownSearchTextAlign: TextAlign.left,
                         searchFieldProps: TextFieldProps(
                           autocorrect: false,
-                          cursorColor: Theme.of(context).accentColor,
+                          cursorColor: Theme.of(context).primaryColor,
                         ),
                         popupItemBuilder: (context, item, isSelected) {
                           // dynamic Car = Cars.where(
@@ -313,7 +312,7 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
                                           item,
                                           style: TextStyle(
                                             color: isSelected
-                                                ? Theme.of(context).accentColor
+                                                ? Theme.of(context).primaryColor
                                                 : Cars.where((element) =>
                                                                 element[
                                                                     "car_no_plate"] ==
@@ -366,7 +365,7 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
                         dropdownSearchTextAlign: TextAlign.left,
                         searchFieldProps: TextFieldProps(
                           autocorrect: false,
-                          cursorColor: Theme.of(context).accentColor,
+                          cursorColor: Theme.of(context).primaryColor,
                         ),
                         popupItemBuilder: (context, item, isSelected) {
                           return SizedBox(
@@ -383,7 +382,7 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
                                           item,
                                           style: TextStyle(
                                             color: isSelected
-                                                ? Theme.of(context).accentColor
+                                                ? Theme.of(context).primaryColor
                                                 : Drivers.where((element) =>
                                                                 element[
                                                                     "name"] ==
@@ -447,7 +446,7 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
                       //   }),
                       // ),
                       // TextField(
-                      //   cursorColor: Theme.of(context).accentColor,
+                      //   cursorColor: Theme.of(context).primaryColor,
                       //   controller: _driverNameController,
                       //   decoration: const InputDecoration(
                       //     label: Text("Driver Name*"),
@@ -480,7 +479,7 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
                                         item,
                                         style: TextStyle(
                                           color: isSelected
-                                              ? Theme.of(context).accentColor
+                                              ? Theme.of(context).primaryColor
                                               : Colors.black,
                                           fontSize: 17,
                                         ),
@@ -496,7 +495,7 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
                         showSearchBox: true,
                         searchFieldProps: TextFieldProps(
                           autocorrect: false,
-                          cursorColor: Theme.of(context).accentColor,
+                          cursorColor: Theme.of(context).primaryColor,
                         ),
                         enabled: true,
                         items: Terminals,
@@ -520,7 +519,7 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
                                     searchFieldProps: TextFieldProps(
                                       autocorrect: false,
                                       cursorColor:
-                                          Theme.of(context).accentColor,
+                                          Theme.of(context).primaryColor,
                                     ),
                                     popupItemBuilder:
                                         (context, item, isSelected) => SizedBox(
@@ -540,7 +539,7 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
                                                     style: TextStyle(
                                                       color: isSelected
                                                           ? Theme.of(context)
-                                                              .accentColor
+                                                              .primaryColor
                                                           : Colors.black,
                                                       fontSize: 17,
                                                     ),
@@ -585,7 +584,7 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
                                 child: DropdownSearch<String>(
                                   searchFieldProps: TextFieldProps(
                                     autocorrect: false,
-                                    cursorColor: Theme.of(context).accentColor,
+                                    cursorColor: Theme.of(context).primaryColor,
                                   ),
                                   popupItemBuilder:
                                       (context, item, isSelected) => SizedBox(
@@ -605,7 +604,7 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
                                                   style: TextStyle(
                                                     color: isSelected
                                                         ? Theme.of(context)
-                                                            .accentColor
+                                                            .primaryColor
                                                         : Colors.black,
                                                     fontSize: 17,
                                                   ),
@@ -808,7 +807,7 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
                                   },
                                   body: jsonEncode(
                                     {
-                                      "ID": widget.carTripDetails["ID"],
+                                      "ID": widget.trip.id,
                                       "date": widget.currentDate,
                                       "car_id": selectedCar["ID"],
                                       "driver_id": selectedDriver["ID"],

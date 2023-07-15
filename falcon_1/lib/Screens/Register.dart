@@ -324,6 +324,7 @@ Future attemptRegister(String name, String email, String password) async {
       return null;
     }
   } catch (e) {
+    print(e);
     return "Error";
   }
   // Dio dio = Dio();

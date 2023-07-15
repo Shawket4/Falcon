@@ -162,7 +162,7 @@ class _AllFuelEventsState extends State<AllFuelEvents> {
               appBar: AppBar(
                 centerTitle: true,
                 backgroundColor: Theme.of(context).primaryColor,
-                title: const Text("كل التفويلات"),
+                title: const Text("All Fuel Events"),
               ),
               body: Scrollbar(
                 scrollbarOrientation: ScrollbarOrientation.left,

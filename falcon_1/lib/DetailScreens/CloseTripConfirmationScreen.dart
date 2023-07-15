@@ -31,65 +31,64 @@ class _CloseTripConfirmationState extends State<CloseTripConfirmation> {
   final TextEditingController _endController = TextEditingController();
   @override
   void initState() {
-    if (widget.trip["start_time"] == "") {
+    print(widget.trip.startTime);
+    start_time = DateTime(
+      currentDateTime.year,
+      currentDateTime.month,
+      currentDateTime.day,
+      currentDateTime.hour,
+      currentDateTime.minute,
+      currentDateTime.second,
+    );
+    if (widget.trip.startTime != "" || widget.trip.startTime == null) {
       start_time = DateTime(
-        currentDateTime.year,
-        currentDateTime.month,
-        currentDateTime.day,
-        currentDateTime.hour,
-        currentDateTime.minute,
-        currentDateTime.second,
-      );
-    } else {
-      start_time = DateTime(
         int.parse(
-          widget.trip["start_time"]!.substring(6, 10),
+          widget.trip.startTime.substring(6, 10),
         ),
         int.parse(
-          widget.trip["start_time"]!.substring(0, 2),
+          widget.trip.startTime.substring(0, 2),
         ),
         int.parse(
-          widget.trip["start_time"]!.substring(3, 5),
+          widget.trip.startTime.substring(3, 5),
         ),
         int.parse(
-          widget.trip["start_time"]!.substring(13, 15),
+          widget.trip.startTime.substring(13, 15),
         ),
         int.parse(
-          widget.trip["start_time"].substring(16, 18),
+          widget.trip.startTime.substring(16, 18),
         ),
         int.parse(
-          widget.trip["start_time"]!.substring(19, 21),
+          widget.trip.startTime.substring(19, 21),
         ),
       );
     }
-    if (widget.trip["end_time"] == "") {
+    end_time = DateTime(
+      currentDateTime.year,
+      currentDateTime.month,
+      currentDateTime.day,
+      currentDateTime.hour,
+      currentDateTime.minute,
+      currentDateTime.second,
+    );
+    if (widget.trip.endTime != "") {
       end_time = DateTime(
-        currentDateTime.year,
-        currentDateTime.month,
-        currentDateTime.day,
-        currentDateTime.hour,
-        currentDateTime.minute,
-        currentDateTime.second,
-      );
-    } else {
-      end_time = DateTime(
         int.parse(
-          widget.trip["end_time"]!.substring(6, 10),
+          widget.trip.endTime!.substring(6, 10),
         ),
         int.parse(
-          widget.trip["end_time"]!.substring(0, 2),
+          widget.trip.endTime!.substring(0, 2),
         ),
         int.parse(
-          widget.trip["end_time"]!.substring(3, 5),
+          widget.trip.endTime!.substring(3, 5),
         ),
         int.parse(
-          widget.trip["end_time"]!.substring(13, 15),
+          widget.trip.endTime!.substring(13, 15),
         ),
         int.parse(
-          widget.trip["end_time"]!.substring(16, 18),
+          widget.trip.endTime!.substring(16, 18),
         ),
         int.parse(
-          widget.trip["end_time"]!.substring(19, 21),
+          widget.trip.endTime!.substring(19, 21),
         ),
       );
     }
@@ -241,15 +240,18 @@ class _CloseTripConfirmationState extends State<CloseTripConfirmation> {
                         {
                           "StartTimeFormatted":
                               DateFormat('HH:mm:ss').format(start_time!),
+                          "StartTime":
+                              DateFormat("hh:mm a").format(start_time!),
                           "StartDateFormatted":
                               DateFormat("MM/dd/yyyy").format(start_time!),
                           "EndTimeFormatted":
                               DateFormat('HH:mm:ss').format(end_time!),
+                          "EndTime": DateFormat("hh:mm a").format(end_time!),
                           "EndDateFormatted":
                               DateFormat("MM/dd/yyyy").format(end_time!),
                           "CurrentTime":
                               DateFormat("hh:mm a'").format(DateTime.now()),
-                          "TripId": widget.trip["ID"],
+                          "TripId": widget.trip.id,
                         },
                       ),
                     )

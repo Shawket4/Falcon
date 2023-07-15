@@ -140,7 +140,7 @@ class _AddServiceEventState extends State<AddServiceEvent> {
                           dropdownSearchTextAlign: TextAlign.left,
                           searchFieldProps: TextFieldProps(
                             autocorrect: false,
-                            cursorColor: Theme.of(context).accentColor,
+                            cursorColor: Theme.of(context).primaryColor,
                           ),
                           popupItemBuilder: (context, item, isSelected) {
                             // dynamic Car = Cars.where(
