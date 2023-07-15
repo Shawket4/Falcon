@@ -92,7 +92,15 @@ class _AllDriversState extends State<AllDrivers> {
         ],
         centerTitle: true,
         backgroundColor: Theme.of(context).primaryColor,
-        title: const Text('السائقين'),
+        title: Text(
+          'Drivers',
+          style: GoogleFonts.jost(
+            textStyle: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
       ),
       body: FutureBuilder(
           future: loadData,

@@ -126,21 +126,19 @@ Future<String> get jwtOrEmpty async {
 }
 
 class Palette {
-  static MaterialColor primarySwatch = MaterialColor(
-    isDarkMode
-        ? 0xFF00796B
-        : 0xFF009688, // 0% comes in here, this will be color picked if no shade is selected when defining a Color property which doesn’t require a swatch.
-    const <int, Color>{
-      50: Color(0xFF2f4faa), //10%
-      100: Color(0xFF4662b3), //20%
-      200: Color(0xFF5d76bd), //30%
-      300: Color(0xFF7489c6), //40%
-      400: Color(0xFF8c9dd0), //50%
-      500: Color(0xFFa3b1d9), //60%
-      600: Color(0xFFbac4e3), //70%
-      700: Color(0xFFd1d8ec), //80%
-      800: Color(0xFFe8ebf6), //90%
-      900: Color(0xFFffffff), //100%
+  static MaterialColor primarySwatch = const MaterialColor(
+    0xFF466995, // 0% comes in here, this will be color picked if no shade is selected when defining a Color property which doesn’t require a swatch.
+    <int, Color>{
+      50: Color(0xFF4464AD), //10%
+      100: Color(0xFF4464AD), //20%
+      200: Color(0xFF4464AD), //30%
+      300: Color(0xFF4464AD), //40%
+      400: Color(0xFF4464AD), //50%
+      500: Color(0xFF4464AD), //60%
+      600: Color(0xFF4464AD), //70%
+      700: Color(0xFF4464AD), //80%
+      800: Color(0xFF4464AD), //90%
+      900: Color(0xFF4464AD), //100%
     },
   );
 }
@@ -154,12 +152,11 @@ class MainWidget extends StatelessWidget {
       title: 'Falcon',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
+        focusColor: Colors.black,
         primarySwatch: Palette.primarySwatch,
-        primaryColorDark: const Color(0xFF00796B),
-        primaryColorLight: const Color(0xFF009688),
-        primaryColor:
-            isDarkMode ? const Color(0xFF00796B) : const Color(0xFF009688),
-        // accentColor: const Color(0xFFFF9800),
+        // primaryColor:
+        //     isDarkMode ? const Color(0xFF00796B) : const Color(0xFF009688),
+        primaryColor: const Color(0xFF466995),
         textTheme: Theme.of(context).textTheme.apply(
               bodyColor: const Color(0xFF212121),
               displayColor: const Color(0xFF212121),
@@ -356,13 +353,11 @@ class _AppDrawerState extends State<AppDrawer> {
                 height: 160,
               ),
               Padding(
-                padding: const EdgeInsets.only(top: 60.0),
+                padding: const EdgeInsets.only(top: 75.0),
                 child: ListTile(
-                  leading: const CircleAvatar(
-                    backgroundImage: AssetImage(
-                      "images/user.png",
-                    ),
-                    radius: 25,
+                  leading: Image.asset(
+                    "images/OLA_Logo.png",
+                    scale: 1.5,
                   ),
                   trailing: Padding(
                     padding: const EdgeInsets.only(
@@ -371,7 +366,7 @@ class _AppDrawerState extends State<AppDrawer> {
                     child: IconButton(
                       icon: const Icon(
                         Icons.logout,
-                        color: Colors.black,
+                        color: Colors.white,
                         size: 30,
                       ),
                       onPressed: () {
@@ -394,7 +389,7 @@ class _AppDrawerState extends State<AppDrawer> {
                     style: GoogleFonts.josefinSans(
                       textStyle: const TextStyle(
                         fontSize: 24,
-                        color: Colors.black,
+                        color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

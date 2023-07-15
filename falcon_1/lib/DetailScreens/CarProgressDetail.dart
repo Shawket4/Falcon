@@ -236,10 +236,11 @@ class _CarProgressDetailScreenState extends State<CarProgressDetailScreen>
           ),
         ],
         title: Text(
-          'Trip Details',
+          'Details',
           style: GoogleFonts.jost(
             textStyle: const TextStyle(
               fontSize: 22,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ),

@@ -312,7 +312,7 @@ class _NewCarTripScreenState extends State<NewCarTripScreen> {
                             border: OutlineInputBorder(
                               borderSide: BorderSide(),
                             ),
-                            labelText: "Car No Plate*",
+                            labelText: "Car Plate*",
                           ),
                           mode: Mode.MENU,
                           showSelectedItems: true,
@@ -1114,7 +1114,7 @@ class _NewCarTripScreenState extends State<NewCarTripScreen> {
                               height: 50,
                               alignment: Alignment.center,
                               child: const Text(
-                                "انشاء رحلة",
+                                "Create Trip",
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,

@@ -212,9 +212,10 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
         // Hamburger Menu
         title: Text(
           'Trips',
-          style: GoogleFonts.josefinSans(
+          style: GoogleFonts.jost(
             textStyle: const TextStyle(
               fontSize: 22,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ),

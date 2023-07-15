@@ -95,7 +95,15 @@ class _AllCarsState extends State<AllCars> {
         ],
         centerTitle: true,
         backgroundColor: Theme.of(context).primaryColor,
-        title: const Text('السيارات'),
+        title: Text(
+          'Cars',
+          style: GoogleFonts.jost(
+            textStyle: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
       ),
       body: FutureBuilder(
           future: loadData,
