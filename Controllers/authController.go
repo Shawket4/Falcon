@@ -31,126 +31,126 @@ func RegisterDriver(c *fiber.Ctx) error {
 	//if data.Transporter == "" {
 	//	data.Transporter = CurrentUser.Name
 	//}
-	driverLicense, err := c.FormFile("DriverLicense")
-	if err != nil {
-		log.Println(err.Error())
-		return c.JSON(fiber.Map{
-			"message": err.Error(),
-			"file":    "save",
-		})
-	}
-	// Save file to disk
-	// Allow multipart form
-	err = c.SaveFile(driverLicense, fmt.Sprintf("./DriverLicenses/%s", driverLicense.Filename))
-	if err != nil {
-		log.Println(err.Error())
-		return c.JSON(fiber.Map{
-			"message": err.Error(),
-			"file":    "save",
-		})
-	}
+	// driverLicense, err := c.FormFile("DriverLicense")
+	// if err != nil {
+	// 	log.Println(err.Error())
+	// 	return c.JSON(fiber.Map{
+	// 		"message": err.Error(),
+	// 		"file":    "save",
+	// 	})
+	// }
+	// // Save file to disk
+	// // Allow multipart form
+	// err = c.SaveFile(driverLicense, fmt.Sprintf("./DriverLicenses/%s", driverLicense.Filename))
+	// if err != nil {
+	// 	log.Println(err.Error())
+	// 	return c.JSON(fiber.Map{
+	// 		"message": err.Error(),
+	// 		"file":    "save",
+	// 	})
+	// }
 
-	safetyLicense, err := c.FormFile("SafetyLicense")
-	if err != nil {
-		log.Println(err.Error())
-		return c.JSON(fiber.Map{
-			"message": err.Error(),
-			"file":    "save",
-		})
-	}
-	// Save file to disk
-	// Allow multipart form
-	err = c.SaveFile(safetyLicense, fmt.Sprintf("./SafetyLicenses/%s", safetyLicense.Filename))
-	if err != nil {
-		log.Println(err.Error())
-		return c.JSON(fiber.Map{
-			"message": err.Error(),
-			"file":    "save",
-		})
-	}
+	// safetyLicense, err := c.FormFile("SafetyLicense")
+	// if err != nil {
+	// 	log.Println(err.Error())
+	// 	return c.JSON(fiber.Map{
+	// 		"message": err.Error(),
+	// 		"file":    "save",
+	// 	})
+	// }
+	// // Save file to disk
+	// // Allow multipart form
+	// err = c.SaveFile(safetyLicense, fmt.Sprintf("./SafetyLicenses/%s", safetyLicense.Filename))
+	// if err != nil {
+	// 	log.Println(err.Error())
+	// 	return c.JSON(fiber.Map{
+	// 		"message": err.Error(),
+	// 		"file":    "save",
+	// 	})
+	// }
 
-	drugTest, err := c.FormFile("DrugTest")
-	if err != nil {
-		log.Println(err.Error())
-		return c.JSON(fiber.Map{
-			"message": err.Error(),
-			"file":    "save",
-		})
-	}
-	// Save file to disk
-	// Allow multipart form
-	err = c.SaveFile(drugTest, fmt.Sprintf("./DrugTests/%s", drugTest.Filename))
-	if err != nil {
-		log.Println(err.Error())
-		return c.JSON(fiber.Map{
-			"message": err.Error(),
-			"file":    "save",
-		})
-	}
+	// drugTest, err := c.FormFile("DrugTest")
+	// if err != nil {
+	// 	log.Println(err.Error())
+	// 	return c.JSON(fiber.Map{
+	// 		"message": err.Error(),
+	// 		"file":    "save",
+	// 	})
+	// }
+	// // Save file to disk
+	// // Allow multipart form
+	// err = c.SaveFile(drugTest, fmt.Sprintf("./DrugTests/%s", drugTest.Filename))
+	// if err != nil {
+	// 	log.Println(err.Error())
+	// 	return c.JSON(fiber.Map{
+	// 		"message": err.Error(),
+	// 		"file":    "save",
+	// 	})
+	// }
 
-	IDLicenseFront, err := c.FormFile("IDLicenseFront")
-	if err != nil {
-		log.Println(err.Error())
-		return c.JSON(fiber.Map{
-			"message": err.Error(),
-			"file":    "save",
-		})
-	}
-	// Save file to disk
-	// Allow multipart form
-	err = c.SaveFile(IDLicenseFront, fmt.Sprintf("./IDLicenses/%s", IDLicenseFront.Filename))
-	if err != nil {
-		log.Println(err.Error())
-		return c.JSON(fiber.Map{
-			"message": err.Error(),
-			"file":    "save",
-		})
-	}
+	// IDLicenseFront, err := c.FormFile("IDLicenseFront")
+	// if err != nil {
+	// 	log.Println(err.Error())
+	// 	return c.JSON(fiber.Map{
+	// 		"message": err.Error(),
+	// 		"file":    "save",
+	// 	})
+	// }
+	// // Save file to disk
+	// // Allow multipart form
+	// err = c.SaveFile(IDLicenseFront, fmt.Sprintf("./IDLicenses/%s", IDLicenseFront.Filename))
+	// if err != nil {
+	// 	log.Println(err.Error())
+	// 	return c.JSON(fiber.Map{
+	// 		"message": err.Error(),
+	// 		"file":    "save",
+	// 	})
+	// }
 
-	IDLicenseBack, err := c.FormFile("IDLicenseBack")
-	if err != nil {
-		log.Println(err.Error())
-		return c.JSON(fiber.Map{
-			"message": err.Error(),
-			"file":    "save",
-		})
-	}
-	// Save file to disk
-	// Allow multipart form
-	err = c.SaveFile(IDLicenseBack, fmt.Sprintf("./IDLicensesBack/%s", IDLicenseBack.Filename))
-	if err != nil {
-		log.Println(err.Error())
-		return c.JSON(fiber.Map{
-			"message": err.Error(),
-			"file":    "save",
-		})
-	}
+	// IDLicenseBack, err := c.FormFile("IDLicenseBack")
+	// if err != nil {
+	// 	log.Println(err.Error())
+	// 	return c.JSON(fiber.Map{
+	// 		"message": err.Error(),
+	// 		"file":    "save",
+	// 	})
+	// }
+	// // Save file to disk
+	// // Allow multipart form
+	// err = c.SaveFile(IDLicenseBack, fmt.Sprintf("./IDLicensesBack/%s", IDLicenseBack.Filename))
+	// if err != nil {
+	// 	log.Println(err.Error())
+	// 	return c.JSON(fiber.Map{
+	// 		"message": err.Error(),
+	// 		"file":    "save",
+	// 	})
+	// }
 
-	CriminalRecord, err := c.FormFile("CriminalRecord")
-	if err != nil {
-		log.Println(err.Error())
-		return c.JSON(fiber.Map{
-			"message": err.Error(),
-			"file":    "save",
-		})
-	}
-	// Save file to disk
-	// Allow multipart form
-	err = c.SaveFile(CriminalRecord, fmt.Sprintf("./CriminalRecords/%s", CriminalRecord.Filename))
-	if err != nil {
-		log.Println(err.Error())
-		return c.JSON(fiber.Map{
-			"message": err.Error(),
-			"file":    "save",
-		})
-	}
+	// CriminalRecord, err := c.FormFile("CriminalRecord")
+	// if err != nil {
+	// 	log.Println(err.Error())
+	// 	return c.JSON(fiber.Map{
+	// 		"message": err.Error(),
+	// 		"file":    "save",
+	// 	})
+	// }
+	// // Save file to disk
+	// // Allow multipart form
+	// err = c.SaveFile(CriminalRecord, fmt.Sprintf("./CriminalRecords/%s", CriminalRecord.Filename))
+	// if err != nil {
+	// 	log.Println(err.Error())
+	// 	return c.JSON(fiber.Map{
+	// 		"message": err.Error(),
+	// 		"file":    "save",
+	// 	})
+	// }
 
-	data.IDLicenseImageName = IDLicenseFront.Filename
-	data.IDLicenseImageNameBack = IDLicenseBack.Filename
-	data.DriverLicenseImageName = driverLicense.Filename
-	data.CriminalRecordImageName = CriminalRecord.Filename
-	data.SafetyLicenseImageName = safetyLicense.Filename
-	data.DrugTestImageName = drugTest.Filename
+	// data.IDLicenseImageName = IDLicenseFront.Filename
+	// data.IDLicenseImageNameBack = IDLicenseBack.Filename
+	// data.DriverLicenseImageName = driverLicense.Filename
+	// data.CriminalRecordImageName = CriminalRecord.Filename
+	// data.SafetyLicenseImageName = safetyLicense.Filename
+	// data.DrugTestImageName = drugTest.Filename
 	if CurrentUser.Permission >= 1 {
 		data.IsApproved = true
 	}

@@ -3,6 +3,8 @@ package main
 import (
 	"Falcon/FiberConfig"
 	"Falcon/Models"
+	"Falcon/Scrapper"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -22,12 +24,14 @@ func main() {
 	// 		time.Sleep(time.Hour)
 	// 	}
 	// }()
-	//go func() {
-	//	for {
-	//		Scrapper.GetVehicleHistoryData()
-	//		time.Sleep(time.Second * 30)
-	//	}
-	//}()
+	go func() {
+		for {
+			Scrapper.GetVehicleData()
+			time.Sleep(time.Second * 10)
+			Scrapper.CalculateDistanceWorker()
+			time.Sleep(time.Hour)
+		}
+	}()
 	Models.Connect()
 	FiberConfig.FiberConfig()
 }

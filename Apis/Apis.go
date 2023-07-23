@@ -495,137 +495,137 @@ func RegisterCar(c *fiber.Ctx) error {
 
 			// Insert the car into the database
 			car.JSONCompartments = datatypes.JSON(jsonCompartments)
-			carLicense, err := c.FormFile("CarLicense")
-			if err != nil {
-				log.Println(err.Error())
-				log.Println("CarLicense")
-				return c.JSON(fiber.Map{
-					"message": err.Error(),
-					"file":    "save",
-				})
-			}
-			// Save file to disk
-			// Allow multipart form
-			err = c.SaveFile(carLicense, fmt.Sprintf("./CarLicenses/%s", carLicense.Filename))
-			if err != nil {
-				log.Println(err.Error())
-				log.Println("CarLicense")
-				return c.JSON(fiber.Map{
-					"message": err.Error(),
-					"file":    "save",
-				})
-			}
-			carLicenseBack, err := c.FormFile("CarLicenseBack")
-			if err != nil {
-				log.Println(err.Error())
-				log.Println("CarLicenseBack")
-				return c.JSON(fiber.Map{
-					"message": err.Error(),
-					"file":    "save",
-				})
-			}
-			// Save file to disk
-			// Allow multipart form
-			err = c.SaveFile(carLicenseBack, fmt.Sprintf("./CarLicensesBack/%s", carLicenseBack.Filename))
-			if err != nil {
-				log.Println(err.Error())
-				log.Println("CarLicenseBack")
-				return c.JSON(fiber.Map{
-					"message": err.Error(),
-					"file":    "save",
-				})
-			}
+			// carLicense, err := c.FormFile("CarLicense")
+			// if err != nil {
+			// 	log.Println(err.Error())
+			// 	log.Println("CarLicense")
+			// 	return c.JSON(fiber.Map{
+			// 		"message": err.Error(),
+			// 		"file":    "save",
+			// 	})
+			// }
+			// // Save file to disk
+			// // Allow multipart form
+			// err = c.SaveFile(carLicense, fmt.Sprintf("./CarLicenses/%s", carLicense.Filename))
+			// if err != nil {
+			// 	log.Println(err.Error())
+			// 	log.Println("CarLicense")
+			// 	return c.JSON(fiber.Map{
+			// 		"message": err.Error(),
+			// 		"file":    "save",
+			// 	})
+			// }
+			// carLicenseBack, err := c.FormFile("CarLicenseBack")
+			// if err != nil {
+			// 	log.Println(err.Error())
+			// 	log.Println("CarLicenseBack")
+			// 	return c.JSON(fiber.Map{
+			// 		"message": err.Error(),
+			// 		"file":    "save",
+			// 	})
+			// }
+			// // Save file to disk
+			// // Allow multipart form
+			// err = c.SaveFile(carLicenseBack, fmt.Sprintf("./CarLicensesBack/%s", carLicenseBack.Filename))
+			// if err != nil {
+			// 	log.Println(err.Error())
+			// 	log.Println("CarLicenseBack")
+			// 	return c.JSON(fiber.Map{
+			// 		"message": err.Error(),
+			// 		"file":    "save",
+			// 	})
+			// }
 
-			if car.CarType == "تريلا" {
-				tankLicense, err := c.FormFile("TankLicense")
-				if err != nil {
-					log.Println(err.Error())
-					log.Println("TankLicense")
-					return c.JSON(fiber.Map{
-						"message": err.Error(),
-						"file":    "save",
-					})
-				}
-				// Save file to disk
-				// Allow multipart form
-				err = c.SaveFile(tankLicense, fmt.Sprintf("./TankLicenses/%s", tankLicense.Filename))
-				if err != nil {
-					log.Println(err.Error())
-					log.Println("TankLicense")
-					return c.JSON(fiber.Map{
-						"message": err.Error(),
-						"file":    "save",
-					})
-				}
-				tankLicenseBack, err := c.FormFile("TankLicenseBack")
-				if err != nil {
-					log.Println(err.Error())
-					log.Println("TankLicenseBack")
-					return c.JSON(fiber.Map{
-						"message": err.Error(),
-						"file":    "save",
-					})
-				}
-				// Save file to disk
-				// Allow multipart form
-				err = c.SaveFile(tankLicenseBack, fmt.Sprintf("./TankLicensesBack/%s", tankLicenseBack.Filename))
-				if err != nil {
-					log.Println(err.Error())
-					log.Println("TankLicenseBack")
-					return c.JSON(fiber.Map{
-						"message": err.Error(),
-						"file":    "save",
-					})
-				}
-				car.TankLicenseImageName = tankLicense.Filename
-				car.TankLicenseImageNameBack = tankLicenseBack.Filename
-			}
+			// if car.CarType == "تريلا" {
+			// 	tankLicense, err := c.FormFile("TankLicense")
+			// 	if err != nil {
+			// 		log.Println(err.Error())
+			// 		log.Println("TankLicense")
+			// 		return c.JSON(fiber.Map{
+			// 			"message": err.Error(),
+			// 			"file":    "save",
+			// 		})
+			// 	}
+			// 	// Save file to disk
+			// 	// Allow multipart form
+			// 	err = c.SaveFile(tankLicense, fmt.Sprintf("./TankLicenses/%s", tankLicense.Filename))
+			// 	if err != nil {
+			// 		log.Println(err.Error())
+			// 		log.Println("TankLicense")
+			// 		return c.JSON(fiber.Map{
+			// 			"message": err.Error(),
+			// 			"file":    "save",
+			// 		})
+			// 	}
+			// 	tankLicenseBack, err := c.FormFile("TankLicenseBack")
+			// 	if err != nil {
+			// 		log.Println(err.Error())
+			// 		log.Println("TankLicenseBack")
+			// 		return c.JSON(fiber.Map{
+			// 			"message": err.Error(),
+			// 			"file":    "save",
+			// 		})
+			// 	}
+			// 	// Save file to disk
+			// 	// Allow multipart form
+			// 	err = c.SaveFile(tankLicenseBack, fmt.Sprintf("./TankLicensesBack/%s", tankLicenseBack.Filename))
+			// 	if err != nil {
+			// 		log.Println(err.Error())
+			// 		log.Println("TankLicenseBack")
+			// 		return c.JSON(fiber.Map{
+			// 			"message": err.Error(),
+			// 			"file":    "save",
+			// 		})
+			// 	}
+			// 	car.TankLicenseImageName = tankLicense.Filename
+			// 	car.TankLicenseImageNameBack = tankLicenseBack.Filename
+			// }
 
-			calibrationLicense, err := c.FormFile("CalibrationLicense")
-			if err != nil {
-				log.Println(err.Error())
-				log.Println("CalibrationLicense")
-				return c.JSON(fiber.Map{
-					"message": err.Error(),
-					"file":    "save",
-				})
-			}
-			// Save file to disk
-			// Allow multipart form
-			err = c.SaveFile(calibrationLicense, fmt.Sprintf("./CalibrationLicenses/%s", calibrationLicense.Filename))
-			if err != nil {
-				log.Println(err.Error())
-				log.Println("CalibrationLicense")
-				return c.JSON(fiber.Map{
-					"message": err.Error(),
-					"file":    "save",
-				})
-			}
-			calibrationLicenseBack, err := c.FormFile("CalibrationLicenseBack")
-			if err != nil {
-				log.Println(err.Error())
-				log.Println("CalibrationLicenseBack")
-				return c.JSON(fiber.Map{
-					"message": err.Error(),
-					"file":    "save",
-				})
-			}
-			// Save file to disk
-			// Allow multipart form
-			err = c.SaveFile(calibrationLicenseBack, fmt.Sprintf("./CalibrationLicensesBack/%s", calibrationLicenseBack.Filename))
-			if err != nil {
-				log.Println(err.Error())
-				log.Println("CalibrationLicenseBack")
-				return c.JSON(fiber.Map{
-					"message": err.Error(),
-					"file":    "save",
-				})
-			}
-			car.CarLicenseImageName = carLicense.Filename
-			car.CarLicenseImageNameBack = carLicenseBack.Filename
-			car.CalibrationLicenseImageName = calibrationLicense.Filename
-			car.CalibrationLicenseImageNameBack = calibrationLicenseBack.Filename
-
+			// calibrationLicense, err := c.FormFile("CalibrationLicense")
+			// if err != nil {
+			// 	log.Println(err.Error())
+			// 	log.Println("CalibrationLicense")
+			// 	return c.JSON(fiber.Map{
+			// 		"message": err.Error(),
+			// 		"file":    "save",
+			// 	})
+			// }
+			// // Save file to disk
+			// // Allow multipart form
+			// err = c.SaveFile(calibrationLicense, fmt.Sprintf("./CalibrationLicenses/%s", calibrationLicense.Filename))
+			// if err != nil {
+			// 	log.Println(err.Error())
+			// 	log.Println("CalibrationLicense")
+			// 	return c.JSON(fiber.Map{
+			// 		"message": err.Error(),
+			// 		"file":    "save",
+			// 	})
+			// }
+			// calibrationLicenseBack, err := c.FormFile("CalibrationLicenseBack")
+			// if err != nil {
+			// 	log.Println(err.Error())
+			// 	log.Println("CalibrationLicenseBack")
+			// 	return c.JSON(fiber.Map{
+			// 		"message": err.Error(),
+			// 		"file":    "save",
+			// 	})
+			// }
+			// // Save file to disk
+			// // Allow multipart form
+			// err = c.SaveFile(calibrationLicenseBack, fmt.Sprintf("./CalibrationLicensesBack/%s", calibrationLicenseBack.Filename))
+			// if err != nil {
+			// 	log.Println(err.Error())
+			// 	log.Println("CalibrationLicenseBack")
+			// 	return c.JSON(fiber.Map{
+			// 		"message": err.Error(),
+			// 		"file":    "save",
+			// 	})
+			// }
+			// car.CarLicenseImageName = carLicense.Filename
+			// car.CarLicenseImageNameBack = carLicenseBack.Filename
+			// car.CalibrationLicenseImageName = calibrationLicense.Filename
+			// car.CalibrationLicenseImageNameBack = calibrationLicenseBack.Filename
+			fmt.Println(car)
 			if err := Models.DB.Save(&car).Error; err != nil {
 				log.Println(err.Error())
 				return err

@@ -129,7 +129,7 @@ import (
 func GetFormattedDate(date string) (string, error) {
 	const (
 		layoutISO = "2006-01-02"
-		layoutUS  = "1/2/2006"
+		layoutUS  = "01/02/2006"
 	)
 	start_date, err := time.Parse(layoutISO, date)
 	if err != nil {

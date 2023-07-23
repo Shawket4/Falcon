@@ -1,6 +1,7 @@
 package Scrapper
 
 import (
+	"Falcon/Models"
 	"Falcon/Structs"
 	"crypto/tls"
 	"encoding/json"
@@ -14,6 +15,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	// "time"
 
@@ -312,6 +314,31 @@ type MileageStruct struct {
 	StartTime      string `json:"StartTime"`
 	EndTime        string `json:"EndTime"`
 	VehicleID      string
+}
+
+func CalculateDistanceWorker() {
+	var Trips []Models.TripStruct
+	if err := Models.DB.Model(&Models.TripStruct{}).Where("is_closed = ?", true).Where("mileage = 0").Find(&Trips).Error; err != nil {
+		log.Println(err.Error())
+	}
+	for _, trip := range Trips {
+		var truckID string
+		for _, vehicle := range VehicleStatusList {
+			if vehicle.PlateNo == trip.CarNoPlate {
+				truckID = vehicle.ID
+			}
+		}
+		feeRate, mileage, err := GetFeeRate(MileageStruct{VehiclePlateNo: trip.CarNoPlate, StartTime: trip.StartTime, EndTime: trip.EndTime, VehicleID: truckID})
+		if err != nil {
+			log.Println(err.Error())
+		}
+		trip.FeeRate = feeRate
+		trip.Mileage = mileage
+		if err := Models.DB.Save(&trip).Error; err != nil {
+			log.Println(err.Error())
+		}
+		time.Sleep(time.Second * 10)
+	}
 }
 
 func GetVehicleMileageHistory(c *fiber.Ctx) error {

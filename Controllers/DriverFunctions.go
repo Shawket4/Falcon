@@ -109,7 +109,7 @@ func NextStep(c *fiber.Ctx) error {
 			Trip.StepCompleteTime.Terminal.Status = true
 			Trip.StepCompleteTime.Terminal.TimeStamp = bodyData.Time
 			Trip.StartTime = bodyData.DateFormatted + "%20" + bodyData.TimeFormatted
-			Trip.StepCompleteTimeDB, err = json.Marshal(Trip.StepCompleteTime)
+			Trip.StepCompleteTimeDB, _ = json.Marshal(Trip.StepCompleteTime)
 			if err := Models.DB.Save(&Trip).Error; err != nil {
 				log.Println(err.Error())
 				return err
@@ -126,7 +126,7 @@ func NextStep(c *fiber.Ctx) error {
 				break
 			}
 		}
-		Trip.StepCompleteTimeDB, err = json.Marshal(Trip.StepCompleteTime)
+		Trip.StepCompleteTimeDB, _ = json.Marshal(Trip.StepCompleteTime)
 		if err := Models.DB.Save(&Trip).Error; err != nil {
 			log.Println(err.Error())
 			return err
@@ -298,9 +298,11 @@ func CompleteTrip(c *fiber.Ctx) error {
 		var bodyData struct {
 			StartDateFormatted string `json:"StartDateFormatted"`
 			StartTimeFormatted string `json:"StartTimeFormatted"`
+			StartTime          string `json:"StartTime"`
 			CurrentTime        string `json:"CurrentTime"`
 			EndDateFormatted   string `json:"EndDateFormatted"`
 			EndTimeFormatted   string `json:"EndTimeFormatted"`
+			EndTime            string `json:"EndTime"`
 			TripId             int    `json:"TripId"`
 		}
 		if err := c.BodyParser(&bodyData); err != nil {
@@ -313,6 +315,7 @@ func CompleteTrip(c *fiber.Ctx) error {
 			log.Println(err.Error())
 			return err
 		}
+
 		var car Models.Car
 		if err := Models.DB.Model(&Models.Car{}).Where("id = ?", trip.CarID).Find(&car).Error; err != nil {
 			log.Println(err.Error())
@@ -336,6 +339,7 @@ func CompleteTrip(c *fiber.Ctx) error {
 		trip.EndTime = bodyData.EndDateFormatted + "%20" + bodyData.EndTimeFormatted
 		trip.StartTime = bodyData.StartDateFormatted + "%20" + bodyData.StartTimeFormatted
 		var truckID string
+		fmt.Println(Scrapper.VehicleStatusList)
 		for _, vehicle := range Scrapper.VehicleStatusList {
 			if vehicle.PlateNo == car.CarNoPlate {
 				truckID = vehicle.ID
@@ -351,14 +355,15 @@ func CompleteTrip(c *fiber.Ctx) error {
 		}
 		if !trip.StepCompleteTime.Terminal.Status {
 			trip.StepCompleteTime.Terminal.Status = true
-			trip.StepCompleteTime.Terminal.TimeStamp = bodyData.CurrentTime
+			trip.StepCompleteTime.Terminal.TimeStamp = bodyData.StartTime
 		}
 		for i := range trip.StepCompleteTime.DropOffPoints {
 			if !trip.StepCompleteTime.DropOffPoints[i].Status {
 				trip.StepCompleteTime.DropOffPoints[i].Status = true
-				trip.StepCompleteTime.DropOffPoints[i].TimeStamp = bodyData.CurrentTime
+				trip.StepCompleteTime.DropOffPoints[i].TimeStamp = bodyData.EndTime
 			}
 		}
+		trip.StepCompleteTimeDB, _ = json.Marshal(trip.StepCompleteTime)
 		trip.FeeRate = feeRate
 		trip.Mileage = mileage
 		trip.IsClosed = true

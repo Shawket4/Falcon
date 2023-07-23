@@ -7,13 +7,12 @@ import (
 
 type TripStruct struct {
 	gorm.Model
-	CarID        uint   `json:"car_id"`
-	DriverID     uint   `json:"driver_id"`
-	CarNoPlate   string `json:"car_no_plate"`
-	DriverName   string `json:"driver_name"`
-	Transporter  string `json:"transporter"`
-	TankCapacity int    `json:"tank_capacity"`
-
+	CarID            uint   `json:"car_id"`
+	DriverID         uint   `json:"driver_id"`
+	CarNoPlate       string `json:"car_no_plate"`
+	DriverName       string `json:"driver_name"`
+	Transporter      string `json:"transporter"`
+	TankCapacity     int    `json:"tank_capacity"`
 	PickUpPoint      string `json:"pick_up_point"`
 	ProgressIndex    int    `json:"progress_index"`
 	StepCompleteTime struct {

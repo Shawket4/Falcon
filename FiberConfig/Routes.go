@@ -33,8 +33,7 @@ func FiberConfig() {
 	app.Post("/api/Login", Controllers.Login)
 	app.Use("/api/User", Controllers.User)
 	app.Use("/api/Logout", Controllers.Logout)
-	app.Post("/api/CreateLocation/", Apis.CreateLocation)
-	app.Post("/api/CreateTerminal/", Apis.CreateTerminal)
+
 	// app.Get("/ShowAllServiceEvents", adaptor.HTTPHandlerFunc(PreviewData.ShowAllServiceEvents))
 	app.Post("/api/removedata", (ManipulateData.DeleteData))
 	app.Post("/api/editdata", (ManipulateData.EditData))
@@ -73,6 +72,8 @@ func FiberConfig() {
 
 	app.Use("/api/GetNotifications", Notifications.ReturnNotifications)
 	protectedApis := app.Group("/api/protected/", middleware.Verify)
+	protectedApis.Post("/CreateLocation/", Apis.CreateLocation)
+	protectedApis.Post("/CreateTerminal/", Apis.CreateTerminal)
 	protectedApis.Post("/GetRouteHistory", Scrapper.GetVehicleRouteHistory)
 	protectedApis.Post("/GetTripRouteHistory", Scrapper.GetTripRouteHistory)
 	protectedApis.Post("/GetPhotoAlbum", Apis.GetPhotoAlbum)
