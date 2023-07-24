@@ -369,7 +369,7 @@ class _AddFuelEventState extends State<AddFuelEvent> {
                                                         context,
                                                         MaterialPageRoute(
                                                           builder: (_) =>
-                                                              CarProgressScreen(
+                                                              HomeScreen(
                                                             jwt: widget.jwt,
                                                           ),
                                                         ),
@@ -481,7 +481,7 @@ class _AddFuelEventState extends State<AddFuelEvent> {
                                                     context,
                                                     MaterialPageRoute(
                                                       builder: (_) =>
-                                                          CarProgressScreen(
+                                                          HomeScreen(
                                                         jwt: widget.jwt,
                                                       ),
                                                     ),

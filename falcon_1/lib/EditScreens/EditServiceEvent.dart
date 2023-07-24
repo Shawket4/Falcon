@@ -467,7 +467,7 @@ class _EditServiceEventState extends State<EditServiceEvent> {
                                                     context,
                                                     MaterialPageRoute(
                                                       builder: (_) =>
-                                                          CarProgressScreen(
+                                                          HomeScreen(
                                                         jwt: widget.jwt,
                                                       ),
                                                     ),

@@ -890,7 +890,7 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
                                                         context,
                                                         MaterialPageRoute(
                                                           builder: (_) =>
-                                                              CarProgressScreen(
+                                                              HomeScreen(
                                                             jwt: widget.jwt,
                                                           ),
                                                         ),
@@ -1010,7 +1010,7 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
                                                     context,
                                                     MaterialPageRoute(
                                                       builder: (_) =>
-                                                          CarProgressScreen(
+                                                          HomeScreen(
                                                         jwt: widget.jwt,
                                                       ),
                                                     ),

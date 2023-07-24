@@ -264,7 +264,7 @@ class _CloseTripConfirmationState extends State<CloseTripConfirmation> {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => CarProgressScreen(
+                      builder: (_) => HomeScreen(
                         jwt: widget.jwt,
                       ),
                     ),

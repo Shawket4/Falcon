@@ -201,7 +201,7 @@ class _NewCarTripScreenState extends State<NewCarTripScreen> {
               appBar: AppBar(
                 centerTitle: true,
                 backgroundColor: Theme.of(context).primaryColor,
-                title: const Text("انشاء رحلة جديدة"),
+                title: const Text("New Trip"),
               ),
               body: Center(
                 child: SafeArea(
@@ -434,8 +434,14 @@ class _NewCarTripScreenState extends State<NewCarTripScreen> {
                           height: 15,
                         ),
                         DropdownSearch<String>(
-                          dropdownSearchDecoration: const InputDecoration(
-                            border: OutlineInputBorder(
+                          dropdownSearchDecoration: InputDecoration(
+                            suffix: IconButton(
+                              onPressed: () {},
+                              icon: const Icon(
+                                Icons.add,
+                              ),
+                            ),
+                            border: const OutlineInputBorder(
                               borderSide: BorderSide(),
                             ),
                             labelText: "Terminal*",
@@ -961,7 +967,7 @@ class _NewCarTripScreenState extends State<NewCarTripScreen> {
                                                           context,
                                                           MaterialPageRoute(
                                                             builder: (_) =>
-                                                                CarProgressScreen(
+                                                                HomeScreen(
                                                               jwt: widget.jwt,
                                                             ),
                                                           ),
@@ -1082,7 +1088,7 @@ class _NewCarTripScreenState extends State<NewCarTripScreen> {
                                                       context,
                                                       MaterialPageRoute(
                                                         builder: (_) =>
-                                                            CarProgressScreen(
+                                                            HomeScreen(
                                                           jwt: widget.jwt,
                                                         ),
                                                       ),

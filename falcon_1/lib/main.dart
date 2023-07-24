@@ -30,11 +30,11 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge.dart' as bridge;
 
 // const String SERVER_IP = 'http://192.168.1.8:3001';
 const String SERVER_IP = 'https://dentex.app:3001';
-// const SERVER_IP = 'http://localhost:3001/api';
+// const SERVER_IP = 'http://localhost:3001';
 // const SERVER_IP = 'http://92.205.60.182:3001/api';
 
 var jwt = "";
-
+Widget? currentWidget;
 var brightness = SchedulerBinding.instance.window.platformBrightness;
 bool isDarkMode = brightness == Brightness.dark;
 late DynamicLibrary lib;
@@ -149,7 +149,7 @@ class MainWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Falcon',
+      title: 'Apex',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         focusColor: Colors.black,
@@ -216,6 +216,10 @@ class MainWidget extends StatelessWidget {
             if (snapshot.data != "") {
               var str = snapshot.data.toString();
               jwt = jsonDecode(str)["jwt"];
+              currentWidget = CarProgressScreen(
+                jwt: jwt,
+                changeDrawerState: _changeDrawerState,
+              );
               // var jwt = jsonDecode(str)["jwt"];
               if (jwt.length < 3) {
                 return const LoginScreen();
@@ -275,13 +279,13 @@ class MainWidget extends StatelessWidget {
                       //     json.decode(json.encode(snapshot.data.toString()));
                       // print(data);
                       if (int.parse(permission) >= 3) {
-                        return CarProgressScreen(
+                        return HomeScreen(
                           jwt: jwt.toString(),
                         );
                       } else if (int.parse(permission) == 2 ||
                           int.parse(permission) == 1) {
                         // print(snapshot.data);
-                        return CarProgressScreen(
+                        return HomeScreen(
                           jwt: jwt.toString(),
                         );
                       } else {
@@ -328,6 +332,45 @@ Widget buildDrawerItem({
       ),
     ],
   );
+}
+
+final GlobalKey<ScaffoldState> _key = GlobalKey();
+
+void _changeDrawerState() {
+  if (_key.currentState!.isDrawerOpen) {
+    _key.currentState!.closeDrawer();
+  } else {
+    _key.currentState!.openDrawer();
+  }
+}
+
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key, required this.jwt});
+  final String jwt;
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  void _update() {
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      key: _key,
+      drawer: AppDrawer(
+        jwt: widget.jwt,
+      ),
+      bottomNavigationBar: CustomNavigationBar(
+        update: _update,
+        changeDrawerState: _changeDrawerState,
+      ),
+      body: currentWidget,
+    );
+  }
 }
 
 class AppDrawer extends StatefulWidget {
@@ -422,7 +465,7 @@ class _AppDrawerState extends State<AppDrawer> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => CarProgressScreen(
+                    builder: (_) => HomeScreen(
                       jwt: widget.jwt.toString(),
                     ),
                   ),
@@ -467,7 +510,7 @@ class _AppDrawerState extends State<AppDrawer> {
           //     : Container(),
           int.parse(permission) > 1
               ? buildDrawerItem(
-                  title: "Add Trip",
+                  title: "New Trip",
                   onTap: () {
                     Navigator.push(
                       context,
@@ -480,7 +523,7 @@ class _AppDrawerState extends State<AppDrawer> {
               : Container(),
           int.parse(permission) > 1
               ? buildDrawerItem(
-                  title: "Add Service Event",
+                  title: "New Service Event",
                   onTap: () {
                     Navigator.push(
                       context,
@@ -494,7 +537,7 @@ class _AppDrawerState extends State<AppDrawer> {
               : Container(),
           int.parse(permission) > 1
               ? buildDrawerItem(
-                  title: "Add Fuel Event",
+                  title: "New Fuel Event",
                   onTap: () {
                     Navigator.push(
                       context,
@@ -610,6 +653,113 @@ class _AppDrawerState extends State<AppDrawer> {
   }
 }
 
+AnimatedContainer AnimatedBar(bool isActive) {
+  return AnimatedContainer(
+    duration: const Duration(milliseconds: 200),
+    margin: const EdgeInsets.only(bottom: 2),
+    height: 4,
+    width: isActive ? 20 : 0,
+    decoration: BoxDecoration(
+        color: const Color(0xFFF58F29),
+        borderRadius: BorderRadius.circular(12)),
+  );
+}
+
+class CustomNavigationBar extends StatefulWidget {
+  const CustomNavigationBar(
+      {super.key, required this.update, required this.changeDrawerState});
+  final Function update;
+  final Function changeDrawerState;
+  @override
+  State<CustomNavigationBar> createState() => _CustomNavigationBarState();
+}
+
+class _CustomNavigationBarState extends State<CustomNavigationBar> {
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8.0),
+        decoration: BoxDecoration(
+          color: const Color(0xFFA4B0F5),
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            GestureDetector(
+              onTap: () {
+                currentWidget = CarProgressScreen(
+                  jwt: jwt,
+                  changeDrawerState: widget.changeDrawerState,
+                );
+                selectedBottomIndex = 0;
+                widget.update();
+              },
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AnimatedBar(selectedBottomIndex == 0),
+                  const SizedBox(
+                    height: 40,
+                    width: 40,
+                    child: Opacity(
+                      opacity: 1,
+                      child: Icon(Icons.list_alt),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            GestureDetector(
+              onTap: () {
+                currentWidget = AllCars(jwt: jwt);
+                selectedBottomIndex = 1;
+                widget.update();
+              },
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AnimatedBar(selectedBottomIndex == 1),
+                  const SizedBox(
+                    height: 40,
+                    width: 40,
+                    child: Opacity(
+                      opacity: 1,
+                      child: Icon(Icons.fire_truck),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            GestureDetector(
+              onTap: () {
+                setState(() {});
+                selectedBottomIndex = 2;
+              },
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AnimatedBar(selectedBottomIndex == 2),
+                  const SizedBox(
+                    height: 40,
+                    width: 40,
+                    child: Opacity(
+                      opacity: 1,
+                      child: Icon(Icons.map_rounded),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class BottomNavigationWidget extends StatefulWidget {
   const BottomNavigationWidget({super.key, required this.jwt});
   final String jwt;
@@ -644,7 +794,7 @@ class _BottomNavigationWidgetState extends State<BottomNavigationWidget> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (_) => CarProgressScreen(jwt: widget.jwt),
+              builder: (_) => HomeScreen(jwt: widget.jwt),
             ),
           );
         } else if (index == 1) {

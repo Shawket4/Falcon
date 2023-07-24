@@ -62,7 +62,7 @@ late File tankLicenseImgFileBack;
 late Uint8List tankLicenseImgBytesBack;
 
 List<String> _transporterList = [];
-List<String> _carTypes = ["فرداني", "تريلا"];
+List<String> _carTypes = ["No Trailer", "Trailer"];
 String? selectedTransporter;
 String? selectedCarType = _carTypes[0];
 // late PlatformFile carLicenseFile;
@@ -112,9 +112,9 @@ Future<Object> get loadData async {
 }
 
 List<Step> getSteps = [
-  Step(title: const Text("رخصة السيارة"), content: Container()),
-  Step(title: const Text("شهادة العيار"), content: Container()),
-  Step(title: const Text("رخصة الديل"), content: Container()),
+  Step(title: const Text("Car License"), content: Container()),
+  Step(title: const Text("Calibration License"), content: Container()),
+  Step(title: const Text("Trailer License"), content: Container()),
 ];
 
 class _AddCarState extends State<AddCar> {
@@ -144,7 +144,7 @@ class _AddCarState extends State<AddCar> {
         centerTitle: true,
         backgroundColor: Theme.of(context).primaryColor,
         title: Text(
-          'إضافة سيارة',
+          'Add Car',
           style: GoogleFonts.josefinSans(
             textStyle: const TextStyle(
               fontSize: 22,
@@ -278,246 +278,240 @@ class _AddCarState extends State<AddCar> {
                               ],
                             )
                           : Container(),
-                      Directionality(
-                        textDirection: TextDirection.rtl,
-                        child: CupertinoFormSection(
-                          header: const Text(
-                            "تفاصيل السيارة",
-                          ),
-                          children: [
-                            CupertinoFormRow(
-                              prefix: const Text("رقم السيارة"),
-                              child: CupertinoTextFormFieldRow(
-                                controller: _carPlateNoController,
-                                placeholder: "رقم السيارة*",
-                              ),
-                            ),
-                            CupertinoFormRow(
-                              prefix: const Text("عين ١"),
-                              child: CupertinoTextFormFieldRow(
-                                controller: _compartment1Controller,
-                                placeholder: "عين ١*",
-                              ),
-                            ),
-                            CupertinoFormRow(
-                              prefix: const Text("عين ٢"),
-                              child: CupertinoTextFormFieldRow(
-                                controller: _compartment2Controller,
-                                placeholder: "عين ٢*",
-                              ),
-                            ),
-                            CupertinoFormRow(
-                              prefix: const Text("عين ٣"),
-                              child: CupertinoTextFormFieldRow(
-                                controller: _compartment3Controller,
-                                placeholder: "عين ٣*",
-                              ),
-                            ),
-                            CupertinoFormRow(
-                              prefix: const Text("عين ٤"),
-                              child: CupertinoTextFormFieldRow(
-                                controller: _compartment4Controller,
-                                placeholder: "عين ٤*",
-                              ),
-                            ),
-                            GestureDetector(
-                              onTap: () async {
-                                DateTime? pickDate = await showDatePicker(
-                                    context: context,
-                                    initialDate: DateTime.now(),
-                                    firstDate: DateTime(2000),
-                                    lastDate: DateTime(2099));
-                                if (pickDate != null) {
-                                  setState(() {
-                                    _licenseExpiryDateController.text =
-                                        intl.DateFormat("yyyy-MM-dd")
-                                            .format(pickDate);
-                                  });
-                                }
-                              },
-                              child: CupertinoFormRow(
-                                prefix: Row(
-                                  children: const [
-                                    Icon(Icons.calendar_today),
-                                    SizedBox(
-                                      width: 10,
-                                    ),
-                                    Text("أنتهاء رخصة السيارة"),
-                                  ],
-                                ),
-                                child: CupertinoTextFormFieldRow(
-                                  onTap: () async {
-                                    DateTime? pickDate = await showDatePicker(
-                                        context: context,
-                                        initialDate: DateTime.now(),
-                                        firstDate: DateTime(2000),
-                                        lastDate: DateTime(2099));
-                                    if (pickDate != null) {
-                                      setState(() {
-                                        _licenseExpiryDateController.text =
-                                            intl.DateFormat("yyyy-MM-dd")
-                                                .format(pickDate);
-                                      });
-                                    }
-                                  },
-                                  controller: _licenseExpiryDateController,
-                                  placeholder: "أنتهاء رخصة السيارة*",
-                                ),
-                              ),
-                            ),
-                            GestureDetector(
-                              onTap: () async {
-                                DateTime? pickDate = await showDatePicker(
-                                    context: context,
-                                    initialDate: DateTime.now(),
-                                    firstDate: DateTime(2000),
-                                    lastDate: DateTime(2099));
-
-                                if (pickDate != null) {
-                                  setState(() {
-                                    _calibrationExpiryDateController.text =
-                                        intl.DateFormat("yyyy-MM-dd")
-                                            .format(pickDate);
-                                  });
-                                }
-                              },
-                              child: CupertinoFormRow(
-                                prefix: Row(
-                                  children: const [
-                                    Icon(Icons.calendar_today),
-                                    SizedBox(
-                                      width: 10,
-                                    ),
-                                    Text("أنتهاء شهادة العيار"),
-                                  ],
-                                ),
-                                child: CupertinoTextFormFieldRow(
-                                  onTap: () async {
-                                    DateTime? pickDate = await showDatePicker(
-                                        context: context,
-                                        initialDate: DateTime.now(),
-                                        firstDate: DateTime(2000),
-                                        lastDate: DateTime(2099));
-
-                                    if (pickDate != null) {
-                                      setState(() {
-                                        _calibrationExpiryDateController.text =
-                                            intl.DateFormat("yyyy-MM-dd")
-                                                .format(pickDate);
-                                      });
-                                    }
-                                  },
-                                  controller: _calibrationExpiryDateController,
-                                  placeholder: "أنتهاء شهادة العيار*",
-                                ),
-                              ),
-                            ),
-                            selectedCarType == _carTypes[1]
-                                ? GestureDetector(
-                                    onTap: () async {
-                                      DateTime? pickDate = await showDatePicker(
-                                          context: context,
-                                          initialDate: DateTime.now(),
-                                          firstDate: DateTime(2000),
-                                          lastDate: DateTime(2099));
-                                      if (pickDate != null) {
-                                        _tankLicenseExpiryDateController.text =
-                                            intl.DateFormat("yyyy-MM-dd")
-                                                .format(pickDate);
-                                        setState(() {});
-                                      }
-                                    },
-                                    child: CupertinoFormRow(
-                                      prefix: Row(
-                                        children: const [
-                                          Icon(Icons.calendar_today),
-                                          SizedBox(
-                                            width: 10,
-                                          ),
-                                          Text("أنتهاء رخصة الديل"),
-                                        ],
-                                      ),
-                                      child: CupertinoTextFormFieldRow(
-                                        onTap: () async {
-                                          DateTime? pickDate =
-                                              await showDatePicker(
-                                                  context: context,
-                                                  initialDate: DateTime.now(),
-                                                  firstDate: DateTime(2000),
-                                                  lastDate: DateTime(2099));
-                                          if (pickDate != null) {
-                                            _tankLicenseExpiryDateController
-                                                    .text =
-                                                intl.DateFormat("yyyy-MM-dd")
-                                                    .format(pickDate);
-                                            setState(() {});
-                                          }
-                                        },
-                                        controller:
-                                            _tankLicenseExpiryDateController,
-                                        placeholder: "أنتهاء رخصة الديل*",
-                                      ),
-                                    ),
-                                  )
-                                : Container(),
-                          ],
+                      CupertinoFormSection(
+                        header: const Text(
+                          "Car Details",
                         ),
+                        children: [
+                          CupertinoFormRow(
+                            prefix: const Text("Car No Plate"),
+                            child: CupertinoTextFormFieldRow(
+                              controller: _carPlateNoController,
+                              placeholder: "Car No Plate*",
+                            ),
+                          ),
+                          CupertinoFormRow(
+                            prefix: const Text("Compartment 1"),
+                            child: CupertinoTextFormFieldRow(
+                              controller: _compartment1Controller,
+                              placeholder: "Size*",
+                            ),
+                          ),
+                          CupertinoFormRow(
+                            prefix: const Text("Compartment 2"),
+                            child: CupertinoTextFormFieldRow(
+                              controller: _compartment2Controller,
+                              placeholder: "Size*",
+                            ),
+                          ),
+                          CupertinoFormRow(
+                            prefix: const Text("Compartment 3"),
+                            child: CupertinoTextFormFieldRow(
+                              controller: _compartment3Controller,
+                              placeholder: "Size*",
+                            ),
+                          ),
+                          CupertinoFormRow(
+                            prefix: const Text("Compartment 4"),
+                            child: CupertinoTextFormFieldRow(
+                              controller: _compartment4Controller,
+                              placeholder: "Size*",
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () async {
+                              DateTime? pickDate = await showDatePicker(
+                                  context: context,
+                                  initialDate: DateTime.now(),
+                                  firstDate: DateTime(2000),
+                                  lastDate: DateTime(2099));
+                              if (pickDate != null) {
+                                setState(() {
+                                  _licenseExpiryDateController.text =
+                                      intl.DateFormat("yyyy-MM-dd")
+                                          .format(pickDate);
+                                });
+                              }
+                            },
+                            child: CupertinoFormRow(
+                              prefix: const Row(
+                                children: [
+                                  Icon(Icons.calendar_today),
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  Text("Car License Expiry"),
+                                ],
+                              ),
+                              child: CupertinoTextFormFieldRow(
+                                onTap: () async {
+                                  DateTime? pickDate = await showDatePicker(
+                                      context: context,
+                                      initialDate: DateTime.now(),
+                                      firstDate: DateTime(2000),
+                                      lastDate: DateTime(2099));
+                                  if (pickDate != null) {
+                                    setState(() {
+                                      _licenseExpiryDateController.text =
+                                          intl.DateFormat("yyyy-MM-dd")
+                                              .format(pickDate);
+                                    });
+                                  }
+                                },
+                                controller: _licenseExpiryDateController,
+                              ),
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () async {
+                              DateTime? pickDate = await showDatePicker(
+                                  context: context,
+                                  initialDate: DateTime.now(),
+                                  firstDate: DateTime(2000),
+                                  lastDate: DateTime(2099));
+
+                              if (pickDate != null) {
+                                setState(() {
+                                  _calibrationExpiryDateController.text =
+                                      intl.DateFormat("yyyy-MM-dd")
+                                          .format(pickDate);
+                                });
+                              }
+                            },
+                            child: CupertinoFormRow(
+                              prefix: const Row(
+                                children: [
+                                  Icon(Icons.calendar_today),
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  Text("Calibration License Expiry"),
+                                ],
+                              ),
+                              child: CupertinoTextFormFieldRow(
+                                onTap: () async {
+                                  DateTime? pickDate = await showDatePicker(
+                                      context: context,
+                                      initialDate: DateTime.now(),
+                                      firstDate: DateTime(2000),
+                                      lastDate: DateTime(2099));
+
+                                  if (pickDate != null) {
+                                    setState(() {
+                                      _calibrationExpiryDateController.text =
+                                          intl.DateFormat("yyyy-MM-dd")
+                                              .format(pickDate);
+                                    });
+                                  }
+                                },
+                                controller: _calibrationExpiryDateController,
+                              ),
+                            ),
+                          ),
+                          selectedCarType == _carTypes[1]
+                              ? GestureDetector(
+                                  onTap: () async {
+                                    DateTime? pickDate = await showDatePicker(
+                                        context: context,
+                                        initialDate: DateTime.now(),
+                                        firstDate: DateTime(2000),
+                                        lastDate: DateTime(2099));
+                                    if (pickDate != null) {
+                                      _tankLicenseExpiryDateController.text =
+                                          intl.DateFormat("yyyy-MM-dd")
+                                              .format(pickDate);
+                                      setState(() {});
+                                    }
+                                  },
+                                  child: CupertinoFormRow(
+                                    prefix: const Row(
+                                      children: [
+                                        Icon(Icons.calendar_today),
+                                        SizedBox(
+                                          width: 10,
+                                        ),
+                                        Text("Trailer License Expiry"),
+                                      ],
+                                    ),
+                                    child: CupertinoTextFormFieldRow(
+                                      onTap: () async {
+                                        DateTime? pickDate =
+                                            await showDatePicker(
+                                                context: context,
+                                                initialDate: DateTime.now(),
+                                                firstDate: DateTime(2000),
+                                                lastDate: DateTime(2099));
+                                        if (pickDate != null) {
+                                          _tankLicenseExpiryDateController
+                                                  .text =
+                                              intl.DateFormat("yyyy-MM-dd")
+                                                  .format(pickDate);
+                                          setState(() {});
+                                        }
+                                      },
+                                      controller:
+                                          _tankLicenseExpiryDateController,
+                                    ),
+                                  ),
+                                )
+                              : Container(),
+                        ],
                       ),
                       const SizedBox(height: 20),
-                      Stepper(
-                        currentStep: currentStep,
-                        controlsBuilder:
-                            (BuildContext context, ControlsDetails details) {
-                          return Row(
-                            children: <Widget>[
-                              !isImagesLoaded
-                                  ? TextButton(
-                                      onPressed: details.onStepContinue,
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          color: Theme.of(context).primaryColor,
-                                          borderRadius:
-                                              BorderRadius.circular(4),
-                                        ),
-                                        child: const Padding(
-                                          padding: EdgeInsets.all(12.0),
-                                          child: Center(
-                                            child: Text(
-                                              'CONTINUE',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    )
-                                  : const Text(""),
-                            ],
-                          );
-                        },
-                        steps: getSteps,
-                        physics: const ClampingScrollPhysics(),
-                        onStepContinue: () async {
-                          late bool isFinished;
-                          if (currentStep == 0) {
-                            isFinished = await carLicensePick();
-                          } else if (currentStep == 1) {
-                            isFinished = await calibrationLicensePick();
-                          } else if (currentStep == 2) {
-                            isFinished = await tankLicensePick();
-                            isImagesLoaded = true;
-                            setState(() {});
-                            return;
-                          }
-                          if (isFinished) {
-                            setState(() {
-                              currentStep++;
-                            });
-                          }
-                        },
-                      ),
+                      // Stepper(
+                      //   currentStep: currentStep,
+                      //   controlsBuilder:
+                      //       (BuildContext context, ControlsDetails details) {
+                      //     return Row(
+                      //       children: <Widget>[
+                      //         !isImagesLoaded
+                      //             ? TextButton(
+                      //                 onPressed: details.onStepContinue,
+                      //                 child: Container(
+                      //                   decoration: BoxDecoration(
+                      //                     color: Theme.of(context).primaryColor,
+                      //                     borderRadius:
+                      //                         BorderRadius.circular(4),
+                      //                   ),
+                      //                   child: const Padding(
+                      //                     padding: EdgeInsets.all(12.0),
+                      //                     child: Center(
+                      //                       child: Text(
+                      //                         'CONTINUE',
+                      //                         style: TextStyle(
+                      //                           color: Colors.white,
+                      //                           fontWeight: FontWeight.bold,
+                      //                         ),
+                      //                       ),
+                      //                     ),
+                      //                   ),
+                      //                 ),
+                      //               )
+                      //             : const Text(""),
+                      //       ],
+                      //     );
+                      //   },
+                      //   steps: getSteps,
+                      //   physics: const ClampingScrollPhysics(),
+                      //   onStepContinue: () async {
+                      //     late bool isFinished;
+                      //     if (currentStep == 0) {
+                      //       isFinished = await carLicensePick();
+                      //     } else if (currentStep == 1) {
+                      //       isFinished = await calibrationLicensePick();
+                      //     } else if (currentStep == 2) {
+                      //       isFinished = await tankLicensePick();
+                      //       isImagesLoaded = true;
+                      //       setState(() {});
+                      //       return;
+                      //     }
+                      //     if (isFinished) {
+                      //       setState(() {
+                      //         currentStep++;
+                      //       });
+                      //     }
+                      //   },
+                      // ),
                       const SizedBox(
                         height: 20,
                       ),
@@ -657,63 +651,63 @@ class _AddCarState extends State<AddCar> {
                                         ? ""
                                         : _tankLicenseExpiryDateController.text,
                               });
-                              request.files.add(
-                                http.MultipartFile.fromBytes(
-                                  'CarLicense',
-                                  carLicenseImgBytes,
-                                  filename:
-                                      "${_carPlateNoController.text} Car_License.${carLicenseFile.extension}",
-                                  contentType: MediaType("image", "jpeg"),
-                                ),
-                              );
-                              request.files.add(
-                                http.MultipartFile.fromBytes(
-                                  'CarLicenseBack',
-                                  carLicenseImgBytesBack,
-                                  filename:
-                                      "${_carPlateNoController.text} Car_License_Back.${carLicenseFileBack.extension}",
-                                  contentType: MediaType("image", "jpeg"),
-                                ),
-                              );
+                              // request.files.add(
+                              //   http.MultipartFile.fromBytes(
+                              //     'CarLicense',
+                              //     carLicenseImgBytes,
+                              //     filename:
+                              //         "${_carPlateNoController.text} Car_License.${carLicenseFile.extension}",
+                              //     contentType: MediaType("image", "jpeg"),
+                              //   ),
+                              // );
+                              // request.files.add(
+                              //   http.MultipartFile.fromBytes(
+                              //     'CarLicenseBack',
+                              //     carLicenseImgBytesBack,
+                              //     filename:
+                              //         "${_carPlateNoController.text} Car_License_Back.${carLicenseFileBack.extension}",
+                              //     contentType: MediaType("image", "jpeg"),
+                              //   ),
+                              // );
 
-                              request.files.add(
-                                http.MultipartFile.fromBytes(
-                                  'CalibrationLicense',
-                                  calibrationLicenseImgBytes,
-                                  filename:
-                                      "${_carPlateNoController.text} Calibration_License.${calibrationLicenseFile.extension}",
-                                  contentType: MediaType("image", "jpeg"),
-                                ),
-                              );
-                              request.files.add(
-                                http.MultipartFile.fromBytes(
-                                  'CalibrationLicenseBack',
-                                  calibrationLicenseImgBytesBack,
-                                  filename:
-                                      "${_carPlateNoController.text} Calibration_License_Back.${calibrationLicenseFileBack.extension}",
-                                  contentType: MediaType("image", "jpeg"),
-                                ),
-                              );
-                              if (selectedCarType == _carTypes[1]) {
-                                request.files.add(
-                                  http.MultipartFile.fromBytes(
-                                    'TankLicense',
-                                    tankLicenseImgBytes,
-                                    filename:
-                                        "${_carPlateNoController.text} Tank_License.${tankLicenseFile.extension}",
-                                    contentType: MediaType("image", "jpeg"),
-                                  ),
-                                );
-                                request.files.add(
-                                  http.MultipartFile.fromBytes(
-                                    'TankLicenseBack',
-                                    tankLicenseImgBytesBack,
-                                    filename:
-                                        "${_carPlateNoController.text} Tank_License_Back.${tankLicenseFileBack.extension}",
-                                    contentType: MediaType("image", "jpeg"),
-                                  ),
-                                );
-                              }
+                              // request.files.add(
+                              //   http.MultipartFile.fromBytes(
+                              //     'CalibrationLicense',
+                              //     calibrationLicenseImgBytes,
+                              //     filename:
+                              //         "${_carPlateNoController.text} Calibration_License.${calibrationLicenseFile.extension}",
+                              //     contentType: MediaType("image", "jpeg"),
+                              //   ),
+                              // );
+                              // request.files.add(
+                              //   http.MultipartFile.fromBytes(
+                              //     'CalibrationLicenseBack',
+                              //     calibrationLicenseImgBytesBack,
+                              //     filename:
+                              //         "${_carPlateNoController.text} Calibration_License_Back.${calibrationLicenseFileBack.extension}",
+                              //     contentType: MediaType("image", "jpeg"),
+                              //   ),
+                              // );
+                              // if (selectedCarType == _carTypes[1]) {
+                              //   request.files.add(
+                              //     http.MultipartFile.fromBytes(
+                              //       'TankLicense',
+                              //       tankLicenseImgBytes,
+                              //       filename:
+                              //           "${_carPlateNoController.text} Tank_License.${tankLicenseFile.extension}",
+                              //       contentType: MediaType("image", "jpeg"),
+                              //     ),
+                              //   );
+                              //   request.files.add(
+                              //     http.MultipartFile.fromBytes(
+                              //       'TankLicenseBack',
+                              //       tankLicenseImgBytesBack,
+                              //       filename:
+                              //           "${_carPlateNoController.text} Tank_License_Back.${tankLicenseFileBack.extension}",
+                              //       contentType: MediaType("image", "jpeg"),
+                              //     ),
+                              //   );
+                              // }
 
                               try {
                                 var response = request.send().then((value) {
@@ -912,7 +906,7 @@ class _AddCarState extends State<AddCar> {
                             height: 50,
                             alignment: Alignment.center,
                             child: const Text(
-                              "إضافة السيارة",
+                              "Register Car",
                               style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,

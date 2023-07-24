@@ -121,7 +121,7 @@ class _AddDriverState extends State<AddDriver> {
         centerTitle: true,
         backgroundColor: Theme.of(context).primaryColor,
         title: Text(
-          'إضافة سائق',
+          'Add Driver',
           style: GoogleFonts.josefinSans(
             textStyle: const TextStyle(
               fontSize: 22,
@@ -214,517 +214,514 @@ class _AddDriverState extends State<AddDriver> {
                             ],
                           )
                         : Container(),
-                    Directionality(
-                      textDirection: TextDirection.rtl,
-                      child: CupertinoFormSection(
-                        header: const Text(
-                          "تفاصيل السائق",
-                        ),
-                        children: [
-                          CupertinoFormRow(
-                            prefix: const Text("أسم السائق"),
-                            child: CupertinoTextFormFieldRow(
-                              controller: _driverNameController,
-                              placeholder: "أسم السائق*",
-                            ),
-                          ),
-                          CupertinoFormRow(
-                            prefix: const Text("رقم الهاتف"),
-                            child: CupertinoTextFormFieldRow(
-                              controller: _mobileController,
-                              placeholder: "رقم الهاتف*",
-                            ),
-                          ),
-                          // CupertinoFormRow(
-                          //   prefix: const Text("البريد الألكتروني"),
-                          //   child: CupertinoTextFormFieldRow(
-                          //     controller: _emailController,
-                          //     placeholder: "البريد الألكتروني*",
-                          //   ),
-                          // ),
-                          // CupertinoFormRow(
-                          //   prefix: const Text("كلمة المرور"),
-                          //   child: CupertinoTextFormFieldRow(
-                          //     obscureText: true,
-                          //     controller: _passwordController,
-                          //     placeholder: "كلمة المرور*",
-                          //   ),
-                          // ),
-                          GestureDetector(
-                            onTap: () async {
-                              DateTime? pickDate = await showDatePicker(
-                                  context: context,
-                                  initialDate: DateTime.now(),
-                                  firstDate: DateTime(2000),
-                                  lastDate: DateTime(2099));
-                              if (pickDate != null) {
-                                // final result =
-                                //     await FilePicker.platform.pickFiles();
-                                // if (result == null) return;
-                                // driverLicenseFile = result.files.first;
-                                // driverLicenseImgFile =
-                                //     File(driverLicenseFile.path!);
-                                // driverLicenseImgBytes =
-                                //     await CompressFile(driverLicenseImgFile)
-                                //         as Uint8List;
-                                // await Navigator.push(
-                                //     context,
-                                //     MaterialPageRoute(
-                                //         builder: (_) => ImagePreview(
-                                //               images: driverLicenseImgBytes,
-                                //               title: "صورة وجه رخصة القيادة",
-                                //             )));
-                                // final resultBack =
-                                //     await FilePicker.platform.pickFiles();
-                                // if (resultBack == null) return;
-                                // driverLicenseFileBack =
-                                //     resultBack.files.first;
-                                // driverLicenseImgFileBack =
-                                //     File(driverLicenseFileBack.path!);
-                                // driverLicenseImgBytesBack =
-                                //     await CompressFile(
-                                //             driverLicenseImgFileBack)
-                                //         as Uint8List;
-                                // await Navigator.push(
-                                //     context,
-                                //     MaterialPageRoute(
-                                //         builder: (_) => ImagePreview(
-                                //               images:
-                                //                   driverLicenseImgBytesBack,
-                                //               title: "صورة خلف رخصة القيادة",
-                                //             )));
-                                setState(() {
-                                  _licenseExpirationDateController.text =
-                                      intl.DateFormat("yyyy-MM-dd")
-                                          .format(pickDate);
-                                });
-                              }
-                            },
-                            child: CupertinoFormRow(
-                              prefix: Row(
-                                children: const [
-                                  Icon(Icons.calendar_today),
-                                  SizedBox(
-                                    width: 10,
-                                  ),
-                                  Text("انتهاء رخصة السائق"),
-                                ],
-                              ),
-                              child: CupertinoTextFormFieldRow(
-                                onTap: () async {
-                                  DateTime? pickDate = await showDatePicker(
-                                      context: context,
-                                      initialDate: DateTime.now(),
-                                      firstDate: DateTime(2000),
-                                      lastDate: DateTime(2099));
-                                  if (pickDate != null) {
-                                    // final result =
-                                    //     await FilePicker.platform.pickFiles();
-                                    // if (result == null) return;
-                                    // driverLicenseFile = result.files.first;
-                                    // driverLicenseImgFile =
-                                    //     File(driverLicenseFile.path!);
-                                    // driverLicenseImgBytes =
-                                    //     await CompressFile(
-                                    //             driverLicenseImgFile)
-                                    //         as Uint8List;
-                                    // await Navigator.push(
-                                    //     context,
-                                    //     MaterialPageRoute(
-                                    //         builder: (_) => ImagePreview(
-                                    //               images:
-                                    //                   driverLicenseImgBytes,
-                                    //               title:
-                                    //                   "صورة وجه رخصة القيادة",
-                                    //             )));
-                                    // final resultBack =
-                                    //     await FilePicker.platform.pickFiles();
-                                    // if (resultBack == null) return;
-                                    // driverLicenseFileBack =
-                                    //     resultBack.files.first;
-                                    // driverLicenseImgFileBack =
-                                    //     File(driverLicenseFileBack.path!);
-                                    // driverLicenseImgBytesBack =
-                                    //     await CompressFile(
-                                    //             driverLicenseImgFileBack)
-                                    //         as Uint8List;
-                                    // await Navigator.push(
-                                    //     context,
-                                    //     MaterialPageRoute(
-                                    //         builder: (_) => ImagePreview(
-                                    //               images:
-                                    //                   driverLicenseImgBytesBack,
-                                    //               title:
-                                    //                   "صورة خلف رخصة القيادة",
-                                    //             )));
-                                    setState(() {
-                                      _licenseExpirationDateController.text =
-                                          intl.DateFormat("yyyy-MM-dd")
-                                              .format(pickDate);
-                                    });
-                                  }
-                                },
-                                controller: _licenseExpirationDateController,
-                                placeholder: "انتهاء رخصة السائق*",
-                              ),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () async {
-                              DateTime? pickDate = await showDatePicker(
-                                  context: context,
-                                  initialDate: DateTime.now(),
-                                  firstDate: DateTime(2000),
-                                  lastDate: DateTime(2099));
-                              if (pickDate != null) {
-                                // final result =
-                                //     await FilePicker.platform.pickFiles();
-                                // if (result == null) return;
-                                // driverLicenseFile = result.files.first;
-                                // driverLicenseImgFile =
-                                //     File(driverLicenseFile.path!);
-                                // driverLicenseImgBytes =
-                                //     await CompressFile(driverLicenseImgFile)
-                                //         as Uint8List;
-                                // await Navigator.push(
-                                //     context,
-                                //     MaterialPageRoute(
-                                //         builder: (_) => ImagePreview(
-                                //               images: driverLicenseImgBytes,
-                                //               title: "صورة وجه رخصة القيادة",
-                                //             )));
-                                // final resultBack =
-                                //     await FilePicker.platform.pickFiles();
-                                // if (resultBack == null) return;
-                                // driverLicenseFileBack =
-                                //     resultBack.files.first;
-                                // driverLicenseImgFileBack =
-                                //     File(driverLicenseFileBack.path!);
-                                // driverLicenseImgBytesBack =
-                                //     await CompressFile(
-                                //             driverLicenseImgFileBack)
-                                //         as Uint8List;
-                                // await Navigator.push(
-                                //     context,
-                                //     MaterialPageRoute(
-                                //         builder: (_) => ImagePreview(
-                                //               images:
-                                //                   driverLicenseImgBytesBack,
-                                //               title: "صورة خلف رخصة القيادة",
-                                //             )));
-                                setState(() {
-                                  _idExpirationDateController.text =
-                                      intl.DateFormat("yyyy-MM-dd")
-                                          .format(pickDate);
-                                });
-                              }
-                            },
-                            child: CupertinoFormRow(
-                              prefix: Row(
-                                children: const [
-                                  Icon(Icons.calendar_today),
-                                  SizedBox(
-                                    width: 10,
-                                  ),
-                                  Text("انتهاء بطاقة السائق"),
-                                ],
-                              ),
-                              child: CupertinoTextFormFieldRow(
-                                onTap: () async {
-                                  DateTime? pickDate = await showDatePicker(
-                                      context: context,
-                                      initialDate: DateTime.now(),
-                                      firstDate: DateTime(2000),
-                                      lastDate: DateTime(2099));
-                                  if (pickDate != null) {
-                                    // final result =
-                                    //     await FilePicker.platform.pickFiles();
-                                    // if (result == null) return;
-                                    // driverLicenseFile = result.files.first;
-                                    // driverLicenseImgFile =
-                                    //     File(driverLicenseFile.path!);
-                                    // driverLicenseImgBytes =
-                                    //     await CompressFile(
-                                    //             driverLicenseImgFile)
-                                    //         as Uint8List;
-                                    // await Navigator.push(
-                                    //     context,
-                                    //     MaterialPageRoute(
-                                    //         builder: (_) => ImagePreview(
-                                    //               images:
-                                    //                   driverLicenseImgBytes,
-                                    //               title:
-                                    //                   "صورة وجه رخصة القيادة",
-                                    //             )));
-                                    // final resultBack =
-                                    //     await FilePicker.platform.pickFiles();
-                                    // if (resultBack == null) return;
-                                    // driverLicenseFileBack =
-                                    //     resultBack.files.first;
-                                    // driverLicenseImgFileBack =
-                                    //     File(driverLicenseFileBack.path!);
-                                    // driverLicenseImgBytesBack =
-                                    //     await CompressFile(
-                                    //             driverLicenseImgFileBack)
-                                    //         as Uint8List;
-                                    // await Navigator.push(
-                                    //     context,
-                                    //     MaterialPageRoute(
-                                    //         builder: (_) => ImagePreview(
-                                    //               images:
-                                    //                   driverLicenseImgBytesBack,
-                                    //               title:
-                                    //                   "صورة خلف رخصة القيادة",
-                                    //             )));
-                                    setState(() {
-                                      _idExpirationDateController.text =
-                                          intl.DateFormat("yyyy-MM-dd")
-                                              .format(pickDate);
-                                    });
-                                  }
-                                },
-                                controller: _idExpirationDateController,
-                                placeholder: "انتهاء بطاقة السائق*",
-                              ),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () async {
-                              DateTime? pickDate = await showDatePicker(
-                                  context: context,
-                                  initialDate: DateTime.now(),
-                                  firstDate: DateTime(2000),
-                                  lastDate: DateTime(2099));
-                              if (pickDate != null) {
-                                // final result =
-                                //     await FilePicker.platform.pickFiles();
-                                // if (result == null) return;
-                                // safetyLicenseFile = result.files.first;
-                                // safetyLicenseImgFile =
-                                //     File(safetyLicenseFile.path!);
-                                // safetyLicenseImgBytes =
-                                //     await CompressFile(safetyLicenseImgFile)
-                                //         as Uint8List;
-                                // await Navigator.push(
-                                //     context,
-                                //     MaterialPageRoute(
-                                //         builder: (_) => ImagePreview(
-                                //               images: safetyLicenseImgBytes,
-                                //               title:
-                                //                   "صورة وجه رخصة القيادة الأمنة",
-                                //             )));
-                                // final resultBack =
-                                //     await FilePicker.platform.pickFiles();
-                                // if (resultBack == null) return;
-                                // safetyLicenseFileBack =
-                                //     resultBack.files.first;
-                                // safetyLicenseImgFileBack =
-                                //     File(safetyLicenseFileBack.path!);
-                                // safetyLicenseImgBytesBack =
-                                //     await CompressFile(
-                                //             safetyLicenseImgFileBack)
-                                //         as Uint8List;
-                                // await Navigator.push(
-                                //     context,
-                                //     MaterialPageRoute(
-                                //         builder: (_) => ImagePreview(
-                                //               images:
-                                //                   safetyLicenseImgBytesBack,
-                                //               title:
-                                //                   "صورة خلف رخصة القيادة الأمنة",
-                                //             )));
-                                setState(() {
-                                  _safetyLicenseExpirationDateController.text =
-                                      intl.DateFormat("yyyy-MM-dd")
-                                          .format(pickDate);
-                                });
-                              }
-                            },
-                            child: CupertinoFormRow(
-                              prefix: Row(
-                                children: const [
-                                  Icon(Icons.calendar_today),
-                                  SizedBox(
-                                    width: 10,
-                                  ),
-                                  Text("انتهاء رخصة القيادة الأمنة"),
-                                ],
-                              ),
-                              child: CupertinoTextFormFieldRow(
-                                onTap: () async {
-                                  DateTime? pickDate = await showDatePicker(
-                                      context: context,
-                                      initialDate: DateTime.now(),
-                                      firstDate: DateTime(2000),
-                                      lastDate: DateTime(2099));
-                                  if (pickDate != null) {
-                                    // final result =
-                                    //     await FilePicker.platform.pickFiles();
-                                    // if (result == null) return;
-                                    // safetyLicenseFile = result.files.first;
-                                    // safetyLicenseImgFile =
-                                    //     File(safetyLicenseFile.path!);
-                                    // safetyLicenseImgBytes =
-                                    //     await CompressFile(
-                                    //             safetyLicenseImgFile)
-                                    //         as Uint8List;
-                                    // await Navigator.push(
-                                    //     context,
-                                    //     MaterialPageRoute(
-                                    //         builder: (_) => ImagePreview(
-                                    //               images:
-                                    //                   safetyLicenseImgBytes,
-                                    //               title:
-                                    //                   "صورة وجه رخصة القيادة الأمنة",
-                                    //             )));
-                                    // final resultBack =
-                                    //     await FilePicker.platform.pickFiles();
-                                    // if (resultBack == null) return;
-                                    // safetyLicenseFileBack =
-                                    //     resultBack.files.first;
-                                    // safetyLicenseImgFileBack =
-                                    //     File(safetyLicenseFileBack.path!);
-                                    // safetyLicenseImgBytesBack =
-                                    //     await CompressFile(
-                                    //             safetyLicenseImgFileBack)
-                                    //         as Uint8List;
-                                    // await Navigator.push(
-                                    //     context,
-                                    //     MaterialPageRoute(
-                                    //         builder: (_) => ImagePreview(
-                                    //               images:
-                                    //                   safetyLicenseImgBytesBack,
-                                    //               title:
-                                    //                   "صورة خلف رخصة القيادة الأمنة",
-                                    //             )));
-                                    setState(() {
-                                      _safetyLicenseExpirationDateController
-                                              .text =
-                                          intl.DateFormat("yyyy-MM-dd")
-                                              .format(pickDate);
-                                    });
-                                  }
-                                },
-                                controller:
-                                    _safetyLicenseExpirationDateController,
-                                placeholder: "انتهاء رخصة القيادة الأمنة*",
-                              ),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () async {
-                              DateTime? pickDate = await showDatePicker(
-                                  context: context,
-                                  initialDate: DateTime.now(),
-                                  firstDate: DateTime(2000),
-                                  lastDate: DateTime(2099));
-                              if (pickDate != null) {
-                                // final result =
-                                //     await FilePicker.platform.pickFiles();
-                                // if (result == null) return;
-                                // drugTestFile = result.files.first;
-                                // drugTestImgFile = File(drugTestFile.path!);
-                                // drugTestImgBytes =
-                                //     await CompressFile(drugTestImgFile)
-                                //         as Uint8List;
-                                // await Navigator.push(
-                                //     context,
-                                //     MaterialPageRoute(
-                                //         builder: (_) => ImagePreview(
-                                //               images: drugTestImgBytes,
-                                //               title:
-                                //                   "صورة وجه رخصة شهادة المخدرات",
-                                //             )));
-                                // final resultBack =
-                                //     await FilePicker.platform.pickFiles();
-                                // if (resultBack == null) return;
-                                // drugTestFileBack = resultBack.files.first;
-                                // drugTestImgFileBack =
-                                //     File(drugTestFileBack.path!);
-                                // drugTestImgBytesBack =
-                                //     await CompressFile(drugTestImgFileBack)
-                                //         as Uint8List;
-                                // await Navigator.push(
-                                //     context,
-                                //     MaterialPageRoute(
-                                //         builder: (_) => ImagePreview(
-                                //               images: drugTestImgBytesBack,
-                                //               title:
-                                //                   "صورة خلف رخصة شهادة المخدرات",
-                                //             )));
-                                setState(() {
-                                  _drugTestExpirationDate.text =
-                                      intl.DateFormat("yyyy-MM-dd")
-                                          .format(pickDate);
-                                });
-                              }
-                            },
-                            child: CupertinoFormRow(
-                              prefix: Row(
-                                children: const [
-                                  Icon(Icons.calendar_today),
-                                  SizedBox(
-                                    width: 10,
-                                  ),
-                                  Text("انتهاء شهادة المخدرات"),
-                                ],
-                              ),
-                              child: CupertinoTextFormFieldRow(
-                                onTap: () async {
-                                  DateTime? pickDate = await showDatePicker(
-                                      context: context,
-                                      initialDate: DateTime.now(),
-                                      firstDate: DateTime(2000),
-                                      lastDate: DateTime(2099));
-                                  if (pickDate != null) {
-                                    // final result =
-                                    //     await FilePicker.platform.pickFiles();
-                                    // if (result == null) return;
-                                    // drugTestFile = result.files.first;
-                                    // drugTestImgFile =
-                                    //     File(drugTestFile.path!);
-                                    // drugTestImgBytes =
-                                    //     await CompressFile(drugTestImgFile)
-                                    //         as Uint8List;
-                                    // await Navigator.push(
-                                    //     context,
-                                    //     MaterialPageRoute(
-                                    //         builder: (_) => ImagePreview(
-                                    //               images: drugTestImgBytes,
-                                    //               title:
-                                    //                   "صورة وجه رخصة شهادة المخدرات",
-                                    //             )));
-                                    // final resultBack =
-                                    //     await FilePicker.platform.pickFiles();
-                                    // if (resultBack == null) return;
-                                    // drugTestFileBack = resultBack.files.first;
-                                    // drugTestImgFileBack =
-                                    //     File(drugTestFileBack.path!);
-                                    // drugTestImgBytesBack = await CompressFile(
-                                    //     drugTestImgFileBack) as Uint8List;
-                                    // await Navigator.push(
-                                    //     context,
-                                    //     MaterialPageRoute(
-                                    //         builder: (_) => ImagePreview(
-                                    //               images:
-                                    //                   drugTestImgBytesBack,
-                                    //               title:
-                                    //                   "صورة خلف رخصة شهادة المخدرات",
-                                    //             )));
-                                    setState(() {
-                                      _drugTestExpirationDate.text =
-                                          intl.DateFormat("yyyy-MM-dd")
-                                              .format(pickDate);
-                                    });
-                                  }
-                                },
-                                controller: _drugTestExpirationDate,
-                                placeholder: "انتهاء شهادة المخدرات*",
-                              ),
-                            ),
-                          ),
-                        ],
+                    CupertinoFormSection(
+                      header: const Text(
+                        "Driver Details",
                       ),
+                      children: [
+                        CupertinoFormRow(
+                          prefix: const Text("Name"),
+                          child: CupertinoTextFormFieldRow(
+                            controller: _driverNameController,
+                            placeholder: "Driver Name*",
+                          ),
+                        ),
+                        CupertinoFormRow(
+                          prefix: const Text("Phone"),
+                          child: CupertinoTextFormFieldRow(
+                            controller: _mobileController,
+                            placeholder: "Phone Number*",
+                          ),
+                        ),
+                        // CupertinoFormRow(
+                        //   prefix: const Text("البريد الألكتروني"),
+                        //   child: CupertinoTextFormFieldRow(
+                        //     controller: _emailController,
+                        //     placeholder: "البريد الألكتروني*",
+                        //   ),
+                        // ),
+                        // CupertinoFormRow(
+                        //   prefix: const Text("كلمة المرور"),
+                        //   child: CupertinoTextFormFieldRow(
+                        //     obscureText: true,
+                        //     controller: _passwordController,
+                        //     placeholder: "كلمة المرور*",
+                        //   ),
+                        // ),
+                        GestureDetector(
+                          onTap: () async {
+                            DateTime? pickDate = await showDatePicker(
+                                context: context,
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime(2000),
+                                lastDate: DateTime(2099));
+                            if (pickDate != null) {
+                              // final result =
+                              //     await FilePicker.platform.pickFiles();
+                              // if (result == null) return;
+                              // driverLicenseFile = result.files.first;
+                              // driverLicenseImgFile =
+                              //     File(driverLicenseFile.path!);
+                              // driverLicenseImgBytes =
+                              //     await CompressFile(driverLicenseImgFile)
+                              //         as Uint8List;
+                              // await Navigator.push(
+                              //     context,
+                              //     MaterialPageRoute(
+                              //         builder: (_) => ImagePreview(
+                              //               images: driverLicenseImgBytes,
+                              //               title: "صورة وجه رخصة القيادة",
+                              //             )));
+                              // final resultBack =
+                              //     await FilePicker.platform.pickFiles();
+                              // if (resultBack == null) return;
+                              // driverLicenseFileBack =
+                              //     resultBack.files.first;
+                              // driverLicenseImgFileBack =
+                              //     File(driverLicenseFileBack.path!);
+                              // driverLicenseImgBytesBack =
+                              //     await CompressFile(
+                              //             driverLicenseImgFileBack)
+                              //         as Uint8List;
+                              // await Navigator.push(
+                              //     context,
+                              //     MaterialPageRoute(
+                              //         builder: (_) => ImagePreview(
+                              //               images:
+                              //                   driverLicenseImgBytesBack,
+                              //               title: "صورة خلف رخصة القيادة",
+                              //             )));
+                              setState(() {
+                                _licenseExpirationDateController.text =
+                                    intl.DateFormat("yyyy-MM-dd")
+                                        .format(pickDate);
+                              });
+                            }
+                          },
+                          child: CupertinoFormRow(
+                            prefix: const Row(
+                              children: [
+                                Icon(Icons.calendar_today),
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                Text("Driver License Expiry"),
+                              ],
+                            ),
+                            child: CupertinoTextFormFieldRow(
+                              onTap: () async {
+                                DateTime? pickDate = await showDatePicker(
+                                    context: context,
+                                    initialDate: DateTime.now(),
+                                    firstDate: DateTime(2000),
+                                    lastDate: DateTime(2099));
+                                if (pickDate != null) {
+                                  // final result =
+                                  //     await FilePicker.platform.pickFiles();
+                                  // if (result == null) return;
+                                  // driverLicenseFile = result.files.first;
+                                  // driverLicenseImgFile =
+                                  //     File(driverLicenseFile.path!);
+                                  // driverLicenseImgBytes =
+                                  //     await CompressFile(
+                                  //             driverLicenseImgFile)
+                                  //         as Uint8List;
+                                  // await Navigator.push(
+                                  //     context,
+                                  //     MaterialPageRoute(
+                                  //         builder: (_) => ImagePreview(
+                                  //               images:
+                                  //                   driverLicenseImgBytes,
+                                  //               title:
+                                  //                   "صورة وجه رخصة القيادة",
+                                  //             )));
+                                  // final resultBack =
+                                  //     await FilePicker.platform.pickFiles();
+                                  // if (resultBack == null) return;
+                                  // driverLicenseFileBack =
+                                  //     resultBack.files.first;
+                                  // driverLicenseImgFileBack =
+                                  //     File(driverLicenseFileBack.path!);
+                                  // driverLicenseImgBytesBack =
+                                  //     await CompressFile(
+                                  //             driverLicenseImgFileBack)
+                                  //         as Uint8List;
+                                  // await Navigator.push(
+                                  //     context,
+                                  //     MaterialPageRoute(
+                                  //         builder: (_) => ImagePreview(
+                                  //               images:
+                                  //                   driverLicenseImgBytesBack,
+                                  //               title:
+                                  //                   "صورة خلف رخصة القيادة",
+                                  //             )));
+                                  setState(() {
+                                    _licenseExpirationDateController.text =
+                                        intl.DateFormat("yyyy-MM-dd")
+                                            .format(pickDate);
+                                  });
+                                }
+                              },
+                              controller: _licenseExpirationDateController,
+                              // placeholder: "انتهاء رخصة السائق*",
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () async {
+                            DateTime? pickDate = await showDatePicker(
+                                context: context,
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime(2000),
+                                lastDate: DateTime(2099));
+                            if (pickDate != null) {
+                              // final result =
+                              //     await FilePicker.platform.pickFiles();
+                              // if (result == null) return;
+                              // driverLicenseFile = result.files.first;
+                              // driverLicenseImgFile =
+                              //     File(driverLicenseFile.path!);
+                              // driverLicenseImgBytes =
+                              //     await CompressFile(driverLicenseImgFile)
+                              //         as Uint8List;
+                              // await Navigator.push(
+                              //     context,
+                              //     MaterialPageRoute(
+                              //         builder: (_) => ImagePreview(
+                              //               images: driverLicenseImgBytes,
+                              //               title: "صورة وجه رخصة القيادة",
+                              //             )));
+                              // final resultBack =
+                              //     await FilePicker.platform.pickFiles();
+                              // if (resultBack == null) return;
+                              // driverLicenseFileBack =
+                              //     resultBack.files.first;
+                              // driverLicenseImgFileBack =
+                              //     File(driverLicenseFileBack.path!);
+                              // driverLicenseImgBytesBack =
+                              //     await CompressFile(
+                              //             driverLicenseImgFileBack)
+                              //         as Uint8List;
+                              // await Navigator.push(
+                              //     context,
+                              //     MaterialPageRoute(
+                              //         builder: (_) => ImagePreview(
+                              //               images:
+                              //                   driverLicenseImgBytesBack,
+                              //               title: "صورة خلف رخصة القيادة",
+                              //             )));
+                              setState(() {
+                                _idExpirationDateController.text =
+                                    intl.DateFormat("yyyy-MM-dd")
+                                        .format(pickDate);
+                              });
+                            }
+                          },
+                          child: CupertinoFormRow(
+                            prefix: Row(
+                              children: const [
+                                Icon(Icons.calendar_today),
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                Text("ID Expiry"),
+                              ],
+                            ),
+                            child: CupertinoTextFormFieldRow(
+                              onTap: () async {
+                                DateTime? pickDate = await showDatePicker(
+                                    context: context,
+                                    initialDate: DateTime.now(),
+                                    firstDate: DateTime(2000),
+                                    lastDate: DateTime(2099));
+                                if (pickDate != null) {
+                                  // final result =
+                                  //     await FilePicker.platform.pickFiles();
+                                  // if (result == null) return;
+                                  // driverLicenseFile = result.files.first;
+                                  // driverLicenseImgFile =
+                                  //     File(driverLicenseFile.path!);
+                                  // driverLicenseImgBytes =
+                                  //     await CompressFile(
+                                  //             driverLicenseImgFile)
+                                  //         as Uint8List;
+                                  // await Navigator.push(
+                                  //     context,
+                                  //     MaterialPageRoute(
+                                  //         builder: (_) => ImagePreview(
+                                  //               images:
+                                  //                   driverLicenseImgBytes,
+                                  //               title:
+                                  //                   "صورة وجه رخصة القيادة",
+                                  //             )));
+                                  // final resultBack =
+                                  //     await FilePicker.platform.pickFiles();
+                                  // if (resultBack == null) return;
+                                  // driverLicenseFileBack =
+                                  //     resultBack.files.first;
+                                  // driverLicenseImgFileBack =
+                                  //     File(driverLicenseFileBack.path!);
+                                  // driverLicenseImgBytesBack =
+                                  //     await CompressFile(
+                                  //             driverLicenseImgFileBack)
+                                  //         as Uint8List;
+                                  // await Navigator.push(
+                                  //     context,
+                                  //     MaterialPageRoute(
+                                  //         builder: (_) => ImagePreview(
+                                  //               images:
+                                  //                   driverLicenseImgBytesBack,
+                                  //               title:
+                                  //                   "صورة خلف رخصة القيادة",
+                                  //             )));
+                                  setState(() {
+                                    _idExpirationDateController.text =
+                                        intl.DateFormat("yyyy-MM-dd")
+                                            .format(pickDate);
+                                  });
+                                }
+                              },
+                              controller: _idExpirationDateController,
+                              // placeholder: "انتهاء بطاقة السائق*",
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () async {
+                            DateTime? pickDate = await showDatePicker(
+                                context: context,
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime(2000),
+                                lastDate: DateTime(2099));
+                            if (pickDate != null) {
+                              // final result =
+                              //     await FilePicker.platform.pickFiles();
+                              // if (result == null) return;
+                              // safetyLicenseFile = result.files.first;
+                              // safetyLicenseImgFile =
+                              //     File(safetyLicenseFile.path!);
+                              // safetyLicenseImgBytes =
+                              //     await CompressFile(safetyLicenseImgFile)
+                              //         as Uint8List;
+                              // await Navigator.push(
+                              //     context,
+                              //     MaterialPageRoute(
+                              //         builder: (_) => ImagePreview(
+                              //               images: safetyLicenseImgBytes,
+                              //               title:
+                              //                   "صورة وجه رخصة القيادة الأمنة",
+                              //             )));
+                              // final resultBack =
+                              //     await FilePicker.platform.pickFiles();
+                              // if (resultBack == null) return;
+                              // safetyLicenseFileBack =
+                              //     resultBack.files.first;
+                              // safetyLicenseImgFileBack =
+                              //     File(safetyLicenseFileBack.path!);
+                              // safetyLicenseImgBytesBack =
+                              //     await CompressFile(
+                              //             safetyLicenseImgFileBack)
+                              //         as Uint8List;
+                              // await Navigator.push(
+                              //     context,
+                              //     MaterialPageRoute(
+                              //         builder: (_) => ImagePreview(
+                              //               images:
+                              //                   safetyLicenseImgBytesBack,
+                              //               title:
+                              //                   "صورة خلف رخصة القيادة الأمنة",
+                              //             )));
+                              setState(() {
+                                _safetyLicenseExpirationDateController.text =
+                                    intl.DateFormat("yyyy-MM-dd")
+                                        .format(pickDate);
+                              });
+                            }
+                          },
+                          child: CupertinoFormRow(
+                            prefix: const Row(
+                              children: [
+                                Icon(Icons.calendar_today),
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                Text("Safety Certificate Expiry"),
+                              ],
+                            ),
+                            child: CupertinoTextFormFieldRow(
+                              onTap: () async {
+                                DateTime? pickDate = await showDatePicker(
+                                    context: context,
+                                    initialDate: DateTime.now(),
+                                    firstDate: DateTime(2000),
+                                    lastDate: DateTime(2099));
+                                if (pickDate != null) {
+                                  // final result =
+                                  //     await FilePicker.platform.pickFiles();
+                                  // if (result == null) return;
+                                  // safetyLicenseFile = result.files.first;
+                                  // safetyLicenseImgFile =
+                                  //     File(safetyLicenseFile.path!);
+                                  // safetyLicenseImgBytes =
+                                  //     await CompressFile(
+                                  //             safetyLicenseImgFile)
+                                  //         as Uint8List;
+                                  // await Navigator.push(
+                                  //     context,
+                                  //     MaterialPageRoute(
+                                  //         builder: (_) => ImagePreview(
+                                  //               images:
+                                  //                   safetyLicenseImgBytes,
+                                  //               title:
+                                  //                   "صورة وجه رخصة القيادة الأمنة",
+                                  //             )));
+                                  // final resultBack =
+                                  //     await FilePicker.platform.pickFiles();
+                                  // if (resultBack == null) return;
+                                  // safetyLicenseFileBack =
+                                  //     resultBack.files.first;
+                                  // safetyLicenseImgFileBack =
+                                  //     File(safetyLicenseFileBack.path!);
+                                  // safetyLicenseImgBytesBack =
+                                  //     await CompressFile(
+                                  //             safetyLicenseImgFileBack)
+                                  //         as Uint8List;
+                                  // await Navigator.push(
+                                  //     context,
+                                  //     MaterialPageRoute(
+                                  //         builder: (_) => ImagePreview(
+                                  //               images:
+                                  //                   safetyLicenseImgBytesBack,
+                                  //               title:
+                                  //                   "صورة خلف رخصة القيادة الأمنة",
+                                  //             )));
+                                  setState(() {
+                                    _safetyLicenseExpirationDateController
+                                            .text =
+                                        intl.DateFormat("yyyy-MM-dd")
+                                            .format(pickDate);
+                                  });
+                                }
+                              },
+                              controller:
+                                  _safetyLicenseExpirationDateController,
+                              // placeholder: "انتهاء رخصة القيادة الأمنة*",
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () async {
+                            DateTime? pickDate = await showDatePicker(
+                                context: context,
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime(2000),
+                                lastDate: DateTime(2099));
+                            if (pickDate != null) {
+                              // final result =
+                              //     await FilePicker.platform.pickFiles();
+                              // if (result == null) return;
+                              // drugTestFile = result.files.first;
+                              // drugTestImgFile = File(drugTestFile.path!);
+                              // drugTestImgBytes =
+                              //     await CompressFile(drugTestImgFile)
+                              //         as Uint8List;
+                              // await Navigator.push(
+                              //     context,
+                              //     MaterialPageRoute(
+                              //         builder: (_) => ImagePreview(
+                              //               images: drugTestImgBytes,
+                              //               title:
+                              //                   "صورة وجه رخصة شهادة المخدرات",
+                              //             )));
+                              // final resultBack =
+                              //     await FilePicker.platform.pickFiles();
+                              // if (resultBack == null) return;
+                              // drugTestFileBack = resultBack.files.first;
+                              // drugTestImgFileBack =
+                              //     File(drugTestFileBack.path!);
+                              // drugTestImgBytesBack =
+                              //     await CompressFile(drugTestImgFileBack)
+                              //         as Uint8List;
+                              // await Navigator.push(
+                              //     context,
+                              //     MaterialPageRoute(
+                              //         builder: (_) => ImagePreview(
+                              //               images: drugTestImgBytesBack,
+                              //               title:
+                              //                   "صورة خلف رخصة شهادة المخدرات",
+                              //             )));
+                              setState(() {
+                                _drugTestExpirationDate.text =
+                                    intl.DateFormat("yyyy-MM-dd")
+                                        .format(pickDate);
+                              });
+                            }
+                          },
+                          child: CupertinoFormRow(
+                            prefix: const Row(
+                              children: [
+                                Icon(Icons.calendar_today),
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                Text("Drug Test Expiry"),
+                              ],
+                            ),
+                            child: CupertinoTextFormFieldRow(
+                              onTap: () async {
+                                DateTime? pickDate = await showDatePicker(
+                                    context: context,
+                                    initialDate: DateTime.now(),
+                                    firstDate: DateTime(2000),
+                                    lastDate: DateTime(2099));
+                                if (pickDate != null) {
+                                  // final result =
+                                  //     await FilePicker.platform.pickFiles();
+                                  // if (result == null) return;
+                                  // drugTestFile = result.files.first;
+                                  // drugTestImgFile =
+                                  //     File(drugTestFile.path!);
+                                  // drugTestImgBytes =
+                                  //     await CompressFile(drugTestImgFile)
+                                  //         as Uint8List;
+                                  // await Navigator.push(
+                                  //     context,
+                                  //     MaterialPageRoute(
+                                  //         builder: (_) => ImagePreview(
+                                  //               images: drugTestImgBytes,
+                                  //               title:
+                                  //                   "صورة وجه رخصة شهادة المخدرات",
+                                  //             )));
+                                  // final resultBack =
+                                  //     await FilePicker.platform.pickFiles();
+                                  // if (resultBack == null) return;
+                                  // drugTestFileBack = resultBack.files.first;
+                                  // drugTestImgFileBack =
+                                  //     File(drugTestFileBack.path!);
+                                  // drugTestImgBytesBack = await CompressFile(
+                                  //     drugTestImgFileBack) as Uint8List;
+                                  // await Navigator.push(
+                                  //     context,
+                                  //     MaterialPageRoute(
+                                  //         builder: (_) => ImagePreview(
+                                  //               images:
+                                  //                   drugTestImgBytesBack,
+                                  //               title:
+                                  //                   "صورة خلف رخصة شهادة المخدرات",
+                                  //             )));
+                                  setState(() {
+                                    _drugTestExpirationDate.text =
+                                        intl.DateFormat("yyyy-MM-dd")
+                                            .format(pickDate);
+                                  });
+                                }
+                              },
+                              controller: _drugTestExpirationDate,
+                              // placeholder: "انتهاء شهادة المخدرات*",
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     // Container(
                     //   constraints: const BoxConstraints(
@@ -1125,7 +1122,7 @@ class _AddDriverState extends State<AddDriver> {
                         height: 50,
                         alignment: Alignment.center,
                         child: const Text(
-                          "إضافة السائق",
+                          "Register Driver",
                           style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -1255,10 +1252,10 @@ class _AddDriverState extends State<AddDriver> {
   }
 
   List<Step> getSteps() => [
-        Step(title: const Text("البطاقة"), content: Container()),
-        Step(title: const Text("الرخصة"), content: Container()),
-        Step(title: const Text("القيادة الأمنة"), content: Container()),
-        Step(title: const Text("شهادة المخدرات"), content: Container()),
-        Step(title: const Text("فيش"), content: Container())
+        Step(title: const Text("ID"), content: Container()),
+        Step(title: const Text("Driver License"), content: Container()),
+        Step(title: const Text("Safety Certificate"), content: Container()),
+        Step(title: const Text("Drug Test"), content: Container()),
+        Step(title: const Text("Criminal Record"), content: Container())
       ];
 }

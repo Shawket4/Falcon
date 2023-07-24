@@ -13,8 +13,11 @@ import 'package:lottie/lottie.dart';
 import '../main.dart';
 
 class CarProgressScreen extends StatefulWidget {
-  const CarProgressScreen({Key? key, required this.jwt}) : super(key: key);
+  const CarProgressScreen(
+      {Key? key, required this.jwt, required this.changeDrawerState})
+      : super(key: key);
   final String jwt;
+  final Function changeDrawerState;
   @override
   State<CarProgressScreen> createState() => _CarProgressScreenState();
 }
@@ -151,9 +154,6 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
   Widget build(BuildContext context) {
     // Return Scaffold with ListView builder from CarList and CarListItem has image and text
     return Scaffold(
-      bottomNavigationBar: BottomNavigationWidget(
-        jwt: widget.jwt,
-      ),
       key: _key,
       // bottomNavigationBar: BottomNavigationBar(
       //   currentIndex: CurrentIndex!,
@@ -201,7 +201,7 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
           ),
         ],
         leading: IconButton(
-          onPressed: () => _key.currentState!.openDrawer(),
+          onPressed: () => widget.changeDrawerState(),
           icon: const Icon(
             Icons.menu,
             size: 30,
@@ -219,9 +219,6 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
             ),
           ),
         ),
-      ),
-      drawer: AppDrawer(
-        jwt: widget.jwt,
       ),
 
       body: FutureBuilder(
@@ -259,7 +256,7 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => CarProgressScreen(
+                            builder: (_) => HomeScreen(
                               jwt: widget.jwt,
                             ),
                           ),
@@ -292,7 +289,7 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => CarProgressScreen(
+                          builder: (_) => HomeScreen(
                             jwt: widget.jwt,
                           ),
                         ),

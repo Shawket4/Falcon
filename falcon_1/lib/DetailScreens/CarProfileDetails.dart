@@ -348,7 +348,7 @@ class _CarProfileDetailsState extends State<CarProfileDetails> {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => CarProgressScreen(
+                            builder: (_) => HomeScreen(
                               jwt: widget.jwt.toString(),
                             ),
                           ),

@@ -222,7 +222,7 @@ class _CarProgressDetailScreenState extends State<CarProgressDetailScreen>
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => CarProgressScreen(
+                    builder: (_) => HomeScreen(
                       jwt: widget.jwt.toString(),
                     ),
                   ),
@@ -437,7 +437,7 @@ class _CarProgressDetailScreenState extends State<CarProgressDetailScreen>
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => CarProgressScreen(
+                      builder: (_) => HomeScreen(
                         jwt: widget.jwt,
                       ),
                     ),
@@ -527,7 +527,7 @@ class _CarProgressDetailScreenState extends State<CarProgressDetailScreen>
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => CarProgressScreen(
+                            builder: (_) => HomeScreen(
                               jwt: widget.jwt,
                             ),
                           ),

@@ -383,7 +383,7 @@ class _AddServiceEventState extends State<AddServiceEvent> {
                                                         context,
                                                         MaterialPageRoute(
                                                           builder: (_) =>
-                                                              CarProgressScreen(
+                                                              HomeScreen(
                                                             jwt: widget.jwt,
                                                           ),
                                                         ),
@@ -494,7 +494,7 @@ class _AddServiceEventState extends State<AddServiceEvent> {
                                                     context,
                                                     MaterialPageRoute(
                                                       builder: (_) =>
-                                                          CarProgressScreen(
+                                                          HomeScreen(
                                                         jwt: widget.jwt,
                                                       ),
                                                     ),
