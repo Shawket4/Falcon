@@ -1479,6 +1479,51 @@ func CreateCarTrip(c *fiber.Ctx) error {
 				log.Println(err.Error())
 				return err
 			}
+			var Terminals []Models.Terminal
+
+			if err := Models.DB.Model(&Models.Terminal{}).Find(&Terminals).Error; err != nil {
+				log.Println(err.Error())
+				return err
+			}
+			terminalExists := func() bool {
+				for _, terminal := range Terminals {
+					if terminal.Name == data.StepCompleteTime.Terminal.TerminalName {
+						return true
+					}
+				}
+				return false
+			}()
+			if !terminalExists {
+				var NewTerminal Models.Terminal
+				NewTerminal.Name = data.StepCompleteTime.Terminal.TerminalName
+				if err := Models.DB.Save(&NewTerminal).Error; err != nil {
+					log.Println(err.Error())
+					return err
+				}
+			}
+			var Locations []Models.Location
+			if err := Models.DB.Model(&Models.Location{}).Find(&Locations).Error; err != nil {
+				log.Println(err.Error())
+				return err
+			}
+			for _, dropOff := range data.StepCompleteTime.DropOffPoints {
+				dropOffExists := func() bool {
+					for _, location := range Locations {
+						if location.Name == dropOff.LocationName {
+							return true
+						}
+					}
+					return false
+				}()
+				if !dropOffExists {
+					var NewLocation Models.Location
+					NewLocation.Name = dropOff.LocationName
+					if err := Models.DB.Save(&NewLocation).Error; err != nil {
+						log.Println(err.Error())
+						return err
+					}
+				}
+			}
 			return c.JSON(fiber.Map{
 				"TripID":  data.ID,
 				"message": "Car Trip Created",

@@ -5,6 +5,44 @@ import (
 	"gorm.io/gorm"
 )
 
+type RoutePoint struct {
+	gorm.Model
+	FinalStructResponseID uint
+	Latitude              string `json:"latitude"`
+	Longitude             string `json:"longitude"`
+	TimeStamp             string `json:"time_stamp"`
+}
+
+type RouteResponse struct {
+	History []struct {
+		Point []struct {
+			Latitude  string `yaml:"a"`
+			Longitude string `yaml:"o"`
+		} `yaml:"p"`
+		DateTime string `yaml:"d"`
+	} `yaml:"history"`
+}
+
+type FinalStructResponse struct {
+	gorm.Model
+	TripStructID uint
+	Points       []RoutePoint
+	TripSummary  TripSummary `json:"trip_summary"`
+}
+
+type TripSummary struct {
+	gorm.Model
+	FinalStructResponseID uint
+	TotalMileage          string `yaml:"TotalMileage"`
+	TotalActiveTime       string `yaml:"TotalActiveTime"`
+	TotalPassiveTime      string `yaml:"TotalPassiveTime"`
+	TotalIdleTime         string `yaml:"TotalIdleTime"`
+	NumberofStops         string `yaml:"NumberofStops"`
+	TotalDisConnectedTime string `yaml:"TotalDisConnectedTime"`
+	Sensor1               string `yaml:"Sensor1"`
+	Sensor2               string `yaml:"Sensor2"`
+}
+
 type TripStruct struct {
 	gorm.Model
 	CarID            uint   `json:"car_id"`
@@ -30,12 +68,13 @@ type TripStruct struct {
 			Status       bool   `json:"status"`
 		} `json:"drop_off_points"`
 	} `gorm:"-" json:"step_complete_time"`
-	StepCompleteTimeDB datatypes.JSON `json:"step_complete_time_db"`
-	NoOfDropOffPoints  int            `json:"no_of_drop_off_points"`
-	Date               string         `json:"date"`
-	FeeRate            float64        `json:"fee_rate"`
-	Mileage            float64        `json:"mileage"`
-	StartTime          string         `json:"start_time"`
-	EndTime            string         `json:"end_time"`
-	IsClosed           bool           `json:"is_closed"`
+	StepCompleteTimeDB datatypes.JSON      `json:"step_complete_time_db"`
+	NoOfDropOffPoints  int                 `json:"no_of_drop_off_points"`
+	Date               string              `json:"date"`
+	FeeRate            float64             `json:"fee_rate"`
+	Mileage            float64             `json:"mileage"`
+	StartTime          string              `json:"start_time"`
+	EndTime            string              `json:"end_time"`
+	IsClosed           bool                `json:"is_closed"`
+	Route              FinalStructResponse `json:"route"`
 }

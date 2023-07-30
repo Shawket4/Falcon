@@ -1,8 +1,13 @@
 package Models
 
 import (
+	"Falcon/AbstractFunctions"
+	"encoding/json"
+	"fmt"
 	"log"
+	"strconv"
 
+	"github.com/360EntSecGroup-Skylar/excelize"
 	"github.com/joho/godotenv"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/sqlite"
@@ -27,7 +32,7 @@ func Connect() {
 	// connection, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	connection, err := gorm.Open(sqlite.Open("database.db"))
 	DB = connection
-	connection.AutoMigrate(&User{}, &FuelEvent{}, &Driver{}, &Service{}, Car{}, &TripStruct{}, &Location{}, &Terminal{})
+	connection.AutoMigrate(&User{}, &FuelEvent{}, &Driver{}, &Service{}, Car{}, &TripStruct{}, &RoutePoint{}, &FinalStructResponse{}, &TripSummary{}, &Location{}, &Terminal{})
 	var admin User
 	admin.Email = "Apex"
 	passwordByte, _ := bcrypt.GenerateFromPassword([]byte("123456"), bcrypt.DefaultCost)
@@ -51,4 +56,65 @@ func Connect() {
 	// } else {
 
 	// }
+	SetupCars()
+}
+
+func SetupCars() {
+	var OldCars []Car
+	if err := DB.Model(&Car{}).Find(&OldCars).Error; err != nil {
+		panic(err)
+	}
+	DB.Delete(&OldCars)
+	f, err := excelize.OpenFile("Book2.xlsx")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	var Cars []Car
+	_ = Cars
+	rows := f.GetRows("Sheet1")
+	for _, row := range rows {
+		var car Car
+		for columnIndex, data := range row {
+			if columnIndex == 0 {
+				car.CarNoPlate = data
+			}
+			if columnIndex == 1 {
+				compartment1, err := strconv.Atoi(data)
+				if err != nil {
+					panic(err)
+				}
+				car.TankCapacity = compartment1
+				car.Compartments = append(car.Compartments, compartment1)
+			}
+			if columnIndex == 2 {
+				car.LicenseExpirationDate, _ = AbstractFunctions.GetFormattedDateExcel(data)
+			}
+			if columnIndex == 3 {
+				car.CalibrationExpirationDate, _ = AbstractFunctions.GetFormattedDateExcel(data)
+			}
+			if columnIndex == 4 {
+				car.TankLicenseExpirationDate, _ = AbstractFunctions.GetFormattedDateExcel(data)
+			}
+			if columnIndex == 5 {
+				if data == "TRUE" {
+					car.CarType = "Trailer"
+				} else if data == "FALSE" {
+					car.CarType = "No Trailer"
+				}
+			}
+		}
+		car.Transporter = "Apex"
+
+		jsonCompartments, err := json.Marshal(car.Compartments)
+		car.JSONCompartments = jsonCompartments
+		if err != nil {
+			panic(err)
+		}
+		Cars = append(Cars, car)
+	}
+	fmt.Println(Cars)
+	if err := DB.Save(&Cars).Error; err != nil {
+		panic(err)
+	}
 }

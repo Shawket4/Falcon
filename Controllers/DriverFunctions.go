@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -349,6 +350,17 @@ func CompleteTrip(c *fiber.Ctx) error {
 		if err != nil {
 			log.Println(err.Error())
 		}
+		go func() {
+			time.Sleep(time.Second * 5)
+			route, err := Scrapper.GetTripRouteHistory(trip.ID)
+			if err != nil {
+				log.Println(err)
+			}
+			trip.Route = route
+			if err := Models.DB.Save(&trip).Error; err != nil {
+				log.Println(err.Error())
+			}
+		}()
 		if err := json.Unmarshal(trip.StepCompleteTimeDB, &trip.StepCompleteTime); err != nil {
 			log.Println(err.Error())
 			return err

@@ -75,7 +75,7 @@ func FiberConfig() {
 	protectedApis.Post("/CreateLocation/", Apis.CreateLocation)
 	protectedApis.Post("/CreateTerminal/", Apis.CreateTerminal)
 	protectedApis.Post("/GetRouteHistory", Scrapper.GetVehicleRouteHistory)
-	protectedApis.Post("/GetTripRouteHistory", Scrapper.GetTripRouteHistory)
+	protectedApis.Post("/GetTripRouteHistory", Scrapper.GetTripRouteHistoryAPI)
 	protectedApis.Post("/GetPhotoAlbum", Apis.GetPhotoAlbum)
 	protectedApis.Post("/RegisterDriver", Controllers.RegisterDriver)
 	protectedApis.Post("/UpdateDriver", Controllers.UpdateDriver)

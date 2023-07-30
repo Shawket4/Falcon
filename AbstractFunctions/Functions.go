@@ -137,3 +137,15 @@ func GetFormattedDate(date string) (string, error) {
 	}
 	return start_date.Format(layoutUS), nil
 }
+
+func GetFormattedDateExcel(date string) (string, error) {
+	parsedTime, err := time.Parse("01-02-06", date)
+	if err != nil {
+		return "", err
+	}
+
+	// Format the parsedTime to the desired layout "2006-01-02"
+	formattedDate := parsedTime.Format("2006-01-02")
+
+	return formattedDate, nil
+}

@@ -12,42 +12,10 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type RoutePoint struct {
-	Latitude  string `json:"latitude"`
-	Longitude string `json:"longitude"`
-	TimeStamp string `json:"time_stamp"`
-}
-
-type FinalStructResponse struct {
-	Points      []RoutePoint
-	TripSummary TripSummary `json:"trip_summary"`
-}
-
-type TripSummary struct {
-	TotalMileage          string `yaml:"TotalMileage"`
-	TotalActiveTime       string `yaml:"TotalActiveTime"`
-	TotalPassiveTime      string `yaml:"TotalPassiveTime"`
-	TotalIdleTime         string `yaml:"TotalIdleTime"`
-	NumberofStops         string `yaml:"NumberofStops"`
-	TotalDisConnectedTime string `yaml:"TotalDisConnectedTime"`
-	Sensor1               string `yaml:"Sensor1"`
-	Sensor2               string `yaml:"Sensor2"`
-}
-
-type RouteResponse struct {
-	History []struct {
-		Point []struct {
-			Latitude  string `yaml:"a"`
-			Longitude string `yaml:"o"`
-		} `yaml:"p"`
-		DateTime string `yaml:"d"`
-	} `yaml:"history"`
-}
-
-func (app *App) GetVehicleRouteHistoryData(client *colly.Collector, data MileageStruct) (FinalStructResponse, error) {
+func (app *App) GetVehicleRouteHistoryData(client *colly.Collector, data MileageStruct) (Models.FinalStructResponse, error) {
 	app.GetCurrentLocationData(client)
-	var returnData FinalStructResponse
-	var tripSummary TripSummary
+	var returnData Models.FinalStructResponse
+	var tripSummary Models.TripSummary
 	// reqString := fmt.Sprintf("https://fms-gps.etit-eg.com/WebPages/GetHistoryTripSummary.ashx?id=%s&time=6&from=%s&to=%s", data.VehicleID, "11/1/2022%2000:00:00", "11/1/2022%2023:59:59")
 	reqString := fmt.Sprintf("https://fms-gps.etit-eg.com/WebPages/GetAllHistoryData.aspx?id=%s&time=6&from=%s&to=%s", data.VehicleID, data.StartTime, data.EndTime)
 	client.Request("GET", "https://fms-gps.etit-eg.com", nil, nil, http.Header{})
@@ -83,16 +51,16 @@ func (app *App) GetVehicleRouteHistoryData(client *colly.Collector, data Mileage
 		jsonString = fmt.Sprintf(`{"history":%s`, jsonString[9:])
 	}
 
-	var responseData RouteResponse
+	var responseData Models.RouteResponse
 
 	if err := yaml.Unmarshal([]byte(jsonString), &responseData); err != nil {
 		fmt.Println("error:", err)
 	}
 
-	var Points []RoutePoint
+	var Points []Models.RoutePoint
 	Points = nil
 	for _, responsePoint := range responseData.History {
-		var point RoutePoint
+		var point Models.RoutePoint
 		point.Latitude = responsePoint.Point[0].Latitude
 		point.Longitude = responsePoint.Point[0].Longitude
 		point.TimeStamp = responsePoint.DateTime
@@ -177,19 +145,13 @@ func GetVehicleRouteHistory(c *fiber.Ctx) error {
 	return c.JSON(route)
 }
 
-func GetTripRouteHistory(c *fiber.Ctx) error {
+func GetTripRouteHistory(tripID uint) (Models.FinalStructResponse, error) {
 	GlobalClient, _ = app.Login()
-	var input struct {
-		ID uint `json:"ID"`
-	}
-	if err := c.BodyParser(&input); err != nil {
-		log.Println(err.Error())
-		return err
-	}
+
 	var trip Models.TripStruct
-	if err := Models.DB.Model(&Models.TripStruct{}).Where("id = ?", input.ID).Find(&trip).Error; err != nil {
+	if err := Models.DB.Model(&Models.TripStruct{}).Where("id = ?", tripID).Find(&trip).Error; err != nil {
 		log.Println(err.Error())
-		return err
+		return Models.FinalStructResponse{}, err
 	}
 	var data MileageStruct
 	data.VehiclePlateNo = trip.CarNoPlate
@@ -204,7 +166,40 @@ func GetTripRouteHistory(c *fiber.Ctx) error {
 	route, err := app.GetVehicleRouteHistoryData(GlobalClient, data)
 	if err != nil {
 		log.Println(err.Error())
+		return Models.FinalStructResponse{}, err
+	}
+	return route, nil
+}
+
+func GetTripRouteHistoryAPI(c *fiber.Ctx) error {
+	var input struct {
+		ID uint `json:"ID"`
+	}
+	if err := c.BodyParser(&input); err != nil {
+		log.Println(err.Error())
 		return err
 	}
-	return c.JSON(route)
+	var trip Models.TripStruct
+	var tripRoute Models.FinalStructResponse
+	var tripPoints []Models.RoutePoint
+	var tripSummary Models.TripSummary
+	if err := Models.DB.Model(&Models.TripStruct{}).Where("id = ?", input.ID).Preload("Route").Find(&trip).Error; err != nil {
+		log.Println(err.Error())
+		return err
+	}
+	if err := Models.DB.Model(&Models.FinalStructResponse{}).Where("id = ?", trip.Route.ID).Preload("Points").Preload("TripSummary").Find(&tripRoute).Error; err != nil {
+		log.Println(err.Error())
+		return err
+	}
+	if err := Models.DB.Model(&Models.RoutePoint{}).Where("final_struct_response_id = ?", trip.Route.ID).Find(&tripPoints).Error; err != nil {
+		log.Println(err.Error())
+		return err
+	}
+	if err := Models.DB.Model(&Models.TripSummary{}).Where("final_struct_response_id = ?", trip.Route.ID).Find(&tripSummary).Error; err != nil {
+		log.Println(err.Error())
+		return err
+	}
+	tripRoute.TripSummary = tripSummary
+	tripRoute.Points = tripPoints
+	return c.JSON(tripRoute)
 }
