@@ -29,6 +29,7 @@ class _NewCarTripScreenState extends State<NewCarTripScreen> {
   int index = 0;
   final List<TextEditingController> _dropOffPointControllers = [];
   final TextEditingController _driverNameController = TextEditingController();
+  final TextEditingController _newTerminalController = TextEditingController();
   final List<TextEditingController> _gasTypeControllers = [];
   var noOfDropOfPoints = 0;
   var DropOffPoints = [];
@@ -434,14 +435,8 @@ class _NewCarTripScreenState extends State<NewCarTripScreen> {
                           height: 15,
                         ),
                         DropdownSearch<String>(
-                          dropdownSearchDecoration: InputDecoration(
-                            suffix: IconButton(
-                              onPressed: () {},
-                              icon: const Icon(
-                                Icons.add,
-                              ),
-                            ),
-                            border: const OutlineInputBorder(
+                          dropdownSearchDecoration: const InputDecoration(
+                            border: OutlineInputBorder(
                               borderSide: BorderSide(),
                             ),
                             labelText: "Terminal*",
@@ -481,6 +476,66 @@ class _NewCarTripScreenState extends State<NewCarTripScreen> {
                             cursorColor: Theme.of(context).primaryColor,
                           ),
                           enabled: true,
+                          dropdownButtonProps: IconButtonProps(
+                            icon: GestureDetector(
+                              onTap: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => Dialog(
+                                    child: SizedBox(
+                                      height: 350,
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 20, horizontal: 10),
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            TextField(
+                                              controller:
+                                                  _newTerminalController,
+                                              decoration: const InputDecoration(
+                                                labelText: "Terminal*",
+                                                border: OutlineInputBorder(),
+                                              ),
+                                            ),
+                                            GestureDetector(
+                                              onTap: () {
+                                                selectedTerminal =
+                                                    _newTerminalController.text;
+                                                setState(() {});
+                                                Navigator.pop(context);
+                                              },
+                                              child: Container(
+                                                decoration: BoxDecoration(
+                                                  color: Theme.of(context)
+                                                      .primaryColor,
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                ),
+                                                width: 200,
+                                                height: 50,
+                                                alignment: Alignment.center,
+                                                child: const Text(
+                                                  "Add Terminal",
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 20,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: const Icon(Icons.add),
+                            ),
+                          ),
                           items: Terminals,
                           selectedItem: selectedTerminal,
                           onChanged: (item) => setState(() {
@@ -500,6 +555,80 @@ class _NewCarTripScreenState extends State<NewCarTripScreen> {
                                   child: Padding(
                                     padding: const EdgeInsets.only(right: 8.0),
                                     child: DropdownSearch<String>(
+                                      dropdownButtonProps: IconButtonProps(
+                                        icon: GestureDetector(
+                                          onTap: () {
+                                            showDialog(
+                                              context: context,
+                                              builder: (context) => Dialog(
+                                                child: SizedBox(
+                                                  height: 350,
+                                                  child: Padding(
+                                                    padding: const EdgeInsets
+                                                            .symmetric(
+                                                        vertical: 20,
+                                                        horizontal: 10),
+                                                    child: Column(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: [
+                                                        TextField(
+                                                          controller:
+                                                              _dropOffPointControllers[
+                                                                  i - 1],
+                                                          decoration:
+                                                              InputDecoration(
+                                                            labelText:
+                                                                "Customer $i*",
+                                                            border:
+                                                                const OutlineInputBorder(),
+                                                          ),
+                                                        ),
+                                                        GestureDetector(
+                                                          onTap: () {
+                                                            setState(() {});
+                                                            Navigator.pop(
+                                                                context);
+                                                          },
+                                                          child: Container(
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              color: Theme.of(
+                                                                      context)
+                                                                  .primaryColor,
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          8),
+                                                            ),
+                                                            width: 200,
+                                                            height: 50,
+                                                            alignment: Alignment
+                                                                .center,
+                                                            child: const Text(
+                                                              "Add Customer",
+                                                              style: TextStyle(
+                                                                color: Colors
+                                                                    .white,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                fontSize: 20,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                          child: const Icon(Icons.add),
+                                        ),
+                                      ),
                                       searchFieldProps: TextFieldProps(
                                         autocorrect: false,
                                         cursorColor:

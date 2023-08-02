@@ -7,7 +7,6 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:falcon_1/DetailScreens/ImageView.dart';
 import 'package:falcon_1/EditScreens/EditCar.dart';
-import 'package:falcon_1/Screens/CarProgressScreen.dart';
 import 'package:falcon_1/main.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
@@ -54,14 +53,13 @@ class _CarProfileDetailsState extends State<CarProfileDetails> {
         ),
       ),
     );
+    print(DateTime.parse(widget.car["license_expiration_date"]));
     carDetails.add(
       Text(
         "الرخصه ساريه حتي: ${widget.car["license_expiration_date"]}",
         style: TextStyle(
-          color: !DateTime.now()
-                  .difference(
-                      DateTime.parse(widget.car["license_expiration_date"]))
-                  .isNegative
+          color: DateTime.parse(widget.car["license_expiration_date"])
+                  .isBefore(DateTime.now())
               ? Colors.red
               : Colors.black,
           fontSize: 20,
@@ -70,14 +68,13 @@ class _CarProfileDetailsState extends State<CarProfileDetails> {
         ),
       ),
     );
+
     carDetails.add(
       Text(
         "رخصة العيار ساريه حتي: ${widget.car["calibration_expiration_date"]}",
         style: TextStyle(
-          color: !DateTime.now()
-                  .difference(
-                      DateTime.parse(widget.car["calibration_expiration_date"]))
-                  .isNegative
+          color: DateTime.parse(widget.car["calibration_expiration_date"])
+                  .isBefore(DateTime.now())
               ? Colors.red
               : Colors.black,
           fontSize: 20,
@@ -91,10 +88,8 @@ class _CarProfileDetailsState extends State<CarProfileDetails> {
         Text(
           "رخصة التانك ساريه حتي: ${widget.car["tank_license_expiration_date"]}",
           style: TextStyle(
-            color: !DateTime.now()
-                    .difference(DateTime.parse(
-                        widget.car["tank_license_expiration_date"]))
-                    .isNegative
+            color: DateTime.parse(widget.car["tank_license_expiration_date"])
+                    .isBefore(DateTime.now())
                 ? Colors.red
                 : Colors.black,
             fontSize: 20,

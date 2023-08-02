@@ -28,9 +28,10 @@ import 'Screens/Login.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_rust_bridge/flutter_rust_bridge.dart' as bridge;
 
-// const String SERVER_IP = 'http://192.168.1.8:3001';
-const String SERVER_IP = 'https://dentex.app:3001';
-// const SERVER_IP = 'http://localhost:3001';
+// const String SERVER_IP = 'http://192.168.103.208:3001';
+// const String SERVER_IP = 'https://dentex.app:3001';
+// const String SERVER_IP = 'https://156.204.195.233:3001';
+const SERVER_IP = 'http://192.168.85.208:3001';
 // const SERVER_IP = 'http://92.205.60.182:3001/api';
 
 var jwt = "";
@@ -42,7 +43,8 @@ late DynamicLibrary lib;
 late ApexImpl impl;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  if (Platform.isAndroid || Platform.isWindows) {
+  if (Platform.isAndroid || Platform.isWindows || Platform.isIOS) {
+    HttpOverrides.global = MyHttpOverrides();
     ByteData data = await rootBundle.load('cert/dentex.pem');
     SecurityContext context = SecurityContext.defaultContext;
     context.setTrustedCertificatesBytes(data.buffer.asUint8List());
@@ -53,6 +55,15 @@ void main() async {
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
   runApp(const MainWidget());
+}
+
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
+  }
 }
 
 int? CurrentIndex = 0;
@@ -355,6 +366,16 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   void _update() {
     setState(() {});
+  }
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override

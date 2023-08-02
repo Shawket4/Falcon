@@ -7,7 +7,6 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:falcon_1/DetailScreens/ImagePreview.dart';
-import 'package:falcon_1/Screens/AllDrivers.dart';
 import 'package:falcon_1/main.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
@@ -16,7 +15,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:http/http.dart' as http;
 import 'package:lottie/lottie.dart';
-import 'package:http_parser/http_parser.dart';
 
 class AddDriver extends StatefulWidget {
   const AddDriver({Key? key, required this.jwt}) : super(key: key);
@@ -742,63 +740,63 @@ class _AddDriverState extends State<AddDriver> {
                     //   ),
                     // ),
                     const SizedBox(height: 20),
-                    Stepper(
-                      currentStep: currentStep,
-                      controlsBuilder:
-                          (BuildContext context, ControlsDetails details) {
-                        return Row(
-                          children: <Widget>[
-                            !isImagesLoaded
-                                ? TextButton(
-                                    onPressed: details.onStepContinue,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: Theme.of(context).primaryColor,
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                      child: const Padding(
-                                        padding: EdgeInsets.all(12.0),
-                                        child: Center(
-                                          child: Text(
-                                            'CONTINUE',
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                                : const Text(""),
-                          ],
-                        );
-                      },
-                      steps: getSteps(),
-                      physics: const ClampingScrollPhysics(),
-                      onStepContinue: () async {
-                        late bool isFinished;
-                        if (currentStep == 0) {
-                          isFinished = await idPick();
-                        } else if (currentStep == 1) {
-                          isFinished = await driverLicensePick();
-                        } else if (currentStep == 2) {
-                          isFinished = await safetyLicensePick();
-                        } else if (currentStep == 3) {
-                          isFinished = await drugTestPick();
-                        } else if (currentStep == 4) {
-                          isFinished = await criminalRecordPick();
-                          isImagesLoaded = true;
-                          setState(() {});
-                          return;
-                        }
-                        if (isFinished) {
-                          setState(() {
-                            currentStep++;
-                          });
-                        }
-                      },
-                    ),
+                    // Stepper(
+                    //   currentStep: currentStep,
+                    //   controlsBuilder:
+                    //       (BuildContext context, ControlsDetails details) {
+                    //     return Row(
+                    //       children: <Widget>[
+                    //         !isImagesLoaded
+                    //             ? TextButton(
+                    //                 onPressed: details.onStepContinue,
+                    //                 child: Container(
+                    //                   decoration: BoxDecoration(
+                    //                     color: Theme.of(context).primaryColor,
+                    //                     borderRadius: BorderRadius.circular(4),
+                    //                   ),
+                    //                   child: const Padding(
+                    //                     padding: EdgeInsets.all(12.0),
+                    //                     child: Center(
+                    //                       child: Text(
+                    //                         'CONTINUE',
+                    //                         style: TextStyle(
+                    //                           color: Colors.white,
+                    //                           fontWeight: FontWeight.bold,
+                    //                         ),
+                    //                       ),
+                    //                     ),
+                    //                   ),
+                    //                 ),
+                    //               )
+                    //             : const Text(""),
+                    //       ],
+                    //     );
+                    //   },
+                    //   steps: getSteps(),
+                    //   physics: const ClampingScrollPhysics(),
+                    //   onStepContinue: () async {
+                    //     late bool isFinished;
+                    //     if (currentStep == 0) {
+                    //       isFinished = await idPick();
+                    //     } else if (currentStep == 1) {
+                    //       isFinished = await driverLicensePick();
+                    //     } else if (currentStep == 2) {
+                    //       isFinished = await safetyLicensePick();
+                    //     } else if (currentStep == 3) {
+                    //       isFinished = await drugTestPick();
+                    //     } else if (currentStep == 4) {
+                    //       isFinished = await criminalRecordPick();
+                    //       isImagesLoaded = true;
+                    //       setState(() {});
+                    //       return;
+                    //     }
+                    //     if (isFinished) {
+                    //       setState(() {
+                    //         currentStep++;
+                    //       });
+                    //     }
+                    //   },
+                    // ),
                     const SizedBox(height: 20),
                     TextButton(
                       onPressed: () async {
@@ -865,72 +863,72 @@ class _AddDriverState extends State<AddDriver> {
                                   : selectedTransporter,
                             },
                           );
-                          request.files.add(
-                            http.MultipartFile.fromBytes(
-                              'DriverLicense',
-                              driverLicenseImgBytes,
-                              filename:
-                                  "${_driverNameController.text} Driver_License.${driverLicenseFile.extension}",
-                              contentType: MediaType("image", "jpeg"),
-                            ),
-                          );
-                          request.files.add(
-                            http.MultipartFile.fromBytes(
-                              'SafetyLicense',
-                              safetyLicenseImgBytes,
-                              filename:
-                                  "${_driverNameController.text} Safety_License.${safetyLicenseFile.extension}",
-                              contentType: MediaType("image", "jpeg"),
-                            ),
-                          );
-                          request.files.add(
-                            http.MultipartFile.fromBytes(
-                              'DrugTest',
-                              drugTestImgBytes,
-                              filename:
-                                  "${_driverNameController.text} Drug_Test.${drugTestFile.extension}",
-                              contentType: MediaType("image", "jpeg"),
-                            ),
-                          );
                           // request.files.add(
                           //   http.MultipartFile.fromBytes(
-                          //     'DriverLicenseBack',
-                          //     driverLicenseImgBytesBack,
+                          //     'DriverLicense',
+                          //     driverLicenseImgBytes,
                           //     filename:
-                          //         "${_driverNameController.text} Driver_License_Back.${driverLicenseFileBack.extension}",
+                          //         "${_driverNameController.text} Driver_License.${driverLicenseFile.extension}",
+                          //     contentType: MediaType("image", "jpeg"),
+                          //   ),
+                          // );
+                          // request.files.add(
+                          //   http.MultipartFile.fromBytes(
+                          //     'SafetyLicense',
+                          //     safetyLicenseImgBytes,
+                          //     filename:
+                          //         "${_driverNameController.text} Safety_License.${safetyLicenseFile.extension}",
+                          //     contentType: MediaType("image", "jpeg"),
+                          //   ),
+                          // );
+                          // request.files.add(
+                          //   http.MultipartFile.fromBytes(
+                          //     'DrugTest',
+                          //     drugTestImgBytes,
+                          //     filename:
+                          //         "${_driverNameController.text} Drug_Test.${drugTestFile.extension}",
+                          //     contentType: MediaType("image", "jpeg"),
+                          //   ),
+                          // );
+                          // // request.files.add(
+                          // //   http.MultipartFile.fromBytes(
+                          // //     'DriverLicenseBack',
+                          // //     driverLicenseImgBytesBack,
+                          // //     filename:
+                          // //         "${_driverNameController.text} Driver_License_Back.${driverLicenseFileBack.extension}",
+                          // //     contentType: MediaType("image", "jpeg"),
+                          // //   ),
+                          // // );
+
+                          // request.files.add(
+                          //   http.MultipartFile.fromBytes(
+                          //     'IDLicenseFront',
+                          //     idLicenseImgBytes,
+                          //     filename:
+                          //         "${_driverNameController.text} ID_License.${idLicenseFile.extension}",
                           //     contentType: MediaType("image", "jpeg"),
                           //   ),
                           // );
 
-                          request.files.add(
-                            http.MultipartFile.fromBytes(
-                              'IDLicenseFront',
-                              idLicenseImgBytes,
-                              filename:
-                                  "${_driverNameController.text} ID_License.${idLicenseFile.extension}",
-                              contentType: MediaType("image", "jpeg"),
-                            ),
-                          );
+                          // request.files.add(
+                          //   http.MultipartFile.fromBytes(
+                          //     'IDLicenseBack',
+                          //     idLicenseImgBytesBack,
+                          //     filename:
+                          //         "${_driverNameController.text} ID_License_Back.${idLicenseFileBack.extension}",
+                          //     contentType: MediaType("image", "jpeg"),
+                          //   ),
+                          // );
 
-                          request.files.add(
-                            http.MultipartFile.fromBytes(
-                              'IDLicenseBack',
-                              idLicenseImgBytesBack,
-                              filename:
-                                  "${_driverNameController.text} ID_License_Back.${idLicenseFileBack.extension}",
-                              contentType: MediaType("image", "jpeg"),
-                            ),
-                          );
-
-                          request.files.add(
-                            http.MultipartFile.fromBytes(
-                              'CriminalRecord',
-                              criminalRecordImgBytes,
-                              filename:
-                                  "${_driverNameController.text} Criminal_Records.${criminalRecordFile.extension}",
-                              contentType: MediaType("image", "jpeg"),
-                            ),
-                          );
+                          // request.files.add(
+                          //   http.MultipartFile.fromBytes(
+                          //     'CriminalRecord',
+                          //     criminalRecordImgBytes,
+                          //     filename:
+                          //         "${_driverNameController.text} Criminal_Records.${criminalRecordFile.extension}",
+                          //     contentType: MediaType("image", "jpeg"),
+                          //   ),
+                          // );
 
                           try {
                             await request.send().then((value) {
@@ -983,7 +981,7 @@ class _AddDriverState extends State<AddDriver> {
                                                     context,
                                                     MaterialPageRoute(
                                                       builder: (_) =>
-                                                          AllDrivers(
+                                                          HomeScreen(
                                                         jwt: widget.jwt
                                                             .toString(),
                                                       ),

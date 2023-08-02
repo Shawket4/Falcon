@@ -32,7 +32,7 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
   late String selectedSortItem;
   late String sortStringItem;
   final ScrollController scrollController = ScrollController();
-  final GlobalKey<ScaffoldState> _key = GlobalKey();
+  // final GlobalKey<ScaffoldState> _key = GlobalKey();
   // Map<String, dynamic> CarMap = {};
   bool isLoaded = false;
   List<dynamic> notificationList = [];
@@ -48,6 +48,7 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
   int _tripCount = 0;
   Future<String> loadData(String jwt) async {
     if (!isLoaded) {
+      trips.clear();
       try {
         var GetCars = await dio
             .post(
@@ -105,42 +106,46 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
     // CarMap.clear();
     trips.clear();
     isLoaded = false;
-    if (!isLoaded) {
-      try {
-        var GetCars = await dio
-            .post(
-              "$SERVER_IP/GetProgressOfCars",
-              data: jsonEncode({
-                "DateFrom": DateFrom,
-                "DateTo": DateTo,
-              }),
-            )
-            .timeout(
-              const Duration(seconds: 4),
-            );
-        if (GetCars.statusCode != 204) {
-          var jsonResponse = GetCars.data;
-          for (var i = 0; i < jsonResponse.length; i++) {
-            // CarList.add(jsonResponse[i]);
-            // if (CarMap[(jsonResponse)[i]["date"]] == null) {
-            //   CarMap[(jsonResponse[i]["date"])] = [];
-            // }
-            // await CarMap[(jsonResponse[i]["date"])]!.add(jsonResponse[i]);
-          }
-        }
-        isLoaded = true;
-        setState(() {});
-      } catch (e) {
-        return "Error";
-      }
-    }
-    setState(() {});
+    // if (!isLoaded) {
+    //   try {
+    //     var GetCars = await dio
+    //         .post(
+    //           "$SERVER_IP/GetProgressOfCars",
+    //           data: jsonEncode({
+    //             "DateFrom": DateFrom,
+    //             "DateTo": DateTo,
+    //           }),
+    //         )
+    //         .timeout(
+    //           const Duration(seconds: 4),
+    //         );
+    //     if (GetCars.statusCode != 204) {
+    //       var jsonResponse = GetCars.data;
+    //       for (var i = 0; i < jsonResponse.length; i++) {
+    //         // CarList.add(jsonResponse[i]);
+    //         // if (CarMap[(jsonResponse)[i]["date"]] == null) {
+    //         //   CarMap[(jsonResponse[i]["date"])] = [];
+    //         // }
+    //         // await CarMap[(jsonResponse[i]["date"])]!.add(jsonResponse[i]);
+    //       }
+    //     }
+    //     isLoaded = true;
+    //     setState(() {});
+    //   } catch (e) {
+    //     return "Error";
+    //   }
+    // }
+    // setState(() {});
+    await loadData(jwt);
     return "";
   }
 
   //Make post request and store body response in this variable
   @override
   void initState() {
+    print("Reached");
+    isLoaded = false;
+    trips.clear();
     selectedSortItem = SortItems[0];
     sortStringItem = "date";
     isSortAscending = true;
@@ -154,7 +159,7 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
   Widget build(BuildContext context) {
     // Return Scaffold with ListView builder from CarList and CarListItem has image and text
     return Scaffold(
-      key: _key,
+      // key: _key,
       // bottomNavigationBar: BottomNavigationBar(
       //   currentIndex: CurrentIndex!,
       //   onTap: (value) => setState(() {

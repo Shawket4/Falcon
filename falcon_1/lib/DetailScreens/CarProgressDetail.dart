@@ -5,7 +5,6 @@ import 'dart:convert';
 import 'package:falcon_1/DetailScreens/CloseTripConfirmationScreen.dart';
 import 'package:falcon_1/EditScreens/EditTrip.dart';
 import 'package:falcon_1/Maps/MapHistory.dart';
-import 'package:falcon_1/Screens/CarProgressScreen.dart';
 import 'package:falcon_1/main.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -222,9 +221,9 @@ class _CarProgressDetailScreenState extends State<CarProgressDetailScreen>
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => HomeScreen(
-                      jwt: widget.jwt.toString(),
-                    ),
+                    builder: (_) => MainWidget(
+                        // jwt: widget.jwt.toString(),
+                        ),
                   ),
                 );
               }).timeout(

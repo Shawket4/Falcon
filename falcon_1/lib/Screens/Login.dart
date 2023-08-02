@@ -329,6 +329,7 @@ Future attemptLogIn(String email, String password) async {
       return null;
     }
   } catch (e) {
+    print(e);
     return "Error";
   }
   // Dio dio = Dio();

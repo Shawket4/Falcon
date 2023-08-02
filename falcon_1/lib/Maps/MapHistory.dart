@@ -28,6 +28,8 @@ class _MapHistoryState extends State<MapHistory> {
   Map<DateTime, LatLng> points = {};
   TripSummary tripSummary = TripSummary();
   Future<bool> loadData() async {
+    print("object");
+
     if (isLoaded) {
       return true;
     }
@@ -35,6 +37,8 @@ class _MapHistoryState extends State<MapHistory> {
       "$SERVER_IP/api/protected/GetTripRouteHistory",
       data: {"ID": widget.tripID},
     );
+    print(request.data);
+
     if (request.statusCode == 200) {
       tripSummary = TripSummary.fromJson(request.data["trip_summary"]);
       for (var point in request.data["Points"]) {
@@ -462,6 +466,7 @@ class _MapHistoryState extends State<MapHistory> {
                 ),
               ],
             );
+            // return Text("Loaded");
           } else {
             return const Center(
               child: CircularProgressIndicator(),

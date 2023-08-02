@@ -5,6 +5,8 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:falcon_1/DriverSalaryScreens/DriverExpenses.dart';
+import 'package:falcon_1/DriverSalaryScreens/DriverLoans.dart';
 import 'package:falcon_1/EditScreens/EditDriver.dart';
 import 'package:falcon_1/Screens/CarProgressScreen.dart';
 import 'package:falcon_1/main.dart';
@@ -115,7 +117,7 @@ class _DriverProfileDetailsState extends State<DriverProfileDetails> {
     dio.options.headers["Content-Type"] = "application/json";
     driverDetails.add(
       Text(
-        "أسم السائق: ${widget.driver["name"]}",
+        "Name: ${widget.driver["name"]}",
         style: const TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w600,
@@ -124,7 +126,7 @@ class _DriverProfileDetailsState extends State<DriverProfileDetails> {
     );
     driverDetails.add(
       Text(
-        "رقم هاتف السائق: ${widget.driver["mobile_number"]}",
+        "Phone: ${widget.driver["mobile_number"]}",
         style: const TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w600,
@@ -135,12 +137,10 @@ class _DriverProfileDetailsState extends State<DriverProfileDetails> {
 
     driverDetails.add(
       Text(
-        "بطاقة السائق ساريه حتي: ${widget.driver["id_license_expiration_date"]}",
+        "ID Expiration: ${widget.driver["id_license_expiration_date"]}",
         style: TextStyle(
-          color: !DateTime.now()
-                  .difference(DateTime.parse(
-                      widget.driver["id_license_expiration_date"]))
-                  .isNegative
+          color: DateTime.parse(widget.driver["id_license_expiration_date"])
+                  .isBefore(DateTime.now())
               ? Colors.red
               : Colors.black,
           fontSize: 20,
@@ -152,12 +152,10 @@ class _DriverProfileDetailsState extends State<DriverProfileDetails> {
 
     driverDetails.add(
       Text(
-        "رخصة القيادة ساريه حتي: ${widget.driver["driver_license_expiration_date"]}",
+        "Driving License Expiration: ${widget.driver["driver_license_expiration_date"]}",
         style: TextStyle(
-          color: !DateTime.now()
-                  .difference(DateTime.parse(
-                      widget.driver["driver_license_expiration_date"]))
-                  .isNegative
+          color: DateTime.parse(widget.driver["driver_license_expiration_date"])
+                  .isBefore(DateTime.now())
               ? Colors.red
               : Colors.black,
           fontSize: 20,
@@ -169,12 +167,10 @@ class _DriverProfileDetailsState extends State<DriverProfileDetails> {
 
     driverDetails.add(
       Text(
-        "رخصة القيادة الأمنة ساريه حتي: ${widget.driver["safety_license_expiration_date"]}",
+        "Safety License Expiration: ${widget.driver["safety_license_expiration_date"]}",
         style: TextStyle(
-          color: !DateTime.now()
-                  .difference(DateTime.parse(
-                      widget.driver["safety_license_expiration_date"]))
-                  .isNegative
+          color: DateTime.parse(widget.driver["safety_license_expiration_date"])
+                  .isBefore(DateTime.now())
               ? Colors.red
               : Colors.black,
           fontSize: 20,
@@ -184,12 +180,10 @@ class _DriverProfileDetailsState extends State<DriverProfileDetails> {
     );
     driverDetails.add(
       Text(
-        "شهادة المخضرات ساريه حتي: ${widget.driver["drug_test_expiration_date"]}",
+        "Drug Test Expiration: ${widget.driver["drug_test_expiration_date"]}",
         style: TextStyle(
-          color: !DateTime.now()
-                  .difference(DateTime.parse(
-                      widget.driver["drug_test_expiration_date"]))
-                  .isNegative
+          color: DateTime.parse(widget.driver["drug_test_expiration_date"])
+                  .isBefore(DateTime.now())
               ? Colors.red
               : Colors.black,
           fontSize: 20,
@@ -334,8 +328,7 @@ class _DriverProfileDetailsState extends State<DriverProfileDetails> {
                 backgroundColor: Theme.of(context).primaryColor,
                 title: Center(
                   child: Text(
-                    'تفاصيل السائق: ${widget.driver["name"]}',
-                    textDirection: TextDirection.rtl,
+                    '${widget.driver["name"]}',
                   ),
                 ),
               ),
@@ -358,20 +351,110 @@ class _DriverProfileDetailsState extends State<DriverProfileDetails> {
                   ),
                   Container(
                     padding: const EdgeInsets.all(15),
-                    child: Directionality(
-                      textDirection: TextDirection.rtl,
-                      child: ListView.builder(
-                        physics: const NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        itemCount: driverDetails.length,
-                        itemBuilder: (context, index) {
-                          return Padding(
-                            child: driverDetails[index],
-                            padding: const EdgeInsets.all(
-                              10,
+                    child: ListView.builder(
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: driverDetails.length,
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          child: driverDetails[index],
+                          padding: const EdgeInsets.all(
+                            10,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => DriverExpenses(
+                                jwt: widget.jwt,
+                                driverName: widget.driver["name"],
+                                id: widget.driver["ID"],
+                              ),
                             ),
                           );
                         },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColor,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(
+                                vertical: 14.0, horizontal: 35.0),
+                            child: Text(
+                              "Expenses",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 22,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => DriverLoans(
+                                jwt: widget.jwt,
+                                id: widget.driver["ID"],
+                                driverName: widget.driver["name"],
+                              ),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColor,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(
+                                vertical: 14.0, horizontal: 50.0),
+                            child: Text(
+                              "Loans",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 22,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  TextButton(
+                    onPressed: () {},
+                    child: Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Container(
+                        width: double.infinity,
+                        height: 52.0,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Center(
+                          child: Text(
+                            "Salaries",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 24,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),
