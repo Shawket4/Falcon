@@ -25,9 +25,10 @@ class NewCarTripScreen extends StatefulWidget {
 
 class _NewCarTripScreenState extends State<NewCarTripScreen> {
   final _pickUpPointController = TextEditingController();
-  final _feeRateController = TextEditingController();
+  // final _feeRateController = TextEditingController();
   int index = 0;
   final List<TextEditingController> _dropOffPointControllers = [];
+  final TextEditingController _receiptNoController = TextEditingController();
   final TextEditingController _driverNameController = TextEditingController();
   final TextEditingController _newTerminalController = TextEditingController();
   final List<TextEditingController> _gasTypeControllers = [];
@@ -54,6 +55,7 @@ class _NewCarTripScreenState extends State<NewCarTripScreen> {
     "Gas 95",
     "Diesel",
     "Mazoot",
+    "Other",
     "Empty",
   ];
 
@@ -264,6 +266,16 @@ class _NewCarTripScreenState extends State<NewCarTripScreen> {
                         //     // ),
                         //   ],
                         // ),
+                        TextField(
+                          controller: _receiptNoController,
+                          decoration: const InputDecoration(
+                            labelText: "Receipt No",
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 15,
+                        ),
                         DropdownSearch<String>(
                           dropdownSearchTextAlign: TextAlign.left,
                           searchFieldProps: TextFieldProps(
@@ -1027,7 +1039,8 @@ class _NewCarTripScreenState extends State<NewCarTripScreen> {
                                             "status": false,
                                           },
                                           "drop_off_points": DropOffPoints
-                                        }
+                                        },
+                                        "receipt_no": _receiptNoController.text,
                                         // "FeeRate":
                                         //     double.parse(_feeRateController.text),
                                       },

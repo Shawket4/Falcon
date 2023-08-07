@@ -8,42 +8,41 @@ import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:lottie/lottie.dart';
 
 import '../main.dart';
+import 'AddTripExpenseScreen.dart';
 
-class DriverLoans extends StatefulWidget {
-  const DriverLoans(
-      {super.key,
-      required this.jwt,
-      required this.id,
-      required this.driverName});
+class TripExpenses extends StatefulWidget {
+  const TripExpenses({
+    super.key,
+    required this.jwt,
+    required this.id,
+  });
   final String jwt;
-  final String driverName;
   final int id;
   @override
-  State<DriverLoans> createState() => _DriverLoansState();
+  State<TripExpenses> createState() => _TripExpensesState();
 }
 
-List<dynamic> LoanList = [];
+List<dynamic> ExpenseList = [];
 Dio dio = Dio();
 
-class _DriverLoansState extends State<DriverLoans> {
+class _TripExpensesState extends State<TripExpenses> {
   Future<String> get loadData async {
-    if (LoanList.isEmpty) {
+    if (ExpenseList.isEmpty) {
       try {
-        var res = await dio.post("$SERVER_IP/api/GetDriverLoans", data: {
+        var res = await dio.post("$SERVER_IP/api/GetTripExpenses", data: {
           "id": widget.id,
         }).then((response) {
           if (response.data != null && response.data != "") {
             // Print Json Response  where date is = DateFrom
             for (var i = 0; i < response.data.length; i++) {
-              LoanList.add(response.data[i]);
+              ExpenseList.add(response.data[i]);
             }
-            LoanList.sort((a, b) => a['date'].compareTo(b['date']));
+            ExpenseList.sort((a, b) => a['date'].compareTo(b['date']));
           }
         }).timeout(
           const Duration(seconds: 4),
         );
       } catch (e) {
-        print(e);
         return "Error";
       }
     }
@@ -52,13 +51,13 @@ class _DriverLoansState extends State<DriverLoans> {
   }
 
   Future<void> reloadData() async {
-    LoanList.clear();
-    var res = await dio.post("$SERVER_IP/api/GetDriverLoans").then((response) {
+    ExpenseList.clear();
+    var res = await dio.post("$SERVER_IP/api/GetTripExpenses").then((response) {
       // Print Json Response  where date is = DateFrom
       for (var i = 0; i < response.data.length; i++) {
-        LoanList.add(response.data[i]);
+        ExpenseList.add(response.data[i]);
       }
-      LoanList.sort((a, b) => a['date'].compareTo(b['date']));
+      ExpenseList.sort((a, b) => a['date'].compareTo(b['date']));
     }).timeout(
       const Duration(seconds: 4),
     );
@@ -70,7 +69,7 @@ class _DriverLoansState extends State<DriverLoans> {
   @override
   void initState() {
     //Clear list
-    LoanList.clear();
+    ExpenseList.clear();
     // Empty the list of cars
     dio.options.headers["Cookie"] = "jwt=${widget.jwt}";
     dio.options.headers["Content-Type"] = "application/json";
@@ -81,10 +80,33 @@ class _DriverLoansState extends State<DriverLoans> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => AddTripExpenseScreen(
+                      jwt: widget.jwt,
+                      id: widget.id,
+                    ),
+                  ),
+                );
+              },
+              icon: const Icon(
+                Icons.add_circle_rounded,
+                color: Colors.green,
+                size: 30,
+              ),
+            ),
+          ),
+        ],
         centerTitle: true,
         backgroundColor: Theme.of(context).primaryColor,
         title: Text(
-          widget.driverName,
+          "Trip Expenses",
           style: GoogleFonts.jost(
             textStyle: const TextStyle(
               fontSize: 22,
@@ -136,9 +158,9 @@ class _DriverLoansState extends State<DriverLoans> {
               ),
             );
           } else {
-            return LoanList.isEmpty
+            return ExpenseList.isEmpty
                 ? const Center(
-                    child: Text("No Loans Found"),
+                    child: Text("No Expenses Found"),
                   )
                 : Scrollbar(
                     scrollbarOrientation: ScrollbarOrientation.left,
@@ -155,7 +177,7 @@ class _DriverLoansState extends State<DriverLoans> {
                         scrollDirection: Axis.vertical,
                         groupBy: (element) => element["date"],
                         sort: true,
-                        elements: LoanList.toList(),
+                        elements: ExpenseList.toList(),
                         groupSeparatorBuilder: (value) => Container(
                           width: double.infinity,
                           padding: const EdgeInsets.all(16),
@@ -194,7 +216,7 @@ class _DriverLoansState extends State<DriverLoans> {
                                       padding: EdgeInsets.all(14),
                                       child: CircleAvatar(
                                         backgroundImage:
-                                            AssetImage('images/driver.png'),
+                                            AssetImage('images/truck.jpg'),
                                         radius: 35,
                                       ),
                                     ),
@@ -203,7 +225,7 @@ class _DriverLoansState extends State<DriverLoans> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          "${element['amount']} (${element['method']})",
+                                          "${element['cost']} (${element['description']})",
                                           style: GoogleFonts.josefinSans(
                                             textStyle: const TextStyle(
                                               fontSize: 20,
@@ -227,12 +249,12 @@ class _DriverLoansState extends State<DriverLoans> {
                                 IconButton(
                                   onPressed: () async {
                                     var res = await dio.post(
-                                        "$SERVER_IP/api/DeleteLoan",
+                                        "$SERVER_IP/api/DeleteExpense",
                                         data: {
                                           "id": element["ID"],
                                         }).then((value) {
                                       if (value.statusCode == 200) {
-                                        LoanList.remove(element);
+                                        ExpenseList.remove(element);
                                         setState(() {});
                                       }
                                     });

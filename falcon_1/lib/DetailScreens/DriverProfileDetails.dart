@@ -7,8 +7,8 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:falcon_1/DriverSalaryScreens/DriverExpenses.dart';
 import 'package:falcon_1/DriverSalaryScreens/DriverLoans.dart';
+import 'package:falcon_1/DriverSalaryScreens/GetDriverSalary.dart';
 import 'package:falcon_1/EditScreens/EditDriver.dart';
-import 'package:falcon_1/Screens/CarProgressScreen.dart';
 import 'package:falcon_1/main.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
@@ -261,7 +261,6 @@ class _DriverProfileDetailsState extends State<DriverProfileDetails> {
                           builder: (_) => EditDriverScreen(
                             jwt: widget.jwt,
                             driver: widget.driver,
-                            imageBytes: imageBytes,
                           ),
                         ),
                       );
@@ -435,7 +434,17 @@ class _DriverProfileDetailsState extends State<DriverProfileDetails> {
                     ],
                   ),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => GetDriverSalary(
+                            driverID: widget.driver["ID"],
+                            jwt: widget.jwt,
+                          ),
+                        ),
+                      );
+                    },
                     child: Padding(
                       padding: const EdgeInsets.all(10.0),
                       child: Container(

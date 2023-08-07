@@ -13,11 +13,12 @@ import 'package:lottie/lottie.dart';
 import '../main.dart';
 
 class CarProgressScreen extends StatefulWidget {
-  const CarProgressScreen(
-      {Key? key, required this.jwt, required this.changeDrawerState})
-      : super(key: key);
+  const CarProgressScreen({
+    Key? key,
+    required this.jwt,
+  }) : super(key: key);
   final String jwt;
-  final Function changeDrawerState;
+  // final Function changeDrawerState;
   @override
   State<CarProgressScreen> createState() => _CarProgressScreenState();
 }
@@ -66,8 +67,7 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
             );
         if (GetCars.statusCode != 204) {
           var jsonResponse = GetCars.data;
-          // print(jsonResponse);
-          trips = await impl.returnTrips(json: jsonResponse);
+          trips = await impl.returnTrips(json: jsonResponse.toString());
           // for (var i = 0; i < jsonResponse.length; i++) {
           //   CarList.add(jsonResponse[i]);
           //   if (CarMap[(jsonResponse)[i]["date"]] == null) {
@@ -143,7 +143,6 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
   //Make post request and store body response in this variable
   @override
   void initState() {
-    print("Reached");
     isLoaded = false;
     trips.clear();
     selectedSortItem = SortItems[0];
@@ -159,6 +158,9 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
   Widget build(BuildContext context) {
     // Return Scaffold with ListView builder from CarList and CarListItem has image and text
     return Scaffold(
+      drawer: AppDrawer(
+        jwt: widget.jwt,
+      ),
       // key: _key,
       // bottomNavigationBar: BottomNavigationBar(
       //   currentIndex: CurrentIndex!,
@@ -205,13 +207,13 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
             ),
           ),
         ],
-        leading: IconButton(
-          onPressed: () => widget.changeDrawerState(),
-          icon: const Icon(
-            Icons.menu,
-            size: 30,
-          ),
-        ),
+        // leading: IconButton(
+        //   onPressed: () => widget.changeDrawerState(),
+        //   icon: const Icon(
+        //     Icons.menu,
+        //     size: 30,
+        //   ),
+        // ),
         centerTitle: true,
         backgroundColor: Theme.of(context).primaryColor,
         // Hamburger Menu
@@ -353,8 +355,8 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
                       // useStickyGroupSeparators: true,
                       scrollDirection: Axis.vertical,
                       groupBy: (element) => element.date,
-                      sort: true,
-                      elements: trips,
+                      sort: false,
+                      elements: trips.reversed.toList(),
                       groupSeparatorBuilder: (value) => Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(16),

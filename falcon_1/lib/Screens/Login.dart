@@ -329,6 +329,7 @@ Future attemptLogIn(String email, String password) async {
       return null;
     }
   } catch (e) {
+    print("case e");
     print(e);
     return "Error";
   }

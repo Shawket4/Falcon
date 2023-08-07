@@ -303,7 +303,7 @@ class _AddDriverState extends State<AddDriver> {
                                 SizedBox(
                                   width: 10,
                                 ),
-                                Text("Driver License Expiry"),
+                                Text("Driving License Expiry"),
                               ],
                             ),
                             child: CupertinoTextFormFieldRow(
@@ -416,13 +416,13 @@ class _AddDriverState extends State<AddDriver> {
                             }
                           },
                           child: CupertinoFormRow(
-                            prefix: Row(
-                              children: const [
+                            prefix: const Row(
+                              children: [
                                 Icon(Icons.calendar_today),
                                 SizedBox(
                                   width: 10,
                                 ),
-                                Text("ID Expiry"),
+                                Text("Driver ID Expiration"),
                               ],
                             ),
                             child: CupertinoTextFormFieldRow(

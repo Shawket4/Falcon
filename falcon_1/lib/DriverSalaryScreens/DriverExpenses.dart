@@ -1,7 +1,6 @@
 // ignore_for_file: non_constant_identifier_names, unused_local_variable
 
 import 'package:dio/dio.dart';
-import 'package:falcon_1/DriverSalaryScreens/AddDriverExpenseScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:grouped_list/grouped_list.dart';
@@ -11,11 +10,12 @@ import 'package:lottie/lottie.dart';
 import '../main.dart';
 
 class DriverExpenses extends StatefulWidget {
-  const DriverExpenses(
-      {super.key,
-      required this.jwt,
-      required this.id,
-      required this.driverName});
+  const DriverExpenses({
+    super.key,
+    required this.jwt,
+    required this.id,
+    required this.driverName,
+  });
   final String jwt;
   final String driverName;
   final int id;
@@ -33,11 +33,13 @@ class _DriverExpensesState extends State<DriverExpenses> {
         var res = await dio.post("$SERVER_IP/api/GetDriverExpenses", data: {
           "id": widget.id,
         }).then((response) {
-          // Print Json Response  where date is = DateFrom
-          for (var i = 0; i < response.data.length; i++) {
-            ExpenseList.add(response.data[i]);
+          if (response.data != null && response.data != "") {
+            // Print Json Response  where date is = DateFrom
+            for (var i = 0; i < response.data.length; i++) {
+              ExpenseList.add(response.data[i]);
+            }
+            ExpenseList.sort((a, b) => a['date'].compareTo(b['date']));
           }
-          ExpenseList.sort((a, b) => a['date'].compareTo(b['date']));
         }).timeout(
           const Duration(seconds: 4),
         );
@@ -80,29 +82,6 @@ class _DriverExpensesState extends State<DriverExpenses> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: IconButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => AddDriverExpenseScreen(
-                      jwt: widget.jwt,
-                      id: widget.id,
-                    ),
-                  ),
-                );
-              },
-              icon: const Icon(
-                Icons.add_circle_rounded,
-                color: Colors.green,
-                size: 30,
-              ),
-            ),
-          ),
-        ],
         centerTitle: true,
         backgroundColor: Theme.of(context).primaryColor,
         title: Text(
@@ -208,37 +187,61 @@ class _DriverExpensesState extends State<DriverExpenses> {
                           child: Card(
                             elevation: 4,
                             child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
-                                const Padding(
-                                  padding: EdgeInsets.all(14),
-                                  child: CircleAvatar(
-                                    backgroundImage:
-                                        AssetImage('images/driver.png'),
-                                    radius: 35,
-                                  ),
-                                ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                Row(
                                   children: [
-                                    Text(
-                                      "${element['cost']} (${element['description']})",
-                                      style: GoogleFonts.josefinSans(
-                                        textStyle: const TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.w600,
-                                        ),
+                                    const Padding(
+                                      padding: EdgeInsets.all(14),
+                                      child: CircleAvatar(
+                                        backgroundImage:
+                                            AssetImage('images/driver.png'),
+                                        radius: 35,
                                       ),
                                     ),
-                                    Text(
-                                      element["date"].toString(),
-                                      style: GoogleFonts.josefinSans(
-                                        textStyle: const TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w500,
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "${element['cost']} (${element['description']})",
+                                          style: GoogleFonts.josefinSans(
+                                            textStyle: const TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
                                         ),
-                                      ),
+                                        Text(
+                                          element["date"].toString(),
+                                          style: GoogleFonts.josefinSans(
+                                            textStyle: const TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ],
+                                ),
+                                IconButton(
+                                  onPressed: () async {
+                                    var res = await dio.post(
+                                        "$SERVER_IP/api/DeleteExpense",
+                                        data: {
+                                          "id": element["ID"],
+                                        }).then((value) {
+                                      if (value.statusCode == 200) {
+                                        ExpenseList.remove(element);
+                                        setState(() {});
+                                      }
+                                    });
+                                  },
+                                  icon: const Icon(
+                                    Icons.delete,
+                                    color: Colors.red,
+                                  ),
                                 ),
                               ],
                             ),

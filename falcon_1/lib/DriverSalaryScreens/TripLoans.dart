@@ -8,28 +8,28 @@ import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:lottie/lottie.dart';
 
 import '../main.dart';
+import 'AddTripLoanScreen.dart';
 
-class DriverLoans extends StatefulWidget {
-  const DriverLoans(
-      {super.key,
-      required this.jwt,
-      required this.id,
-      required this.driverName});
+class TripLoans extends StatefulWidget {
+  const TripLoans({
+    super.key,
+    required this.jwt,
+    required this.id,
+  });
   final String jwt;
-  final String driverName;
   final int id;
   @override
-  State<DriverLoans> createState() => _DriverLoansState();
+  State<TripLoans> createState() => _TripLoansState();
 }
 
 List<dynamic> LoanList = [];
 Dio dio = Dio();
 
-class _DriverLoansState extends State<DriverLoans> {
+class _TripLoansState extends State<TripLoans> {
   Future<String> get loadData async {
     if (LoanList.isEmpty) {
       try {
-        var res = await dio.post("$SERVER_IP/api/GetDriverLoans", data: {
+        var res = await dio.post("$SERVER_IP/api/GetTripLoans", data: {
           "id": widget.id,
         }).then((response) {
           if (response.data != null && response.data != "") {
@@ -53,7 +53,7 @@ class _DriverLoansState extends State<DriverLoans> {
 
   Future<void> reloadData() async {
     LoanList.clear();
-    var res = await dio.post("$SERVER_IP/api/GetDriverLoans").then((response) {
+    var res = await dio.post("$SERVER_IP/api/GetTripLoans").then((response) {
       // Print Json Response  where date is = DateFrom
       for (var i = 0; i < response.data.length; i++) {
         LoanList.add(response.data[i]);
@@ -81,10 +81,33 @@ class _DriverLoansState extends State<DriverLoans> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => AddTripLoanScreen(
+                      jwt: widget.jwt,
+                      id: widget.id,
+                    ),
+                  ),
+                );
+              },
+              icon: const Icon(
+                Icons.add_circle_rounded,
+                color: Colors.green,
+                size: 30,
+              ),
+            ),
+          ),
+        ],
         centerTitle: true,
         backgroundColor: Theme.of(context).primaryColor,
         title: Text(
-          widget.driverName,
+          "Trip Loans",
           style: GoogleFonts.jost(
             textStyle: const TextStyle(
               fontSize: 22,
@@ -194,7 +217,7 @@ class _DriverLoansState extends State<DriverLoans> {
                                       padding: EdgeInsets.all(14),
                                       child: CircleAvatar(
                                         backgroundImage:
-                                            AssetImage('images/driver.png'),
+                                            AssetImage('images/truck.jpg'),
                                         radius: 35,
                                       ),
                                     ),

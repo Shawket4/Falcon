@@ -31,16 +31,18 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge.dart' as bridge;
 // const String SERVER_IP = 'http://192.168.103.208:3001';
 // const String SERVER_IP = 'https://dentex.app:3001';
 // const String SERVER_IP = 'https://156.204.195.233:3001';
-const SERVER_IP = 'http://192.168.85.208:3001';
+const SERVER_IP = 'http://192.168.1.7:3001';
+// const SERVER_IP = 'http://165.22.31.49:3001';
 // const SERVER_IP = 'http://92.205.60.182:3001/api';
 
 var jwt = "";
+
 Widget? currentWidget;
 var brightness = SchedulerBinding.instance.window.platformBrightness;
 bool isDarkMode = brightness == Brightness.dark;
 late DynamicLibrary lib;
-
 late ApexImpl impl;
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   if (Platform.isAndroid || Platform.isWindows || Platform.isIOS) {
@@ -227,10 +229,10 @@ class MainWidget extends StatelessWidget {
             if (snapshot.data != "") {
               var str = snapshot.data.toString();
               jwt = jsonDecode(str)["jwt"];
-              currentWidget = CarProgressScreen(
-                jwt: jwt,
-                changeDrawerState: _changeDrawerState,
-              );
+              // currentWidget = CarProgressScreen(
+              //   jwt: jwt,
+              //   changeDrawerState: _changeDrawerState,
+              // );
               // var jwt = jsonDecode(str)["jwt"];
               if (jwt.length < 3) {
                 return const LoginScreen();
@@ -345,16 +347,6 @@ Widget buildDrawerItem({
   );
 }
 
-final GlobalKey<ScaffoldState> _key = GlobalKey();
-
-void _changeDrawerState() {
-  if (_key.currentState!.isDrawerOpen) {
-    _key.currentState!.closeDrawer();
-  } else {
-    _key.currentState!.openDrawer();
-  }
-}
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, required this.jwt});
   final String jwt;
@@ -368,8 +360,19 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {});
   }
 
+  // final GlobalKey<ScaffoldState> _key = GlobalKey();
+
+  // void _changeDrawerState() {
+  //   if (_key.currentState!.isDrawerOpen) {
+  //     _key.currentState!.closeDrawer();
+  //   } else {
+  //     _key.currentState!.openDrawer();
+  //   }
+  // }
+
   @override
   void initState() {
+    currentWidget ??= CarProgressScreen(jwt: jwt);
     super.initState();
   }
 
@@ -381,14 +384,9 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _key,
-      drawer: AppDrawer(
-        jwt: widget.jwt,
-      ),
-      bottomNavigationBar: CustomNavigationBar(
-        update: _update,
-        changeDrawerState: _changeDrawerState,
-      ),
+      // bottomNavigationBar: CustomNavigationBar(
+      //   update: _update,
+      // ),
       body: currentWidget,
     );
   }
@@ -687,10 +685,8 @@ AnimatedContainer AnimatedBar(bool isActive) {
 }
 
 class CustomNavigationBar extends StatefulWidget {
-  const CustomNavigationBar(
-      {super.key, required this.update, required this.changeDrawerState});
+  const CustomNavigationBar({super.key, required this.update});
   final Function update;
-  final Function changeDrawerState;
   @override
   State<CustomNavigationBar> createState() => _CustomNavigationBarState();
 }
@@ -713,7 +709,6 @@ class _CustomNavigationBarState extends State<CustomNavigationBar> {
               onTap: () {
                 currentWidget = CarProgressScreen(
                   jwt: jwt,
-                  changeDrawerState: widget.changeDrawerState,
                 );
                 selectedBottomIndex = 0;
                 widget.update();

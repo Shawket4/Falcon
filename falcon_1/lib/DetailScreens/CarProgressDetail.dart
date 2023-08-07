@@ -3,8 +3,10 @@
 import 'dart:convert';
 
 import 'package:falcon_1/DetailScreens/CloseTripConfirmationScreen.dart';
+import 'package:falcon_1/DriverSalaryScreens/TripLoans.dart';
 import 'package:falcon_1/EditScreens/EditTrip.dart';
 import 'package:falcon_1/Maps/MapHistory.dart';
+import 'package:falcon_1/bridge_generated.dart';
 import 'package:falcon_1/main.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -13,10 +15,13 @@ import 'package:falcon_1/stepper/step.dart' as step;
 import 'package:dio/dio.dart';
 import 'package:intl/intl.dart' as intl;
 
+import '../DriverSalaryScreens/TripExpenses.dart';
+
 class CarProgressDetailScreen extends StatefulWidget {
-  const CarProgressDetailScreen({Key? key, this.trip, required this.jwt})
+  const CarProgressDetailScreen(
+      {Key? key, required this.trip, required this.jwt})
       : super(key: key);
-  final dynamic trip;
+  final Trip trip;
   final String jwt;
   @override
   State<CarProgressDetailScreen> createState() =>
@@ -302,6 +307,15 @@ class _CarProgressDetailScreenState extends State<CarProgressDetailScreen>
                       ),
                     ),
                   ),
+                  Text(
+                    "Receipt No: ${widget.trip.receiptNo}",
+                    style: GoogleFonts.jost(
+                      textStyle: const TextStyle(
+                        fontSize: 20.0,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -355,6 +369,73 @@ class _CarProgressDetailScreenState extends State<CarProgressDetailScreen>
           ),
         ),
         body(),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => TripExpenses(
+                      jwt: widget.jwt,
+                      id: widget.trip.id,
+                    ),
+                  ),
+                );
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Padding(
+                  padding:
+                      EdgeInsets.symmetric(vertical: 14.0, horizontal: 35.0),
+                  child: Text(
+                    "Expenses",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 22,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => TripLoans(
+                      jwt: widget.jwt,
+                      id: widget.trip.id,
+                    ),
+                  ),
+                );
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Padding(
+                  padding:
+                      EdgeInsets.symmetric(vertical: 14.0, horizontal: 50.0),
+                  child: Text(
+                    "Loans",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 22,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -391,7 +472,7 @@ class _CarProgressDetailScreenState extends State<CarProgressDetailScreen>
           height: 10.0,
         ),
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
             GestureDetector(
               onTap: () async {
@@ -432,20 +513,19 @@ class _CarProgressDetailScreenState extends State<CarProgressDetailScreen>
                     );
                 setState(() {
                   Navigator.pop(dialogContext);
+                  Navigator.pop(context);
                   // Rebuild Whole Page
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => HomeScreen(
-                        jwt: widget.jwt,
-                      ),
+                      builder: (_) => const MainWidget(),
                     ),
                   );
                 });
               },
               child: Container(
-                height: 50,
-                width: 160,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 45, vertical: 15),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10.0),
                   color: Colors.red,
@@ -522,20 +602,21 @@ class _CarProgressDetailScreenState extends State<CarProgressDetailScreen>
                           );
                       setState(() {
                         Navigator.pop(dialogContext);
+                        Navigator.pop(context);
                         // Rebuild Whole Page
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => HomeScreen(
-                              jwt: widget.jwt,
-                            ),
+                            builder: (_) => const MainWidget(),
                           ),
                         );
                       });
                     },
                     child: Container(
-                      width: 160,
-                      height: 50,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 58,
+                        vertical: 15,
+                      ),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10.0),
                         color: Colors.green,
@@ -621,8 +702,8 @@ class _CarProgressDetailScreenState extends State<CarProgressDetailScreen>
                       // });
                     },
                     child: Container(
-                      width: 160,
-                      height: 50,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 35, vertical: 15),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10.0),
                         color: Colors.green,

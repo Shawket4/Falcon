@@ -2,7 +2,7 @@
 
 import 'dart:convert';
 import 'package:dropdown_search/dropdown_search.dart';
-import 'package:falcon_1/Screens/CarProgressScreen.dart';
+import 'package:falcon_1/bridge_generated.dart';
 import 'package:falcon_1/main.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +14,7 @@ import 'package:lottie/lottie.dart';
 class EditCarTripScreen extends StatefulWidget {
   EditCarTripScreen(this.jwt, this.trip);
   final String jwt;
-  final dynamic trip;
+  final Trip trip;
 
   // Current Date in the format of YYYY-MM-DD
   late String currentDate;
@@ -30,6 +30,7 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
   int index = 0;
   final List<TextEditingController> _dropOffPointControllers = [];
   final List<TextEditingController> _gasTypeControllers = [];
+  final TextEditingController _receiptNoController = TextEditingController();
   final TextEditingController _driverNameController = TextEditingController();
   var noOfDropOfPoints = 0;
   var DropOffPoints = [];
@@ -57,6 +58,7 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
     "Gas 95",
     "Diesel",
     "Mazoot",
+    "Other",
     "Empty",
   ];
 
@@ -98,7 +100,7 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
             _gasTypeControllers.add(TextEditingController());
           }
         });
-        Drivers.add("غير محدد");
+
         var DriverReq =
             await dio.post("$SERVER_IP/api/GetDrivers").then((response) {
           Drivers = response.data;
@@ -112,11 +114,11 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
             await dio.get("$SERVER_IP/api/GetLocations").then((response) {
           var str = response.data;
           for (var terminal in str["Terminals"]) {
-            Terminals.add(terminal);
+            Terminals.add(terminal["name"]);
           }
 
           for (var customer in str["Customers"]) {
-            Customers.add(customer);
+            Customers.add(customer["name"]);
           }
           selectedCustomer = Customers[0];
           for (var i = 0; i < 6; i++) {
@@ -159,6 +161,7 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
     selectedTerminal =
         widget.trip.stepCompleteTimeDb.terminal.terminalName.toString();
     selectedGasType = gasTypes[0];
+    _receiptNoController.text = widget.trip.receiptNo;
     super.initState();
   }
 
@@ -227,7 +230,7 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
             appBar: AppBar(
               centerTitle: true,
               backgroundColor: Theme.of(context).primaryColor,
-              title: const Text("تعديل الرحلة"),
+              title: const Text("Edit Trip"),
             ),
             body: Center(
               child: SafeArea(
@@ -288,6 +291,16 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
                       //     // ),
                       //   ],
                       // ),
+                      TextField(
+                        controller: _receiptNoController,
+                        decoration: const InputDecoration(
+                          labelText: "Receipt No",
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 15,
+                      ),
                       DropdownSearch<String>(
                         dropdownSearchTextAlign: TextAlign.left,
                         searchFieldProps: TextFieldProps(
@@ -822,6 +835,7 @@ class _EditCarTripScreenState extends State<EditCarTripScreen> {
                                         },
                                         "drop_off_points": DropOffPoints
                                       },
+                                      "receipt_no": _receiptNoController.text,
                                       // "FeeRate":
                                       //     double.parse(_feeRateController.text),
                                     },

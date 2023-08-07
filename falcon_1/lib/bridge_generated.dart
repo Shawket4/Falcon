@@ -86,6 +86,7 @@ class Trip {
   final String startTime;
   final String endTime;
   final bool isClosed;
+  final String receiptNo;
 
   const Trip({
     required this.id,
@@ -109,6 +110,7 @@ class Trip {
     required this.startTime,
     required this.endTime,
     required this.isClosed,
+    required this.receiptNo,
   });
 }
 
@@ -216,8 +218,8 @@ class ApexImpl implements Apex {
 
   Trip _wire2api_trip(dynamic raw) {
     final arr = raw as List<dynamic>;
-    if (arr.length != 21)
-      throw Exception('unexpected arr length: expect 21 but see ${arr.length}');
+    if (arr.length != 22)
+      throw Exception('unexpected arr length: expect 22 but see ${arr.length}');
     return Trip(
       id: _wire2api_u32(arr[0]),
       createdAt: _wire2api_String(arr[1]),
@@ -240,6 +242,7 @@ class ApexImpl implements Apex {
       startTime: _wire2api_String(arr[18]),
       endTime: _wire2api_String(arr[19]),
       isClosed: _wire2api_bool(arr[20]),
+      receiptNo: _wire2api_String(arr[21]),
     );
   }
 

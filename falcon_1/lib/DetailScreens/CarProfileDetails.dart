@@ -5,7 +5,6 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:falcon_1/DetailScreens/ImageView.dart';
 import 'package:falcon_1/EditScreens/EditCar.dart';
 import 'package:falcon_1/main.dart';
 import 'package:flutter/material.dart';
@@ -37,7 +36,7 @@ class _CarProfileDetailsState extends State<CarProfileDetails> {
     compartments = widget.car["json_compartments"];
     carDetails.add(
       Text(
-        "رقم السيارة: ${widget.car["car_no_plate"]}",
+        "Car Plate: ${widget.car["car_no_plate"]}",
         style: const TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w600,
@@ -46,17 +45,17 @@ class _CarProfileDetailsState extends State<CarProfileDetails> {
     );
     carDetails.add(
       Text(
-        "حجم التانك: ${widget.car["tank_capacity"]}",
+        "Tank Capacity: ${widget.car["tank_capacity"]}",
         style: const TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w600,
         ),
       ),
     );
-    print(DateTime.parse(widget.car["license_expiration_date"]));
+
     carDetails.add(
       Text(
-        "الرخصه ساريه حتي: ${widget.car["license_expiration_date"]}",
+        "Car License Expiration: ${widget.car["license_expiration_date"]}",
         style: TextStyle(
           color: DateTime.parse(widget.car["license_expiration_date"])
                   .isBefore(DateTime.now())
@@ -71,7 +70,7 @@ class _CarProfileDetailsState extends State<CarProfileDetails> {
 
     carDetails.add(
       Text(
-        "رخصة العيار ساريه حتي: ${widget.car["calibration_expiration_date"]}",
+        "Calibration Expiration: ${widget.car["calibration_expiration_date"]}",
         style: TextStyle(
           color: DateTime.parse(widget.car["calibration_expiration_date"])
                   .isBefore(DateTime.now())
@@ -86,7 +85,7 @@ class _CarProfileDetailsState extends State<CarProfileDetails> {
     if (widget.car["tank_license_expiration_date"] != "") {
       carDetails.add(
         Text(
-          "رخصة التانك ساريه حتي: ${widget.car["tank_license_expiration_date"]}",
+          "Tank License Expiration: ${widget.car["tank_license_expiration_date"]}",
           style: TextStyle(
             color: DateTime.parse(widget.car["tank_license_expiration_date"])
                     .isBefore(DateTime.now())
@@ -102,7 +101,7 @@ class _CarProfileDetailsState extends State<CarProfileDetails> {
 
     carDetails.add(
       Text(
-        "عدد عيون التانك: ${widget.car["json_compartments"].length}",
+        "Number Of Compartments: ${widget.car["json_compartments"].length}",
         style: const TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w600,
@@ -112,7 +111,7 @@ class _CarProfileDetailsState extends State<CarProfileDetails> {
     for (var i = 0; i < compartments.length; i++) {
       carDetails.add(
         Text(
-          'حجم العين رقم ${i + 1}: ${compartments[i]}',
+          'Compartment ${i + 1} Size: ${compartments[i]}',
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w600,
@@ -293,7 +292,6 @@ class _CarProfileDetailsState extends State<CarProfileDetails> {
                         builder: (_) => EditCarScreen(
                           car: widget.car,
                           jwt: widget.jwt,
-                          imageBytes: imageBytes,
                         ),
                       ),
                     );
@@ -404,8 +402,7 @@ class _CarProfileDetailsState extends State<CarProfileDetails> {
               ],
               backgroundColor: Theme.of(context).primaryColor,
               title: Text(
-                'تفاصيل السيارة ${widget.car["car_no_plate"]}',
-                textDirection: TextDirection.ltr,
+                widget.car["car_no_plate"],
               ),
             ),
             body: ListView(
@@ -441,21 +438,18 @@ class _CarProfileDetailsState extends State<CarProfileDetails> {
                 ),
                 Container(
                   padding: const EdgeInsets.all(15),
-                  child: Directionality(
-                    textDirection: TextDirection.rtl,
-                    child: ListView.builder(
-                      physics: const NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      itemCount: carDetails.length,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          child: carDetails[index],
-                          padding: const EdgeInsets.all(
-                            10,
-                          ),
-                        );
-                      },
-                    ),
+                  child: ListView.builder(
+                    physics: const NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    itemCount: carDetails.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        child: carDetails[index],
+                        padding: const EdgeInsets.all(
+                          10,
+                        ),
+                      );
+                    },
                   ),
                 ),
                 // widget.car["CarLicenseImageName"] == ""
@@ -497,40 +491,6 @@ class _CarProfileDetailsState extends State<CarProfileDetails> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    if (widget.car["CarLicenseImageName"] != "")
-                      GestureDetector(
-                        onTap: () async {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => ImageView(
-                                images: imageBytes,
-                                name: widget.car["car_no_plate"],
-                                type: "Car",
-                                id: widget.car["ID"],
-                              ),
-                            ),
-                          );
-                        },
-                        child: Container(
-                          width: 160,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10.0),
-                            color: Theme.of(context).primaryColor,
-                          ),
-                          child: const Center(
-                            child: Text(
-                              "عرض الصور",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20.0,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
                     if (gpsCompatible)
                       GestureDetector(
                         onTap: () async {
@@ -545,7 +505,7 @@ class _CarProfileDetailsState extends State<CarProfileDetails> {
                           ),
                           child: const Center(
                             child: Text(
-                              "فتح الخرائط",
+                              "Show On Map",
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 20.0,

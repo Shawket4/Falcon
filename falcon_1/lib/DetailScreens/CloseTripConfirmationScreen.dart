@@ -103,7 +103,7 @@ class _CloseTripConfirmationState extends State<CloseTripConfirmation> {
       appBar: AppBar(
         centerTitle: true,
         backgroundColor: Theme.of(context).primaryColor,
-        title: const Text("تأكيد اغلاق النقلة"),
+        title: const Text("Close Trip"),
       ),
       body: ListView(
         children: [
@@ -260,13 +260,12 @@ class _CloseTripConfirmationState extends State<CloseTripConfirmation> {
                     );
                 setState(() {
                   Navigator.pop(dialogContext);
+                  Navigator.pop(context);
                   // Rebuild Whole Page
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => HomeScreen(
-                        jwt: widget.jwt,
-                      ),
+                      builder: (_) => const MainWidget(),
                     ),
                   );
                 });
@@ -280,7 +279,7 @@ class _CloseTripConfirmationState extends State<CloseTripConfirmation> {
                 height: 50,
                 alignment: Alignment.center,
                 child: const Text(
-                  "اغلاق النقلة",
+                  "Close Trip",
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,

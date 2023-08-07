@@ -18,22 +18,19 @@ import '../DetailScreens/ImageViewUpdateCar.dart';
 import 'package:http_parser/http_parser.dart';
 
 class EditCarScreen extends StatefulWidget {
-  const EditCarScreen(
-      {Key? key,
-      @required this.car,
-      @required this.jwt,
-      required this.imageBytes})
-      : super(key: key);
+  const EditCarScreen({
+    Key? key,
+    @required this.car,
+    @required this.jwt,
+  }) : super(key: key);
   final dynamic car;
   final String? jwt;
-  final Map<String, Uint8List> imageBytes;
+  // final Map<String, Uint8List> imageBytes;
   @override
   State<EditCarScreen> createState() => _EditCarScreenState();
 }
 
 int tankCapacity = 0;
-var request =
-    http.MultipartRequest("POST", Uri.parse("$SERVER_IP/api/UpdateCar"));
 final _carPlateNoController = TextEditingController();
 final _compartment1Controller = TextEditingController();
 final _compartment2Controller = TextEditingController();
@@ -67,7 +64,7 @@ late File tankLicenseImgFileBack;
 late Uint8List tankLicenseImgBytesBack;
 
 List<String> _transporterList = [];
-List<String> _carTypes = ["فرداني", "تريلا"];
+List<String> _carTypes = ["No Trailer", "Trailer"];
 String? selectedTransporter;
 String? selectedCarType = _carTypes[0];
 
@@ -96,8 +93,6 @@ Future<Object> get loadData async {
 class _EditCarScreenState extends State<EditCarScreen> {
   @override
   void initState() {
-    request =
-        http.MultipartRequest("POST", Uri.parse("$SERVER_IP/api/UpdateCar"));
     _carPlateNoController.text = widget.car["car_no_plate"];
     // Loop over car["Compartments"] and set the text controllers to the values
     List compartments = widget.car["json_compartments"];
@@ -117,8 +112,7 @@ class _EditCarScreenState extends State<EditCarScreen> {
           break;
       }
     }
-    List<dynamic> imageBytesList = [];
-    imageBytesList = widget.imageBytes.entries.map((e) => e.value).toList();
+
     selectedCarType = widget.car["car_type"];
     selectedTransporter = widget.car["transporter"];
     _licenseExpiryDateController.text =
@@ -127,34 +121,33 @@ class _EditCarScreenState extends State<EditCarScreen> {
         widget.car["calibration_expiration_date"].toString();
     _tankLicenseExpiryDateController.text =
         widget.car["tank_license_expiration_date"].toString();
-
-    if (imageBytesList[0] != null) {
-      carLicenseImgBytes = imageBytesList[0];
-    }
-    if (imageBytesList[1] != null) {
-      carLicenseImgBytesBack = imageBytesList[1];
-    }
-    if (widget.car["car_type"] == "تريلا") {
-      if (imageBytesList[2] != null) {
-        tankLicenseImgBytes = imageBytesList[2];
-      }
-      if (imageBytesList[3] != null) {
-        tankLicenseImgBytesBack = imageBytesList[3];
-      }
-      if (imageBytesList[4] != null) {
-        calibrationLicenseImgBytes = imageBytesList[4];
-      }
-      if (imageBytesList[5] != null) {
-        calibrationLicenseImgBytesBack = imageBytesList[5];
-      }
-    } else {
-      if (imageBytesList[2] != null) {
-        calibrationLicenseImgBytes = imageBytesList[2];
-      }
-      if (imageBytesList[3] != null) {
-        calibrationLicenseImgBytesBack = imageBytesList[3];
-      }
-    }
+    // if (imageBytesList[0] != null) {
+    //   carLicenseImgBytes = imageBytesList[0];
+    // }
+    // if (imageBytesList[1] != null) {
+    //   carLicenseImgBytesBack = imageBytesList[1];
+    // }
+    // if (widget.car["car_type"] == "تريلا") {
+    //   if (imageBytesList[2] != null) {
+    //     tankLicenseImgBytes = imageBytesList[2];
+    //   }
+    //   if (imageBytesList[3] != null) {
+    //     tankLicenseImgBytesBack = imageBytesList[3];
+    //   }
+    //   if (imageBytesList[4] != null) {
+    //     calibrationLicenseImgBytes = imageBytesList[4];
+    //   }
+    //   if (imageBytesList[5] != null) {
+    //     calibrationLicenseImgBytesBack = imageBytesList[5];
+    //   }
+    // } else {
+    //   if (imageBytesList[2] != null) {
+    //     calibrationLicenseImgBytes = imageBytesList[2];
+    //   }
+    //   if (imageBytesList[3] != null) {
+    //     calibrationLicenseImgBytesBack = imageBytesList[3];
+    //   }
+    // }
 
     super.initState();
   }
@@ -460,25 +453,25 @@ class _EditCarScreenState extends State<EditCarScreen> {
                           ),
                         ),
                         const SizedBox(height: 20),
-                        Center(
-                          child: TextButton(
-                            onPressed: () async {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => ImageViewUpdateCar(
-                                    images: widget.imageBytes,
-                                    name: widget.car["car_no_plate"],
-                                    carType: widget.car["car_type"],
-                                  ),
-                                ),
-                              );
-                            },
-                            child: const Text(
-                              "Show Photos",
-                            ),
-                          ),
-                        ),
+                        // Center(
+                        //   child: TextButton(
+                        //     onPressed: () async {
+                        //       Navigator.push(
+                        //         context,
+                        //         MaterialPageRoute(
+                        //           builder: (_) => ImageViewUpdateCar(
+                        //             images: widget.imageBytes,
+                        //             name: widget.car["car_no_plate"],
+                        //             carType: widget.car["car_type"],
+                        //           ),
+                        //         ),
+                        //       );
+                        //     },
+                        //     child: const Text(
+                        //       "Show Photos",
+                        //     ),
+                        //   ),
+                        // ),
                         const SizedBox(height: 20),
                         Center(
                           // ignore: deprecated_member_use
@@ -543,97 +536,151 @@ class _EditCarScreenState extends State<EditCarScreen> {
                                   tankCapacity +=
                                       int.parse(_compartment4Controller.text);
                                 }
-                                request.headers['Cookie'] = "jwt=${widget.jwt}";
-                                request.fields['request'] = jsonEncode({
-                                  "ID": widget.car["ID"],
-                                  "car_no_plate": _carPlateNoController.text,
-                                  //Tank Capacity to int
-                                  "tank_capacity": tankCapacity,
-                                  "car_type": selectedCarType.toString(),
-                                  "transporter": selectedTransporter,
-                                  "compartments": <int>[
-                                    if (_compartment1Controller.text != "")
-                                      int.parse(_compartment1Controller.text),
-                                    if (_compartment2Controller.text != "")
-                                      int.parse(_compartment2Controller.text),
-                                    if (_compartment3Controller.text != "")
-                                      int.parse(_compartment3Controller.text),
-                                    if (_compartment4Controller.text != "")
-                                      int.parse(_compartment4Controller.text),
-                                  ],
-                                  "license_expiration_date":
-                                      _licenseExpiryDateController.text,
-                                  "calibration_expiration_date":
-                                      _calibrationExpiryDateController.text,
-                                  "tank_license_expiration_date":
-                                      selectedCarType == _carTypes[0]
-                                          ? ""
-                                          : _tankLicenseExpiryDateController
-                                              .text,
-                                });
-                                if (carLicenseImgBytes.isNotEmpty) {
-                                  request.files.add(
-                                    http.MultipartFile.fromBytes(
-                                      'CarLicense',
-                                      carLicenseImgBytes,
-                                      filename:
-                                          widget.car["car_license_image_name"],
-                                      contentType: MediaType("image", "jpeg"),
-                                    ),
-                                  );
-                                }
+                                // request.headers['Cookie'] = "jwt=${widget.jwt}";
+                                // request.fields['request'] = jsonEncode({
+                                //   "ID": widget.car["ID"],
+                                //   "car_no_plate": _carPlateNoController.text,
+                                //   //Tank Capacity to int
+                                //   "tank_capacity": tankCapacity,
+                                //   "car_type": selectedCarType.toString(),
+                                //   "transporter": selectedTransporter,
+                                //   "compartments": <int>[
+                                //     if (_compartment1Controller.text != "")
+                                //       int.parse(_compartment1Controller.text),
+                                //     if (_compartment2Controller.text != "")
+                                //       int.parse(_compartment2Controller.text),
+                                //     if (_compartment3Controller.text != "")
+                                //       int.parse(_compartment3Controller.text),
+                                //     if (_compartment4Controller.text != "")
+                                //       int.parse(_compartment4Controller.text),
+                                //   ],
+                                //   "license_expiration_date":
+                                //       _licenseExpiryDateController.text,
+                                //   "calibration_expiration_date":
+                                //       _calibrationExpiryDateController.text,
+                                //   "tank_license_expiration_date":
+                                //       selectedCarType == _carTypes[0]
+                                //           ? ""
+                                //           : _tankLicenseExpiryDateController
+                                //               .text,
+                                // });
+                                // if (carLicenseImgBytes.isNotEmpty) {
+                                //   request.files.add(
+                                //     http.MultipartFile.fromBytes(
+                                //       'CarLicense',
+                                //       carLicenseImgBytes,
+                                //       filename:
+                                //           widget.car["car_license_image_name"],
+                                //       contentType: MediaType("image", "jpeg"),
+                                //     ),
+                                //   );
+                                // }
 
-                                request.files.add(
-                                  http.MultipartFile.fromBytes(
-                                    'CarLicenseBack',
-                                    carLicenseImgBytesBack,
-                                    filename: widget
-                                        .car["car_license_image_name_back"],
-                                    contentType: MediaType("image", "jpeg"),
-                                  ),
-                                );
+                                // request.files.add(
+                                //   http.MultipartFile.fromBytes(
+                                //     'CarLicenseBack',
+                                //     carLicenseImgBytesBack,
+                                //     filename: widget
+                                //         .car["car_license_image_name_back"],
+                                //     contentType: MediaType("image", "jpeg"),
+                                //   ),
+                                // );
 
-                                request.files.add(
-                                  http.MultipartFile.fromBytes(
-                                    'CalibrationLicense',
-                                    calibrationLicenseImgBytes,
-                                    filename: widget
-                                        .car["calibration_license_image_name"],
-                                    contentType: MediaType("image", "jpeg"),
-                                  ),
-                                );
-                                request.files.add(
-                                  http.MultipartFile.fromBytes(
-                                    'CalibrationLicenseBack',
-                                    calibrationLicenseImgBytesBack,
-                                    filename: widget.car[
-                                        "calibration_license_image_name_back"],
-                                    contentType: MediaType("image", "jpeg"),
-                                  ),
-                                );
-                                if (selectedCarType == _carTypes[1]) {
-                                  request.files.add(
-                                    http.MultipartFile.fromBytes(
-                                      'TankLicense',
-                                      tankLicenseImgBytes,
-                                      filename:
-                                          widget.car["tank_license_image_name"],
-                                      contentType: MediaType("image", "jpeg"),
-                                    ),
-                                  );
-                                  request.files.add(
-                                    http.MultipartFile.fromBytes(
-                                      'TankLicenseBack',
-                                      tankLicenseImgBytesBack,
-                                      filename: widget
-                                          .car["tank_license_image_name_back"],
-                                      contentType: MediaType("image", "jpeg"),
-                                    ),
-                                  );
-                                }
+                                // request.files.add(
+                                //   http.MultipartFile.fromBytes(
+                                //     'CalibrationLicense',
+                                //     calibrationLicenseImgBytes,
+                                //     filename: widget
+                                //         .car["calibration_license_image_name"],
+                                //     contentType: MediaType("image", "jpeg"),
+                                //   ),
+                                // );
+                                // request.files.add(
+                                //   http.MultipartFile.fromBytes(
+                                //     'CalibrationLicenseBack',
+                                //     calibrationLicenseImgBytesBack,
+                                //     filename: widget.car[
+                                //         "calibration_license_image_name_back"],
+                                //     contentType: MediaType("image", "jpeg"),
+                                //   ),
+                                // );
+                                // if (selectedCarType == _carTypes[1]) {
+                                //   request.files.add(
+                                //     http.MultipartFile.fromBytes(
+                                //       'TankLicense',
+                                //       tankLicenseImgBytes,
+                                //       filename:
+                                //           widget.car["tank_license_image_name"],
+                                //       contentType: MediaType("image", "jpeg"),
+                                //     ),
+                                //   );
+                                //   request.files.add(
+                                //     http.MultipartFile.fromBytes(
+                                //       'TankLicenseBack',
+                                //       tankLicenseImgBytesBack,
+                                //       filename: widget
+                                //           .car["tank_license_image_name_back"],
+                                //       contentType: MediaType("image", "jpeg"),
+                                //     ),
+                                //   );
+                                // }
 
                                 try {
-                                  var response = request.send().then((value) {
+                                  var response = http
+                                      .post(
+                                          Uri.parse("$SERVER_IP/api/UpdateCar"),
+                                          headers: {
+                                            "Content-Type": "application/json",
+                                            "Cookie": "jwt=${widget.jwt}",
+                                          },
+                                          body: jsonEncode({
+                                            "ID": widget.car["ID"],
+                                            "car_no_plate":
+                                                _carPlateNoController.text,
+                                            //Tank Capacity to int
+                                            "tank_capacity": tankCapacity,
+                                            "car_type":
+                                                selectedCarType.toString(),
+                                            "transporter": selectedTransporter,
+                                            "compartments": <int>[
+                                              if (_compartment1Controller
+                                                      .text !=
+                                                  "")
+                                                int.parse(
+                                                    _compartment1Controller
+                                                        .text),
+                                              if (_compartment2Controller
+                                                      .text !=
+                                                  "")
+                                                int.parse(
+                                                    _compartment2Controller
+                                                        .text),
+                                              if (_compartment3Controller
+                                                      .text !=
+                                                  "")
+                                                int.parse(
+                                                    _compartment3Controller
+                                                        .text),
+                                              if (_compartment4Controller
+                                                      .text !=
+                                                  "")
+                                                int.parse(
+                                                    _compartment4Controller
+                                                        .text),
+                                            ],
+                                            "license_expiration_date":
+                                                _licenseExpiryDateController
+                                                    .text,
+                                            "calibration_expiration_date":
+                                                _calibrationExpiryDateController
+                                                    .text,
+                                            "tank_license_expiration_date":
+                                                selectedCarType == _carTypes[0]
+                                                    ? ""
+                                                    : _tankLicenseExpiryDateController
+                                                        .text,
+                                          }))
+                                      .then((value) {
                                     if (value.statusCode == 200) {
                                       //Clear all the fields
                                       tankCapacity = 0;
