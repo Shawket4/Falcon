@@ -129,6 +129,7 @@ impl support::IntoDart for Trip {
             self.start_time.into_dart(),
             self.end_time.into_dart(),
             self.is_closed.into_dart(),
+            self.receipt_no.into_dart(),
         ]
         .into_dart()
     }

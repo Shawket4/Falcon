@@ -26,6 +26,7 @@ pub struct Trip {
     pub start_time: String,
     pub end_time: String,
     pub is_closed: bool,
+    pub receipt_no: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -59,5 +60,5 @@ pub struct StepCompleteTimeDB {
 
 pub fn return_trips(json: String) -> anyhow::Result<Vec<Trip>> {
     let trips: Vec<Trip> = serde_json::from_str(json.as_str())?;
-    Ok((trips))
+    Ok(trips)
 }
