@@ -105,6 +105,7 @@ func NextStep(c *fiber.Ctx) error {
 			log.Println(err.Error())
 			return err
 		}
+		fmt.Println(Trip)
 
 		if !Trip.StepCompleteTime.Terminal.Status {
 			Trip.StepCompleteTime.Terminal.Status = true
@@ -339,28 +340,14 @@ func CompleteTrip(c *fiber.Ctx) error {
 		}
 		trip.EndTime = bodyData.EndDateFormatted + "%20" + bodyData.EndTimeFormatted
 		trip.StartTime = bodyData.StartDateFormatted + "%20" + bodyData.StartTimeFormatted
-		var truckID string
+		// var truckID string
 		fmt.Println(Scrapper.VehicleStatusList)
-		for _, vehicle := range Scrapper.VehicleStatusList {
-			if vehicle.PlateNo == car.CarNoPlate {
-				truckID = vehicle.ID
-			}
-		}
-		feeRate, mileage, err := Scrapper.GetFeeRate(Scrapper.MileageStruct{VehiclePlateNo: car.CarNoPlate, StartTime: trip.StartTime, EndTime: trip.EndTime, VehicleID: truckID})
-		if err != nil {
-			log.Println(err.Error())
-		}
-		go func() {
-			time.Sleep(time.Second * 5)
-			route, err := Scrapper.GetTripRouteHistory(trip.ID)
-			if err != nil {
-				log.Println(err)
-			}
-			trip.Route = route
-			if err := Models.DB.Save(&trip).Error; err != nil {
-				log.Println(err.Error())
-			}
-		}()
+
+		// feeRate, mileage, err := Scrapper.GetFeeRate(Scrapper.MileageStruct{VehiclePlateNo: car.CarNoPlate, StartTime: trip.StartTime, EndTime: trip.EndTime, VehicleID: truckID})
+		// if err != nil {
+		// 	log.Println(err.Error())
+		// }
+		// fmt.Println(mileage)
 		if err := json.Unmarshal(trip.StepCompleteTimeDB, &trip.StepCompleteTime); err != nil {
 			log.Println(err.Error())
 			return err
@@ -376,13 +363,28 @@ func CompleteTrip(c *fiber.Ctx) error {
 			}
 		}
 		trip.StepCompleteTimeDB, _ = json.Marshal(trip.StepCompleteTime)
-		trip.FeeRate = feeRate
-		trip.Mileage = mileage
-		trip.IsClosed = true
 		if err := Models.DB.Save(&trip).Error; err != nil {
 			log.Println(err.Error())
 			return err
 		}
+		go func() {
+			time.Sleep(time.Second * 5)
+			route, err := Scrapper.GetTripRouteHistory(trip.ID)
+			if err != nil {
+				log.Println(err)
+			}
+			trip.Route = route
+			// trip.FeeRate = feeRate
+			// trip.Mileage = mileage
+			trip.Route.DriverFees = trip.Route.Mileage * 2
+			trip.DriverFees = trip.Route.DriverFees
+			trip.Mileage = trip.Route.Mileage
+			trip.FeeRate = trip.Route.DriverFees
+			trip.IsClosed = true
+			if err := Models.DB.Save(&trip).Error; err != nil {
+				log.Println(err.Error())
+			}
+		}()
 		return c.JSON(fiber.Map{
 			"message": "Trip Closed Successfully",
 		})

@@ -28,6 +28,8 @@ type FinalStructResponse struct {
 	TripStructID uint
 	Points       []RoutePoint
 	TripSummary  TripSummary `json:"trip_summary"`
+	Mileage      float64     `json:"mileage"`
+	DriverFees   float64     `json:"driver_fees"`
 }
 
 type TripSummary struct {
@@ -41,6 +43,22 @@ type TripSummary struct {
 	TotalDisConnectedTime string `yaml:"TotalDisConnectedTime"`
 	Sensor1               string `yaml:"Sensor1"`
 	Sensor2               string `yaml:"Sensor2"`
+}
+
+type Expense struct {
+	gorm.Model
+	TripStructID uint
+	Cost         float64 `json:"cost"`
+	Description  string  `json:"description"`
+	Date         string  `json:"date"`
+}
+
+type Loan struct {
+	gorm.Model
+	TripStructID uint
+	Amount       float64 `json:"amount"`
+	Method       string  `json:"method"`
+	Date         string  `json:"date"`
 }
 
 type TripStruct struct {
@@ -72,9 +90,12 @@ type TripStruct struct {
 	NoOfDropOffPoints  int                 `json:"no_of_drop_off_points"`
 	Date               string              `json:"date"`
 	FeeRate            float64             `json:"fee_rate"`
-	Mileage            float64             `json:"mileage"`
 	StartTime          string              `json:"start_time"`
 	EndTime            string              `json:"end_time"`
+	Mileage            float64             `json:"mileage"`
+	DriverFees         float64             `json:"driver_fees"`
 	IsClosed           bool                `json:"is_closed"`
 	Route              FinalStructResponse `json:"route"`
+	Expenses           []Expense
+	Loans              []Loan
 }

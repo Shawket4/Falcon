@@ -143,7 +143,7 @@ func GenerateTripsExcelTable(c *fiber.Ctx) error {
 			Days := DaysBetweenDates(data.DateFrom, data.DateTo)
 			var trips []Models.TripStruct
 
-			if err := Models.DB.Model(&Models.TripStruct{}).Where("`date` BETWEEN DATE_SUB(?, INTERVAL ? DAY) AND ? ", data.DateTo, Days, data.DateTo).Order("date").Find(&trips).Error; err != nil {
+			if err := Models.DB.Model(&Models.TripStruct{}).Where("`date` BETWEEN DATE_SUB(?, INTERVAL ? DAY) AND ? ", data.DateTo, Days, data.DateTo).Preload("Route").Order("date").Find(&trips).Error; err != nil {
 				log.Println(err)
 				return err
 			}
@@ -157,7 +157,7 @@ func GenerateTripsExcelTable(c *fiber.Ctx) error {
 				excelTrip.TruckNo = trip.CarNoPlate
 				excelTrip.PickUpLocation = trip.PickUpPoint
 				excelTrip.FeeRate = trip.FeeRate
-				excelTrip.Mileage = trip.Mileage
+				excelTrip.Mileage = trip.Route.Mileage
 				var StepCompleteTime struct {
 					//{"TruckLoad": ["", "Exxon Mobile Mostrod", true], "DropOffPoints": [["", "هاي ميكس بدر", true], ["", "هاي ميكس بدر", true]]}
 					Terminal struct {

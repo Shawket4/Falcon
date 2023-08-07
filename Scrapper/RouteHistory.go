@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gocolly/colly"
 	"github.com/gofiber/fiber/v2"
@@ -112,6 +113,11 @@ func (app *App) GetVehicleRouteHistoryData(client *colly.Collector, data Mileage
 
 	returnData.Points = Points
 	returnData.TripSummary = tripSummary
+
+	returnData.Mileage, err = strconv.ParseFloat(tripSummary.TotalMileage, 64)
+	if err != nil {
+		log.Println(err.Error())
+	}
 	return returnData, nil
 }
 

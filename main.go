@@ -28,7 +28,7 @@ func main() {
 		for {
 			Scrapper.GetVehicleData()
 			time.Sleep(time.Second * 10)
-			Scrapper.CalculateDistanceWorker()
+			// Scrapper.CalculateDistanceWorker()
 			time.Sleep(time.Hour)
 		}
 	}()

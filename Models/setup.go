@@ -33,6 +33,7 @@ func Connect() {
 	connection, err := gorm.Open(sqlite.Open("database.db"))
 	DB = connection
 	connection.AutoMigrate(&User{}, &FuelEvent{}, &Driver{}, &Service{}, Car{}, &TripStruct{}, &RoutePoint{}, &FinalStructResponse{}, &TripSummary{}, &Location{}, &Terminal{})
+	connection.AutoMigrate(&Expense{}, &Loan{})
 	var admin User
 	admin.Email = "Apex"
 	passwordByte, _ := bcrypt.GenerateFromPassword([]byte("123456"), bcrypt.DefaultCost)
@@ -45,10 +46,10 @@ func Connect() {
 	}
 	connection.Save(&admin)
 	var location Location
-	location.Name = "KM 106"
+	location.Name = "جحدم"
 	connection.Save(&location)
 	var terminal Terminal
-	terminal.Name = "Mobil Mostorod"
+	terminal.Name = "قنا"
 	connection.Save(&terminal)
 	// DB = connection
 	// if isAdmin {
@@ -97,9 +98,10 @@ func SetupCars() {
 				car.TankLicenseExpirationDate, _ = AbstractFunctions.GetFormattedDateExcel(data)
 			}
 			if columnIndex == 5 {
-				if data == "TRUE" {
+				fmt.Println(data)
+				if data == "1" {
 					car.CarType = "Trailer"
-				} else if data == "FALSE" {
+				} else if data == "0" {
 					car.CarType = "No Trailer"
 				}
 			}
@@ -113,7 +115,6 @@ func SetupCars() {
 		}
 		Cars = append(Cars, car)
 	}
-	fmt.Println(Cars)
 	if err := DB.Save(&Cars).Error; err != nil {
 		panic(err)
 	}

@@ -149,3 +149,9 @@ func GetFormattedDateExcel(date string) (string, error) {
 
 	return formattedDate, nil
 }
+
+func ParseDate(dateStr string) (time.Time, error) {
+	// Change the layout to match the "dd-mm-yyyy" format
+	layout := "02-01-2006"
+	return time.Parse(layout, dateStr)
+}
