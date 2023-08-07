@@ -98,4 +98,5 @@ type TripStruct struct {
 	Route              FinalStructResponse `json:"route"`
 	Expenses           []Expense
 	Loans              []Loan
+	ReceiptNo          string `json:"receipt_no"`
 }

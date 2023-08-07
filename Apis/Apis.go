@@ -94,23 +94,22 @@ func GetProgressOfCars(c *fiber.Ctx) error {
 			// Make Days variable to store the number of days between the two dates
 			// var Days int = DaysBetweenDates(Data.DateFrom, Data.DateTo)
 			Days := 30
-			var Cars []Models.TripStruct
+			var Trips []Models.TripStruct
 			//var trips *sql.Rows
 			if Controllers.CurrentUser.Permission != 0 && Controllers.CurrentUser.Permission != 4 {
-				if err := Models.DB.Model(&Models.TripStruct{}).Find(&Cars).Error; err != nil {
+				if err := Models.DB.Model(&Models.TripStruct{}).Find(&Trips).Error; err != nil {
 					log.Println(err.Error())
 					return err
 				}
 				//trips, err = db.Query("SELECT `CarProgressBarID`, `Car No Plate`, `CarProgressIndex`, `Driver Name`, `StepCompleteTime`, `NoOfDropOffPoints`, `Date`, `Compartments`, `FeeRate`, `Milage`, `start_time`, `end_time`, `IsInTrip` FROM CarProgressBars WHERE Date BETWEEN DATE_SUB(?, INTERVAL ? DAY) AND ? AND `Transporter` = ? ORDER BY `Date` DESC;", Data.DateTo, Days, Data.DateTo, Controllers.CurrentUser.Name)
 			} else if Controllers.CurrentUser.Permission == 4 {
-				if err := Models.DB.Model(&Models.TripStruct{}).Where("date BETWEEN DATE_SUB(?, INTERVAL ? DAY) AND ?", Data.DateTo, Days, Data.DateTo).Find(&Cars).Error; err != nil {
+				if err := Models.DB.Model(&Models.TripStruct{}).Where("date BETWEEN DATE_SUB(?, INTERVAL ? DAY) AND ?", Data.DateTo, Days, Data.DateTo).Find(&Trips).Error; err != nil {
 					log.Println(err.Error())
 					return err
 				}
 				//trips, err = db.Query("SELECT `CarProgressBarID`, `Car No Plate`, `CarProgressIndex`, `Driver Name`, `StepCompleteTime`, `NoOfDropOffPoints`, `Date`, `Compartments`, `FeeRate`, `Milage`, `start_time`, `end_time`, `IsInTrip` FROM CarProgressBars WHERE Date BETWEEN DATE_SUB(?, INTERVAL ? DAY) AND ? ORDER BY `Date` DESC;", Data.DateTo, Days, Data.DateTo)
 			}
-
-			return c.JSON(Cars)
+			return c.JSON(Trips)
 		}
 	} else {
 		return c.JSON(fiber.Map{
@@ -1600,7 +1599,10 @@ func EditCarTrip(c *fiber.Ctx) error {
 			trip.StepCompleteTimeDB = data.StepCompleteTimeDB
 			trip.NoOfDropOffPoints = data.NoOfDropOffPoints
 			trip.Date = data.Date
+			trip.ReceiptNo = data.ReceiptNo
 			trip.Route.Mileage = 0
+			trip.Route.DriverFees = 0
+			trip.DriverFees = 0
 			trip.FeeRate = 0
 			trip.StartTime = data.StartTime
 			trip.EndTime = data.EndTime

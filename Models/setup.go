@@ -8,8 +8,8 @@ import (
 	"strconv"
 
 	"github.com/360EntSecGroup-Skylar/excelize"
-	"github.com/joho/godotenv"
-	"golang.org/x/crypto/bcrypt"
+	// "github.com/joho/godotenv"
+
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -17,9 +17,9 @@ import (
 var DB *gorm.DB
 
 func Connect() {
-	if err := godotenv.Load(".env"); err != nil {
-		log.Fatalf("Error loading .env file")
-	}
+	// if err := godotenv.Load(".env"); err != nil {
+	// 	log.Fatalf("Error loading .env file")
+	// }
 
 	// DbHost := os.Getenv("DB_HOST")
 	// DbUser := os.Getenv("DB_USER")
@@ -34,30 +34,30 @@ func Connect() {
 	DB = connection
 	connection.AutoMigrate(&User{}, &FuelEvent{}, &Driver{}, &Service{}, Car{}, &TripStruct{}, &RoutePoint{}, &FinalStructResponse{}, &TripSummary{}, &Location{}, &Terminal{})
 	connection.AutoMigrate(&Expense{}, &Loan{})
-	var admin User
-	admin.Email = "Apex"
-	passwordByte, _ := bcrypt.GenerateFromPassword([]byte("123456"), bcrypt.DefaultCost)
-	admin.Password = passwordByte
-	admin.Permission = 2
-	admin.Name = "Apex"
-	admin.IsApproved = 1
+	// var admin User
+	// admin.Email = "Apex"
+	// passwordByte, _ := bcrypt.GenerateFromPassword([]byte("123456"), bcrypt.DefaultCost)
+	// admin.Password = passwordByte
+	// admin.Permission = 2
+	// admin.Name = "Apex"
+	// admin.IsApproved = 1
 	if err != nil {
 		log.Println(err)
 	}
-	connection.Save(&admin)
-	var location Location
-	location.Name = "جحدم"
-	connection.Save(&location)
-	var terminal Terminal
-	terminal.Name = "قنا"
-	connection.Save(&terminal)
+	// connection.Save(&admin)
+	// var location Location
+	// location.Name = "جحدم"
+	// connection.Save(&location)
+	// var terminal Terminal
+	// terminal.Name = "قنا"
+	// connection.Save(&terminal)
 	// DB = connection
 	// if isAdmin {
 	// connection.AutoMigrate(&Models.AdminUser{})
 	// } else {
 
 	// }
-	SetupCars()
+	// SetupCars()
 }
 
 func SetupCars() {
