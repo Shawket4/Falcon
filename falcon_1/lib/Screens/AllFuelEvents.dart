@@ -34,6 +34,7 @@ class _AllFuelEventsState extends State<AllFuelEvents> {
           FuelEvent parsedEvent = FuelEvent();
           parsedEvent.EventId = event["ID"];
           parsedEvent.CarNoPlate = event["car_no_plate"];
+          parsedEvent.DriverName = event["driver_name"];
           parsedEvent.Date = event["date"];
           parsedEvent.Liters = double.parse(event["liters"].toStringAsFixed(2));
           parsedEvent.PricePerLiter =
@@ -267,6 +268,7 @@ class _AllFuelEventsState extends State<AllFuelEvents> {
 class FuelEvent {
   late int EventId;
   late String CarNoPlate;
+  late String DriverName;
   late String Date;
   late double Liters;
   late double PricePerLiter;

@@ -162,6 +162,7 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
         jwt: widget.jwt,
       ),
       // key: _key,
+      bottomNavigationBar: const BottomAppBar(),
       // bottomNavigationBar: BottomNavigationBar(
       //   currentIndex: CurrentIndex!,
       //   onTap: (value) => setState(() {
@@ -355,7 +356,8 @@ class _CarProgressScreenState extends State<CarProgressScreen> {
                       // useStickyGroupSeparators: true,
                       scrollDirection: Axis.vertical,
                       groupBy: (element) => element.date,
-                      sort: false,
+                      sort: true,
+                      reverse: true,
                       elements: trips.reversed.toList(),
                       groupSeparatorBuilder: (value) => Container(
                         width: double.infinity,

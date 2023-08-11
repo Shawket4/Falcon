@@ -63,13 +63,13 @@ class _GenerateFuelTableScreenState extends State<GenerateFuelTableScreen> {
                         if (pickDate != null) {
                           setState(() {
                             _dateFrom.text =
-                                intl.DateFormat("yyyy-MM-dd").format(pickDate);
+                                intl.DateFormat("dd-MM-yyyy").format(pickDate);
                           });
                         }
                       },
                       child: CupertinoFormRow(
-                        prefix: Row(
-                          children: const [
+                        prefix: const Row(
+                          children: [
                             Icon(Icons.calendar_today),
                             SizedBox(
                               width: 10,
@@ -86,7 +86,7 @@ class _GenerateFuelTableScreenState extends State<GenerateFuelTableScreen> {
                                 lastDate: DateTime(2099));
                             if (pickDate != null) {
                               setState(() {
-                                _dateFrom.text = intl.DateFormat("yyyy-MM-dd")
+                                _dateFrom.text = intl.DateFormat("dd-MM-yyyy")
                                     .format(pickDate);
                               });
                             }
@@ -106,13 +106,13 @@ class _GenerateFuelTableScreenState extends State<GenerateFuelTableScreen> {
                         if (pickDate != null) {
                           setState(() {
                             _dateTo.text =
-                                intl.DateFormat("yyyy-MM-dd").format(pickDate);
+                                intl.DateFormat("dd-MM-yyyy").format(pickDate);
                           });
                         }
                       },
                       child: CupertinoFormRow(
-                        prefix: Row(
-                          children: const [
+                        prefix: const Row(
+                          children: [
                             Icon(Icons.calendar_today),
                             SizedBox(
                               width: 10,
@@ -129,7 +129,7 @@ class _GenerateFuelTableScreenState extends State<GenerateFuelTableScreen> {
                                 lastDate: DateTime(2099));
                             if (pickDate != null) {
                               setState(() {
-                                _dateTo.text = intl.DateFormat("yyyy-MM-dd")
+                                _dateTo.text = intl.DateFormat("dd-MM-yyyy")
                                     .format(pickDate);
                               });
                             }

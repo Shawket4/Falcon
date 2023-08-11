@@ -31,8 +31,8 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge.dart' as bridge;
 // const String SERVER_IP = 'http://192.168.103.208:3001';
 // const String SERVER_IP = 'https://dentex.app:3001';
 // const String SERVER_IP = 'https://156.204.195.233:3001';
-const SERVER_IP = 'http://192.168.1.7:3001';
-// const SERVER_IP = 'http://165.22.31.49:3001';
+// const SERVER_IP = 'http://192.168.1.7:3001';
+const SERVER_IP = 'http://165.22.31.49:3001';
 // const SERVER_IP = 'http://92.205.60.182:3001/api';
 
 var jwt = "";
