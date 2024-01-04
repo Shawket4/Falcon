@@ -32,6 +32,15 @@ func main() {
 			time.Sleep(time.Hour)
 		}
 	}()
+	// go func() {
+	// 	time.Sleep(time.Second * 30)
+	// 	for {
+	// 		if err := Scrapper.CheckLandMarks(); err != nil {
+	// 			log.Println(err)
+	// 		}
+	// 		time.Sleep(time.Hour * 12)
+	// 	}
+	// }()
 	Models.Connect()
 	FiberConfig.FiberConfig()
 }

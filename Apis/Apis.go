@@ -109,6 +109,7 @@ func GetProgressOfCars(c *fiber.Ctx) error {
 				}
 				//trips, err = db.Query("SELECT `CarProgressBarID`, `Car No Plate`, `CarProgressIndex`, `Driver Name`, `StepCompleteTime`, `NoOfDropOffPoints`, `Date`, `Compartments`, `FeeRate`, `Milage`, `start_time`, `end_time`, `IsInTrip` FROM CarProgressBars WHERE Date BETWEEN DATE_SUB(?, INTERVAL ? DAY) AND ? ORDER BY `Date` DESC;", Data.DateTo, Days, Data.DateTo)
 			}
+
 			return c.JSON(Trips)
 		}
 	} else {
@@ -1873,6 +1874,7 @@ func EditServiceEvent(c *fiber.Ctx) error {
 			}
 			serviceEvent.CarID = input.CarID
 			serviceEvent.CarNoPlate = input.CarNoPlate
+			serviceEvent.ServiceType = input.ServiceType
 			serviceEvent.DateOfService = input.DateOfService
 			serviceEvent.OdometerReading = input.OdometerReading
 			serviceEvent.ProofImageName = input.ProofImageName

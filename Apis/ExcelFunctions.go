@@ -1,6 +1,7 @@
 package Apis
 
 import (
+	"Falcon/AbstractFunctions"
 	"Falcon/Controllers"
 	"Falcon/Models"
 	"encoding/json"
@@ -12,20 +13,30 @@ import (
 )
 
 func GenerateFuelEventsExcelTable(c *fiber.Ctx) error {
-	var data struct {
+	var input struct {
 		DateFrom string `json:"DateFrom"`
 		DateTo   string `json:"DateTo"`
 	}
-	if err := c.BodyParser(&data); err != nil {
+	if err := c.BodyParser(&input); err != nil {
 		log.Println(err.Error())
 		return err
 	}
 	var FuelEvents []Models.FuelEvent
 	var Cars []string
 	CarFuelEvents := make(map[string][]Models.FuelEvent)
-	Days := DaysBetweenDates(data.DateFrom, data.DateTo)
+	DateFrom, err := AbstractFunctions.ParseDate(input.DateFrom)
 
-	if err := Models.DB.Model(&Models.FuelEvent{}).Where("`date` BETWEEN DATE_SUB(?, INTERVAL ? DAY) AND ?", data.DateTo, Days, data.DateTo).Find(&FuelEvents).Error; err != nil {
+	if err != nil {
+		log.Println(err.Error())
+		return err
+	}
+
+	DateTo, err := AbstractFunctions.ParseDate(input.DateTo)
+	if err != nil {
+		log.Println(err.Error())
+		return err
+	}
+	if err := Models.DB.Model(&Models.FuelEvent{}).Where("date BETWEEN ? AND ?", DateFrom, DateTo).Find(&FuelEvents).Error; err != nil {
 		log.Println(err.Error())
 		return err
 	}
@@ -52,16 +63,28 @@ func GenerateFuelEventsExcelTable(c *fiber.Ctx) error {
 	}
 
 	headers := map[string]string{
-		"A1": "التاريخ",
-		"B1": "رقم السيارة",
-		"C1": "عدد اللترات",
-		"D1": "سعر اللتر",
-		"E1": "سعر التفويلة",
-		"F1": "معدل التفويل",
-		"G1": "عداد التفويلة الماضية",
-		"H1": "العداد الحالي",
-		"I1": "الكيلو مترات",
+		"A1": "Date",
+		"B1": "Car No Plate",
+		"C1": "Driver Name",
+		"D1": "Amount Of Liters",
+		"E1": "Price Per Liter",
+		"F1": "Total Price",
+		"G1": "Fuel Usage Rate",
+		"H1": "Previous Odometer",
+		"I1": "Current Odometer",
+		"J1": "Kilometers",
+		"A2": "التاريخ",
+		"B2": "رقم السيارة",
+		"C2": "اسم السائق",
+		"D2": "عدد اللترات",
+		"E2": "سعر اللتر",
+		"F2": "سعر التفويلة",
+		"G2": "معدل التفويل",
+		"H2": "عداد التفويلة الماضية",
+		"I2": "العداد الحالي",
+		"J2": "الكيلو مترات",
 	}
+
 	file := excelize.NewFile()
 
 	for _, carSheet := range Cars {
@@ -74,8 +97,8 @@ func GenerateFuelEventsExcelTable(c *fiber.Ctx) error {
 		}
 	}
 	file.DeleteSheet("Sheet1")
-	var filename string = fmt.Sprintf("./fuel %s:%s.xlsx", data.DateFrom, data.DateTo)
-	err := file.SaveAs(filename)
+	var filename string = fmt.Sprintf("./fuel %s:%s.xlsx", input.DateFrom, input.DateTo)
+	err = file.SaveAs(filename)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -85,16 +108,17 @@ func GenerateFuelEventsExcelTable(c *fiber.Ctx) error {
 }
 
 func appendFuelRow(file *excelize.File, sheet string, index int, rows []Models.FuelEvent) (fileWriter *excelize.File) {
-	rowCount := index + 2
+	rowCount := index + 3
 	file.SetCellValue(sheet, fmt.Sprintf("A%v", rowCount), rows[index].Date)
 	file.SetCellValue(sheet, fmt.Sprintf("B%v", rowCount), rows[index].CarNoPlate)
-	file.SetCellValue(sheet, fmt.Sprintf("C%v", rowCount), rows[index].Liters)
-	file.SetCellValue(sheet, fmt.Sprintf("D%v", rowCount), rows[index].PricePerLiter)
-	file.SetCellValue(sheet, fmt.Sprintf("E%v", rowCount), rows[index].Price)
-	file.SetCellValue(sheet, fmt.Sprintf("F%v", rowCount), rows[index].FuelRate)
-	file.SetCellValue(sheet, fmt.Sprintf("G%v", rowCount), rows[index].OdometerBefore)
-	file.SetCellValue(sheet, fmt.Sprintf("H%v", rowCount), rows[index].OdometerAfter)
-	file.SetCellValue(sheet, fmt.Sprintf("I%v", rowCount), rows[index].OdometerAfter-rows[index].OdometerBefore)
+	file.SetCellValue(sheet, fmt.Sprintf("C%v", rowCount), rows[index].DriverName)
+	file.SetCellValue(sheet, fmt.Sprintf("D%v", rowCount), rows[index].Liters)
+	file.SetCellValue(sheet, fmt.Sprintf("E%v", rowCount), rows[index].PricePerLiter)
+	file.SetCellValue(sheet, fmt.Sprintf("F%v", rowCount), rows[index].Price)
+	file.SetCellValue(sheet, fmt.Sprintf("G%v", rowCount), rows[index].FuelRate)
+	file.SetCellValue(sheet, fmt.Sprintf("H%v", rowCount), rows[index].OdometerBefore)
+	file.SetCellValue(sheet, fmt.Sprintf("I%v", rowCount), rows[index].OdometerAfter)
+	file.SetCellValue(sheet, fmt.Sprintf("J%v", rowCount), rows[index].OdometerAfter-rows[index].OdometerBefore)
 	return file
 }
 

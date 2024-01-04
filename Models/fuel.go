@@ -11,6 +11,7 @@ type FuelEvent struct {
 	gorm.Model
 	CarID          uint    `json:"car_id"`
 	CarNoPlate     string  `json:"car_no_plate"`
+	DriverName     string  `json:"driver_name"`
 	Date           string  `json:"date"`
 	Liters         float64 `json:"liters"`
 	PricePerLiter  float64 `json:"price_per_liter"`
@@ -37,6 +38,7 @@ func (input *FuelEvent) Edit() (*FuelEvent, error) {
 	}
 	fmt.Println(CurrentFuelEvent)
 	CurrentFuelEvent.CarNoPlate = input.CarNoPlate
+	CurrentFuelEvent.DriverName = input.DriverName
 	CurrentFuelEvent.Date = input.Date
 	CurrentFuelEvent.Liters = input.Liters
 	CurrentFuelEvent.PricePerLiter = input.PricePerLiter

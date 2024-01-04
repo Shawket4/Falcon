@@ -133,7 +133,8 @@ func CalculateDriverSalary(c *fiber.Ctx) error {
 	file.DeleteSheet("Sheet1")
 
 	headers := map[string]string{
-		"A1": "Date", "B1": "Driver Name", "C1": "Car No Plate", "D1": "Distance", "E1": "Driver Fees", "F1": "Trip Expenses", "G1": "Total Expenses", "H1": "Description", "I1": "Trip Loans", "J1": "Total Loans", "K1": "Notes", "L1": "Trip Salary", "M1": "Start Time", "N1": "End Time",
+		"A1": "Receipt No", "B1": "Date", "C1": "Driver Name", "D1": "Car No Plate", "E1": "Distance", "F1": "Driver Fees", "G1": "Trip Expenses", "H1": "Total Expenses", "I1": "Description", "J1": "Trip Loans", "K1": "Total Loans", "L1": "Notes", "M1": "Trip Salary", "N1": "Start Time", "O1": "End Time",
+		"A2": "رقم الفاتورة", "B2": "التاريخ", "C2": "اسم السائق", "D2": "رقم السيارة", "E2": "المسافة", "F2": "نولون السائق", "G2": "مصروفات النقلة", "H2": "اجمالي المصروفات", "I2": "تفصيل المصروفات", " J2": "العهد", "K2": "اجمالي العهد", "L2": "ملاحظات", "M2": "اجمالي حساب النقلة", "N2": "معاد البداية", "O2": "معاد النهاية",
 	}
 
 	for k, v := range headers {
@@ -141,11 +142,12 @@ func CalculateDriverSalary(c *fiber.Ctx) error {
 	}
 
 	for index, trip := range DriverTrips {
-		file.SetCellValue("Salary", fmt.Sprintf("A%v", index+2), trip.Date)
-		file.SetCellValue("Salary", fmt.Sprintf("B%v", index+2), trip.DriverName)
-		file.SetCellValue("Salary", fmt.Sprintf("C%v", index+2), trip.CarNoPlate)
-		file.SetCellValue("Salary", fmt.Sprintf("D%v", index+2), trip.Mileage)
-		file.SetCellValue("Salary", fmt.Sprintf("E%v", index+2), trip.DriverFees)
+		file.SetCellValue("Salary", fmt.Sprintf("A%v", index+3), trip.ReceiptNo)
+		file.SetCellValue("Salary", fmt.Sprintf("B%v", index+3), trip.Date)
+		file.SetCellValue("Salary", fmt.Sprintf("C%v", index+3), trip.DriverName)
+		file.SetCellValue("Salary", fmt.Sprintf("D%v", index+3), trip.CarNoPlate)
+		file.SetCellValue("Salary", fmt.Sprintf("E%v", index+3), trip.Mileage)
+		file.SetCellValue("Salary", fmt.Sprintf("F%v", index+3), trip.DriverFees)
 		var totalSalary float64
 		var totalExpenses float64
 		var tripExpenses string
@@ -160,9 +162,9 @@ func CalculateDriverSalary(c *fiber.Ctx) error {
 			tripExpenses = fmt.Sprintf("%s+%v", tripExpenses, expense.Cost)
 			expensesDescriptions = fmt.Sprintf("%s+%s", expensesDescriptions, expense.Description)
 		}
-		file.SetCellValue("Salary", fmt.Sprintf("F%v", index+2), tripExpenses)
-		file.SetCellValue("Salary", fmt.Sprintf("G%v", index+2), totalExpenses)
-		file.SetCellValue("Salary", fmt.Sprintf("H%v", index+2), expensesDescriptions)
+		file.SetCellValue("Salary", fmt.Sprintf("G%v", index+3), tripExpenses)
+		file.SetCellValue("Salary", fmt.Sprintf("H%v", index+3), totalExpenses)
+		file.SetCellValue("Salary", fmt.Sprintf("I%v", index+3), expensesDescriptions)
 
 		var totalLoans float64
 		var tripLoans string
@@ -177,13 +179,13 @@ func CalculateDriverSalary(c *fiber.Ctx) error {
 			tripLoans = fmt.Sprintf("%s+%v", tripLoans, loan.Amount)
 			loansMethods = fmt.Sprintf("%s+%s", loansMethods, loan.Method)
 		}
-		file.SetCellValue("Salary", fmt.Sprintf("I%v", index+2), tripLoans)
-		file.SetCellValue("Salary", fmt.Sprintf("J%v", index+2), totalLoans)
-		file.SetCellValue("Salary", fmt.Sprintf("K%v", index+2), loansMethods)
+		file.SetCellValue("Salary", fmt.Sprintf("J%v", index+3), tripLoans)
+		file.SetCellValue("Salary", fmt.Sprintf("K%v", index+3), totalLoans)
+		file.SetCellValue("Salary", fmt.Sprintf("L%v", index+3), loansMethods)
 		totalSalary = totalExpenses + trip.DriverFees - totalLoans
-		file.SetCellValue("Salary", fmt.Sprintf("L%v", index+2), totalSalary)
-		file.SetCellValue("Salary", fmt.Sprintf("M%v", index+2), trip.StartTime)
-		file.SetCellValue("Salary", fmt.Sprintf("N%v", index+2), trip.EndTime)
+		file.SetCellValue("Salary", fmt.Sprintf("M%v", index+3), totalSalary)
+		file.SetCellValue("Salary", fmt.Sprintf("N%v", index+3), trip.StartTime)
+		file.SetCellValue("Salary", fmt.Sprintf("O%v", index+3), trip.EndTime)
 	}
 
 	var filename string = fmt.Sprintf("./Salaries/Salary For %s From %s To %s.xlsx", Driver.Name, input.DateFrom, input.DateTo)
