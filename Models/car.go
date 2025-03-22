@@ -24,4 +24,9 @@ type Car struct {
 	TankLicenseImageNameBack        string         `json:"tank_license_image_name_back"`
 	IsInTrip                        bool           `json:"is_in_trip"`
 	IsApproved                      bool           `json:"is_approved"`
+	Location                        string         `json:"location"`
+	Latitude                        string         `json:"lat"`
+	Longitude                       string         `json:"long"`
+	LastFuelOdometer                int            `json:"last_fuel_odometer"`
+	LastOilChangeID                 int            `json:"last_oil_change_id"`
 }

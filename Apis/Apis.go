@@ -1,7 +1,6 @@
 package Apis
 
 import (
-	"Falcon/AbstractFunctions"
 	"Falcon/Controllers"
 	"Falcon/Database"
 	"Falcon/Models"
@@ -70,195 +69,30 @@ type User struct {
 	MobileNumber string `json:"Mobile_Number"`
 }
 
-func GetProgressOfCars(c *fiber.Ctx) error {
-	// Fetch all cars from database
-	Controllers.User(c)
-	if Controllers.CurrentUser.Id != 0 {
-		if Controllers.CurrentUser.Permission == 0 {
-			return c.Status(fiber.StatusForbidden).SendString("You do not have permission to access this page")
-		} else {
-			var Data struct {
-				DateFrom string `json:"DateFrom"`
-				DateTo   string `json:"DateTo"`
-			}
-			// defer cars.Close()
-			if err := c.BodyParser(&Data); err != nil {
-				log.Println(err.Error())
-				return c.JSON(fiber.Map{
-					"message": err.Error(),
-				})
-			}
-
-			// var Cars []TripStruct
-
-			// Make Days variable to store the number of days between the two dates
-			// var Days int = DaysBetweenDates(Data.DateFrom, Data.DateTo)
-			Days := 30
-			var Trips []Models.TripStruct
-			//var trips *sql.Rows
-			if Controllers.CurrentUser.Permission != 0 && Controllers.CurrentUser.Permission != 4 {
-				if err := Models.DB.Model(&Models.TripStruct{}).Find(&Trips).Error; err != nil {
-					log.Println(err.Error())
-					return err
-				}
-				//trips, err = db.Query("SELECT `CarProgressBarID`, `Car No Plate`, `CarProgressIndex`, `Driver Name`, `StepCompleteTime`, `NoOfDropOffPoints`, `Date`, `Compartments`, `FeeRate`, `Milage`, `start_time`, `end_time`, `IsInTrip` FROM CarProgressBars WHERE Date BETWEEN DATE_SUB(?, INTERVAL ? DAY) AND ? AND `Transporter` = ? ORDER BY `Date` DESC;", Data.DateTo, Days, Data.DateTo, Controllers.CurrentUser.Name)
-			} else if Controllers.CurrentUser.Permission == 4 {
-				if err := Models.DB.Model(&Models.TripStruct{}).Where("date BETWEEN DATE_SUB(?, INTERVAL ? DAY) AND ?", Data.DateTo, Days, Data.DateTo).Find(&Trips).Error; err != nil {
-					log.Println(err.Error())
-					return err
-				}
-				//trips, err = db.Query("SELECT `CarProgressBarID`, `Car No Plate`, `CarProgressIndex`, `Driver Name`, `StepCompleteTime`, `NoOfDropOffPoints`, `Date`, `Compartments`, `FeeRate`, `Milage`, `start_time`, `end_time`, `IsInTrip` FROM CarProgressBars WHERE Date BETWEEN DATE_SUB(?, INTERVAL ? DAY) AND ? ORDER BY `Date` DESC;", Data.DateTo, Days, Data.DateTo)
-			}
-
-			return c.JSON(Trips)
-		}
-	} else {
-		return c.JSON(fiber.Map{
-			"message": "Not Logged In.",
-		})
-	}
-}
-
 func GetCars(c *fiber.Ctx) error {
-	Controllers.User(c)
-	if Controllers.CurrentUser.Id != 0 {
-		type dataStruct struct {
-			Include string `json:"Include"`
-			All     bool   `json:"All"`
-		}
-		var data dataStruct
-		if err := c.BodyParser(&data); err != nil {
-			log.Println(err.Error())
-			return c.JSON(fiber.Map{
-				"message": err.Error(),
-			})
-		}
 
-		var cars []Models.Car
-		fmt.Println(Controllers.CurrentUser.Permission)
-		if Controllers.CurrentUser.Permission >= 1 && Controllers.CurrentUser.Permission != 4 {
-			if data.All {
-				if err := Models.DB.Model(&Models.Car{}).Where("transporter = ?", Controllers.CurrentUser.Name).Find(&cars).Error; err != nil {
-					log.Println(err.Error())
-					return err
-				}
-				//cars, err = db.Query("SELECT `CarNoPlate`, `Compartments`, `IsInTrip` FROM `Cars` WHERE `IsApproved` = 1 AND `Transporter` = ?;", Controllers.CurrentUser.Name)
-			} else {
-				if err := Models.DB.Model(&Models.Car{}).Where("transporter = ?", Controllers.CurrentUser.Name).Find(&cars).Error; err != nil {
-					log.Println(err.Error())
-					return err
-				}
-				//cars, err = db.Query("SELECT `CarNoPlate`, `Compartments`, `IsInTrip` FROM `Cars` WHERE `LicenseExpirationDate` > CURRENT_DATE() AND `CalibrationExpirationDate` > CURRENT_DATE() AND `IsApproved` = 1 AND `Transporter` =?;", Controllers.CurrentUser.Name)
-			}
-		} else if Controllers.CurrentUser.Permission == 4 {
-			if data.All {
-				if err := Models.DB.Model(&Models.Car{}).Find(&cars).Error; err != nil {
-					log.Println(err.Error())
-					return err
-				}
-				//cars, err = db.Query("SELECT `CarNoPlate`, `Compartments`, `IsInTrip` FROM `Cars` WHERE `IsApproved` = 1;")
-			} else {
-				if err := Models.DB.Model(&Models.Car{}).Find(&cars).Error; err != nil {
-					log.Println(err.Error())
-					return err
-				}
-				//cars, err = db.Query("SELECT `CarNoPlate`, `Compartments`, `IsInTrip` FROM `Cars` WHERE `LicenseExpirationDate` > CURRENT_DATE() AND `CalibrationExpirationDate` > CURRENT_DATE() AND `IsApproved` = 1;")
-			}
-		}
-		//if err != nil {
-		//	log.Println(err.Error())
-		//}
-		//defer cars.Close()
-		//var CarNoPlates []string
-		//var Compartments [][]int
-		//var IsInTripList []bool
-		//for cars.Next() {
-		//	var carNoPlateStruct struct {
-		//		CarNoPlate   string `json:"CarNoPlate"`
-		//		Compartments []int  `json:"Compartments"`
-		//		IsInTrip     bool   `json:"IsInTrip"`
-		//	}
-		//	var jsonData string
-		//	var IsInTrip string
-		//	err = cars.Scan(&carNoPlateStruct.CarNoPlate, &jsonData, &IsInTrip)
-		//	json.Unmarshal([]byte(jsonData), &carNoPlateStruct.Compartments)
-		//	if err != nil {
-		//		log.Println(err.Error())
-		//	}
-		//
-		//	if IsInTrip == "true" {
-		//		carNoPlateStruct.IsInTrip = true
-		//	} else {
-		//		carNoPlateStruct.IsInTrip = false
-		//	}
-		//
-		//	CarNoPlates = append(CarNoPlates, carNoPlateStruct.CarNoPlate)
-		//	Compartments = append(Compartments, carNoPlateStruct.Compartments)
-		//	IsInTripList = append(IsInTripList, carNoPlateStruct.IsInTrip)
-		//}
-		//if data.Include != "" {
-		//	includedCar, err := db.Query("SELECT `CarNoPlate`, `Compartments`, `IsInTrip` FROM `Cars` WHERE `CarNoPlate` = ?", data.Include)
-		//	if err != nil {
-		//		log.Println(err.Error())
-		//	}
-		//	defer includedCar.Close()
-		//	for includedCar.Next() {
-		//		var carNoPlateStruct struct {
-		//			CarNoPlate   string `json:"CarNoPlate"`
-		//			Compartments []int  `json:"Compartments"`
-		//			IsInTrip     bool   `json:"IsInTrip"`
-		//		}
-		//		var jsonData string
-		//		var IsInTrip string
-		//		err = includedCar.Scan(&carNoPlateStruct.CarNoPlate, &jsonData, &IsInTrip)
-		//		json.Unmarshal([]byte(jsonData), &carNoPlateStruct.Compartments)
-		//		if err != nil {
-		//			log.Println(err.Error())
-		//		}
-		//		if IsInTrip == "true" {
-		//			carNoPlateStruct.IsInTrip = true
-		//		} else {
-		//			carNoPlateStruct.IsInTrip = false
-		//		}
-		//		CarNoPlates = append(CarNoPlates, carNoPlateStruct.CarNoPlate)
-		//		Compartments = append(Compartments, carNoPlateStruct.Compartments)
-		//		IsInTripList = append(IsInTripList, carNoPlateStruct.IsInTrip)
-		//	}
-		//}
-		return c.JSON(cars)
-	} else {
-		return c.JSON(fiber.Map{
-			"message": "Not Logged In.",
-		})
+	var cars []Models.Car
+	if err := Models.DB.Model(&Models.Car{}).Find(&cars).Error; err != nil {
+		log.Println(err.Error())
+		return err
 	}
+	return c.JSON(cars)
 }
 
 func GetDrivers(c *fiber.Ctx) error {
-	Controllers.User(c)
-	if Controllers.CurrentUser.Id != 0 {
+	// if Controllers.CurrentUser.Id != 0 {
 
-		var drivers []Models.Driver
+	var drivers []Models.Driver
 
-		if Controllers.CurrentUser.Permission != 0 && Controllers.CurrentUser.Permission != 4 {
-			if err := Models.DB.Model(&Models.Driver{}).Where("transporter = ?", Controllers.CurrentUser.Name).Find(&drivers).Error; err != nil {
-				log.Println(err.Error())
-				return err
-			}
-			//drivers, err = db.Query("SELECT `name` FROM `drivers` WHERE AND `driver_license_expiration_date` > CURRENT_DATE() AND `safety_license_expiration_date` > CURRENT_DATE() AND `drug_test_expiration_date` > CURRENT_DATE() AND `is_in_trip` = 0 AND `is_approved` = 1 AND `transporter` = ?;", Controllers.CurrentUser.Name)
-		} else if Controllers.CurrentUser.Permission == 4 {
-			if err := Models.DB.Model(&Models.Driver{}).Find(&drivers).Error; err != nil {
-				log.Println(err.Error())
-				return err
-			}
-			//drivers, err = db.Query("SELECT `name` FROM `drivers` WHERE AND `driver_license_expiration_date` > CURRENT_DATE() AND `safety_license_expiration_date` > CURRENT_DATE() AND `drug_test_expiration_date` > CURRENT_DATE() AND `is_in_trip` = 0 AND `is_approved` = 1;")
-		}
+	//drivers, err = db.Query("SELECT `name` FROM `drivers` WHERE AND `driver_license_expiration_date` > CURRENT_DATE() AND `safety_license_expiration_date` > CURRENT_DATE() AND `drug_test_expiration_date` > CURRENT_DATE() AND `is_in_trip` = 0 AND `is_approved` = 1 AND `transporter` = ?;", Controllers.CurrentUser.Name)
 
-		return c.JSON(drivers)
-	} else {
-		return c.JSON(fiber.Map{
-			"message": "Not Logged In.",
-		})
+	if err := Models.DB.Model(&Models.Driver{}).Find(&drivers).Error; err != nil {
+		log.Println(err.Error())
+		return err
 	}
+	//drivers, err = db.Query("SELECT `name` FROM `drivers` WHERE AND `driver_license_expiration_date` > CURRENT_DATE() AND `safety_license_expiration_date` > CURRENT_DATE() AND `drug_test_expiration_date` > CURRENT_DATE() AND `is_in_trip` = 0 AND `is_approved` = 1;")
+
+	return c.JSON(drivers)
 }
 
 func GetTransporters(c *fiber.Ctx) error {
@@ -738,58 +572,40 @@ func GetCarProfileData(c *fiber.Ctx) error {
 }
 
 func GetDriverProfileData(c *fiber.Ctx) error {
-	Controllers.User(c)
-	if Controllers.CurrentUser.Id != 0 {
-		if Controllers.CurrentUser.Permission == 0 {
-			return c.Status(fiber.StatusForbidden).SendString("You do not have permission to access this page")
-		} else if Controllers.CurrentUser.Permission >= 1 && Controllers.CurrentUser.Permission != 4 {
-			var Drivers []Models.Driver
-			if err := Models.DB.Model(&Models.Driver{}).Where("transporter = ?", Controllers.CurrentUser.Name).Find(&Drivers).Error; err != nil {
-				log.Println(err.Error())
-				return err
-			}
-			//query, err := db.Query("SELECT `id`, `name`, `email`, `mobile_number`, `driver_license_expiration_date`, `safety_license_expiration_date`, `drug_test_expiration_date`, `IsApproved`, `Transporter`, `DriverLicenseImageName`, `SafetyLicenseImageName`, `DrugTestImageName`, `DriverLicenseImageNameBack`, `SafetyLicenseImageNameBack`, `DrugTestImageNameBack` FROM `users` WHERE permission = 0 AND `IsApproved` = 1 AND `Transporter` = ?", Controllers.CurrentUser.Name)
-			//if err != nil {
-			//	log.Println(err.Error())
-			//}
-			//defer query.Close()
-			//
-			//for query.Next() {
-			//	var driver Driver
-			//	err = query.Scan(&driver.DriverId, &driver.Name, &driver.Email, &driver.MobileNumber, &driver.LicenseExpirationDate, &driver.SafetyExpirationDate, &driver.DrugTestExpirationDate, &driver.IsApproved, &driver.Transporter, &driver.DriverLicenseImageName, &driver.SafetyLicenseImageName, &driver.DrugTestImageName, &driver.DriverLicenseImageNameBack, &driver.SafetyLicenseImageNameBack, &driver.DrugTestImageNameBack)
-			//	if err != nil {
-			//		log.Println(err.Error())
-			//	}
-			//	Drivers = append(Drivers, driver)
-			return c.JSON(Drivers)
-		} else {
-			//db := Database.ConnectToDB()
-			var Drivers []Models.Driver
-			if err := Models.DB.Model(&Models.Driver{}).Find(&Drivers).Error; err != nil {
-				log.Println(err.Error())
-				return err
-			}
-			//query, err := db.Query("SELECT `id`, `name`, `email`, `mobile_number`, `driver_license_expiration_date`, `safety_license_expiration_date`, `drug_test_expiration_date`, `IsApproved`, `Transporter`, `DriverLicenseImageName`, `SafetyLicenseImageName`, `DrugTestImageName`, `DriverLicenseImageNameBack`, `SafetyLicenseImageNameBack`, `DrugTestImageNameBack` FROM `users` WHERE permission = 0 AND `IsApproved` = 1;")
-			//if err != nil {
-			//	log.Println(err.Error())
-			//}
-			//defer query.Close()
-			//
-			//for query.Next() {
-			//	var driver Driver
-			//	err = query.Scan(&driver.DriverId, &driver.Name, &driver.Email, &driver.MobileNumber, &driver.LicenseExpirationDate, &driver.SafetyExpirationDate, &driver.DrugTestExpirationDate, &driver.IsApproved, &driver.Transporter, &driver.DriverLicenseImageName, &driver.SafetyLicenseImageName, &driver.DrugTestImageName, &driver.DriverLicenseImageNameBack, &driver.SafetyLicenseImageNameBack, &driver.DrugTestImageNameBack)
-			//	if err != nil {
-			//		log.Println(err.Error())
-			//	}
-			//	Drivers = append(Drivers, driver)
-			//}
-			return c.JSON(Drivers)
-		}
-	} else {
-		return c.JSON(fiber.Map{
-			"message": "Not Logged In.",
-		})
+	var Drivers []Models.Driver
+	//query, err := db.Query("SELECT `id`, `name`, `email`, `mobile_number`, `driver_license_expiration_date`, `safety_license_expiration_date`, `drug_test_expiration_date`, `IsApproved`, `Transporter`, `DriverLicenseImageName`, `SafetyLicenseImageName`, `DrugTestImageName`, `DriverLicenseImageNameBack`, `SafetyLicenseImageNameBack`, `DrugTestImageNameBack` FROM `users` WHERE permission = 0 AND `IsApproved` = 1 AND `Transporter` = ?", Controllers.CurrentUser.Name)
+	//if err != nil {
+	//	log.Println(err.Error())
+	//}
+	//defer query.Close()
+	//
+	//for query.Next() {
+	//	var driver Driver
+	//	err = query.Scan(&driver.DriverId, &driver.Name, &driver.Email, &driver.MobileNumber, &driver.LicenseExpirationDate, &driver.SafetyExpirationDate, &driver.DrugTestExpirationDate, &driver.IsApproved, &driver.Transporter, &driver.DriverLicenseImageName, &driver.SafetyLicenseImageName, &driver.DrugTestImageName, &driver.DriverLicenseImageNameBack, &driver.SafetyLicenseImageNameBack, &driver.DrugTestImageNameBack)
+	//	if err != nil {
+	//		log.Println(err.Error())
+	//	}
+	//	Drivers = append(Drivers, driver)
+	//db := Database.ConnectToDB()
+	if err := Models.DB.Model(&Models.Driver{}).Find(&Drivers).Error; err != nil {
+		log.Println(err.Error())
+		return err
 	}
+	//query, err := db.Query("SELECT `id`, `name`, `email`, `mobile_number`, `driver_license_expiration_date`, `safety_license_expiration_date`, `drug_test_expiration_date`, `IsApproved`, `Transporter`, `DriverLicenseImageName`, `SafetyLicenseImageName`, `DrugTestImageName`, `DriverLicenseImageNameBack`, `SafetyLicenseImageNameBack`, `DrugTestImageNameBack` FROM `users` WHERE permission = 0 AND `IsApproved` = 1;")
+	//if err != nil {
+	//	log.Println(err.Error())
+	//}
+	//defer query.Close()
+	//
+	//for query.Next() {
+	//	var driver Driver
+	//	err = query.Scan(&driver.DriverId, &driver.Name, &driver.Email, &driver.MobileNumber, &driver.LicenseExpirationDate, &driver.SafetyExpirationDate, &driver.DrugTestExpirationDate, &driver.IsApproved, &driver.Transporter, &driver.DriverLicenseImageName, &driver.SafetyLicenseImageName, &driver.DrugTestImageName, &driver.DriverLicenseImageNameBack, &driver.SafetyLicenseImageNameBack, &driver.DrugTestImageNameBack)
+	//	if err != nil {
+	//		log.Println(err.Error())
+	//	}
+	//	Drivers = append(Drivers, driver)
+	//}
+	return c.JSON(Drivers)
 }
 
 func GetTransporterProfileData(c *fiber.Ctx) error {
@@ -1118,59 +934,6 @@ func EditTransporter(c *fiber.Ctx) error {
 	}
 }
 
-func DeleteCarTrip(c *fiber.Ctx) error {
-	Controllers.User(c)
-	if Controllers.CurrentUser.Id != 0 {
-		if Controllers.CurrentUser.Permission == 0 {
-			return c.Status(fiber.StatusForbidden).SendString("You do not have permission to access this page")
-		} else {
-			var data struct {
-				TripId int `json:"TripId"`
-			}
-			if err := c.BodyParser(&data); err != nil {
-				log.Println(err.Error())
-				return c.Status(fiber.StatusBadRequest).SendString("Invalid request body")
-			}
-			var trip Models.TripStruct
-			if err := Models.DB.Model(&Models.TripStruct{}).Where("id = ?", data.TripId).Find(&trip).Error; err != nil {
-				log.Println(err.Error())
-				return err
-			}
-			var car Models.Car
-			if err := Models.DB.Model(&Models.Car{}).Where("id = ?", trip.CarID).Find(&car).Error; err != nil {
-				log.Println(err.Error())
-				return err
-			}
-			var driver Models.Driver
-			if err := Models.DB.Model(&Models.Driver{}).Where("id = ?", trip.DriverID).Find(&driver).Error; err != nil {
-				log.Println(err.Error())
-				return err
-			}
-			car.IsInTrip = false
-			driver.IsInTrip = false
-			if err := Models.DB.Save(&car).Error; err != nil {
-				log.Println(err.Error())
-				return err
-			}
-			if err := Models.DB.Save(&driver).Error; err != nil {
-				log.Println(err.Error())
-				return err
-			}
-			if err := Models.DB.Delete(&Models.TripStruct{}, trip.ID).Error; err != nil {
-				log.Println(err.Error())
-				return err
-			}
-			return c.JSON(fiber.Map{
-				"Message": "Car Trip deleted successfully",
-			})
-		}
-	} else {
-		return c.JSON(fiber.Map{
-			"message": "Not Logged In.",
-		})
-	}
-}
-
 func GetPendingRequests(c *fiber.Ctx) error {
 	Controllers.User(c)
 	if Controllers.CurrentUser.Id != 0 {
@@ -1433,194 +1196,87 @@ func UpdateDriverStatusByID(DriverID uint) (*Models.Driver, error) {
 	return &driver, nil
 }
 
-func CreateCarTrip(c *fiber.Ctx) error {
-	Controllers.User(c)
-	if Controllers.CurrentUser.Id != 0 {
-		if Controllers.CurrentUser.Permission == 0 {
-			return c.Status(fiber.StatusForbidden).SendString("You do not have permission to access this page")
-		} else {
-			var data Models.TripStruct
-			if err := c.BodyParser(&data); err != nil {
-				return err
-			}
-			// Step Complete Time
+// Functions to manage fee mappings
 
-			// Format {"TruckLoad": ["", PickUpPoint], DropOffPoints: [[time, DropOffPoint]]}
-			//{"TruckLoad": ["", "Exxon Mobile Mostrod", true], "DropOffPoints": [["", "هاي ميكس بدر", true], ["", "هاي ميكس بدر", true]]}
+// CreateFeeMapping creates a new fee mapping for a company
+// func CalculateRevenue(trip *Models.TripStruct) (float64, error) {
+// 	var totalRevenue float64 = 0
 
-			startDate, err := AbstractFunctions.GetFormattedDate(data.Date)
-			if err != nil {
-				log.Println(err)
-				return c.JSON(err.Error())
-			}
-			data.StartTime = startDate + "%2000:00:00"
-			//insert, err := db.Query("INSERT INTO CarProgressBars (`CarProgressBarID`, `Date`, `start_time`, `end_time`, `Car No Plate`, `CarProgressIndex`, `Driver Name`, `StepCompleteTime`, `NoOfDropOffPoints`, `Compartments`, `PickUpLocation`, `Transporter`, `FeeRate`, `IsInTrip`) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", data.Date, startTime, "", data.CarNoPlate, 0, data.DriverName, StepCompleteTime, data.NoOfDropOffPoints, jsonCompartments, data.PickUpPoint, Transporter, feeRate, "true")
-			//if err != nil {
-			//	log.Println(err.Error())
-			//}
-			// fmt.Println(data)
-			car, err := UpdateCarStatusByID(data.CarID)
-			if err != nil {
-				log.Println(err.Error())
-				return err
-			}
-			data.CarNoPlate = car.CarNoPlate
-			data.TankCapacity = car.TankCapacity
-			data.Transporter = car.Transporter
-			driver, err := UpdateDriverStatusByID(data.DriverID)
-			if err != nil {
-				log.Println(err.Error())
-				return err
-			}
-			data.DriverName = driver.Name
-			if data.StepCompleteTimeDB, err = json.Marshal(data.StepCompleteTime); err != nil {
-				log.Println(err.Error())
-				return err
-			}
-			data.IsClosed = false
-			if err := Models.DB.Create(&data).Error; err != nil {
-				log.Println(err.Error())
-				return err
-			}
-			var Terminals []Models.Terminal
+// 	switch trip.Company {
+// 	case "TAQA", "Watanya":
+// 		// Distance-based pricing
+// 		trip.DistanceBasedPricing = true
 
-			if err := Models.DB.Model(&Models.Terminal{}).Find(&Terminals).Error; err != nil {
-				log.Println(err.Error())
-				return err
-			}
-			terminalExists := func() bool {
-				for _, terminal := range Terminals {
-					if terminal.Name == data.StepCompleteTime.Terminal.TerminalName {
-						return true
-					}
-				}
-				return false
-			}()
-			if !terminalExists {
-				var NewTerminal Models.Terminal
-				NewTerminal.Name = data.StepCompleteTime.Terminal.TerminalName
-				if err := Models.DB.Save(&NewTerminal).Error; err != nil {
-					log.Println(err.Error())
-					return err
-				}
-			}
-			var Locations []Models.Location
-			if err := Models.DB.Model(&Models.Location{}).Find(&Locations).Error; err != nil {
-				log.Println(err.Error())
-				return err
-			}
-			for _, dropOff := range data.StepCompleteTime.DropOffPoints {
-				dropOffExists := func() bool {
-					for _, location := range Locations {
-						if location.Name == dropOff.LocationName {
-							return true
-						}
-					}
-					return false
-				}()
-				if !dropOffExists {
-					var NewLocation Models.Location
-					NewLocation.Name = dropOff.LocationName
-					if err := Models.DB.Save(&NewLocation).Error; err != nil {
-						log.Println(err.Error())
-						return err
-					}
-				}
-			}
-			return c.JSON(fiber.Map{
-				"TripID":  data.ID,
-				"message": "Car Trip Created",
-			})
-		}
-	}
-	return c.JSON(fiber.Map{
-		"message": "Not Logged In.",
-	})
-}
+// 		// Calculate revenue based on mileage for each drop-off point
+// 		for _, dropOff := range trip.StepCompleteTime.DropOffPoints {
+// 			// Fetch distance from database or mapping service
+// 			distance, err := GetDistanceBetweenPoints(trip.StepCompleteTime.Terminal.TerminalName, dropOff.LocationName)
+// 			if err != nil {
+// 				return 0, err
+// 			}
 
-func EditCarTrip(c *fiber.Ctx) error {
-	Controllers.User(c)
-	if Controllers.CurrentUser.Id != 0 {
-		if Controllers.CurrentUser.Permission == 0 {
-			return c.Status(fiber.StatusForbidden).SendString("You do not have permission to access this page")
-		} else {
-			var data Models.TripStruct
-			if err := c.BodyParser(&data); err != nil {
-				return err
-			}
-			// Step Complete Time
+// 			// Calculate fee based on distance and capacity
+// 			pointRevenue := distance * trip.FeePerKilometer * float64(dropOff.Capacity)
+// 			totalRevenue += pointRevenue
 
-			// Format {"TruckLoad": ["", PickUpPoint], DropOffPoints: [[time, DropOffPoint]]}
-			//{"TruckLoad": ["", "Exxon Mobile Mostrod", true], "DropOffPoints": [["", "هاي ميكس بدر", true], ["", "هاي ميكس بدر", true]]}
+// 			// Store the distance for reference
+// 			dropOff.Distance = distance
+// 		}
 
-			startDate, err := AbstractFunctions.GetFormattedDate(data.Date)
-			if err != nil {
-				log.Println(err)
-				return c.JSON(err.Error())
-			}
-			data.StartTime = startDate + "%2000:00:00"
-			//insert, err := db.Query("INSERT INTO CarProgressBars (`CarProgressBarID`, `Date`, `start_time`, `end_time`, `Car No Plate`, `CarProgressIndex`, `Driver Name`, `StepCompleteTime`, `NoOfDropOffPoints`, `Compartments`, `PickUpLocation`, `Transporter`, `FeeRate`, `IsInTrip`) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", data.Date, startTime, "", data.CarNoPlate, 0, data.DriverName, StepCompleteTime, data.NoOfDropOffPoints, jsonCompartments, data.PickUpPoint, Transporter, feeRate, "true")
-			//if err != nil {
-			//	log.Println(err.Error())
-			//}
-			// fmt.Println(data)
-			car, err := UpdateCarStatusByID(data.CarID)
-			if err != nil {
-				log.Println(err.Error())
-				return err
-			}
-			data.CarNoPlate = car.CarNoPlate
-			data.TankCapacity = car.TankCapacity
-			data.Transporter = car.Transporter
-			driver, err := UpdateDriverStatusByID(data.DriverID)
-			if err != nil {
-				log.Println(err.Error())
-				return err
-			}
-			data.DriverName = driver.Name
-			if data.StepCompleteTimeDB, err = json.Marshal(data.StepCompleteTime); err != nil {
-				log.Println(err.Error())
-				return err
-			}
-			data.IsClosed = false
-			var trip Models.TripStruct
-			if err := Models.DB.Model(&Models.TripStruct{}).Where("id = ?", data.ID).Find(&trip).Error; err != nil {
-				log.Println(err.Error())
-				return err
-			}
-			trip.CarID = data.CarID
-			trip.DriverID = data.DriverID
-			trip.CarNoPlate = data.CarNoPlate
-			trip.DriverName = data.DriverName
-			trip.Transporter = data.Transporter
-			trip.TankCapacity = data.TankCapacity
-			trip.PickUpPoint = data.PickUpPoint
-			trip.ProgressIndex = data.ProgressIndex
-			trip.StepCompleteTime = data.StepCompleteTime
-			trip.StepCompleteTimeDB = data.StepCompleteTimeDB
-			trip.NoOfDropOffPoints = data.NoOfDropOffPoints
-			trip.Date = data.Date
-			trip.ReceiptNo = data.ReceiptNo
-			trip.Route.Mileage = 0
-			trip.Route.DriverFees = 0
-			trip.DriverFees = 0
-			trip.FeeRate = 0
-			trip.StartTime = data.StartTime
-			trip.EndTime = data.EndTime
-			trip.IsClosed = false
-			if err := Models.DB.Save(&trip).Error; err != nil {
-				log.Println(err.Error())
-				return err
-			}
-			return c.JSON(fiber.Map{
-				"message": "Car Trip Updated",
-			})
-		}
-	}
-	return c.JSON(fiber.Map{
-		"message": "Not Logged In.",
-	})
-}
+// 		// Update trip mileage with total calculated distance
+// 		var totalDistance float64 = 0
+// 		for _, dropOff := range trip.StepCompleteTime.DropOffPoints {
+// 			totalDistance += dropOff.Distance
+// 		}
+// 		trip.Mileage = totalDistance
+
+// 	case "Petrol Arrows":
+// 		// Flat-rate pricing
+// 		trip.DistanceBasedPricing = false
+
+// 		// Load fee maps from database
+// 		fees, err := GetFeeMapsByCompany(trip.Company)
+// 		if err != nil {
+// 			return 0, err
+// 		}
+// 		trip.FlatRateFees = fees
+
+// 		// Calculate revenue based on predefined fees for each drop-off point
+// 		for i, dropOff := range trip.StepCompleteTime.DropOffPoints {
+// 			fee, err := LookupFee(fees, trip.StepCompleteTime.Terminal.TerminalName, dropOff.LocationName)
+// 			if err != nil {
+// 				return 0, err
+// 			}
+
+// 			// Calculate point revenue based on flat fee and capacity
+// 			pointRevenue := fee * float64(dropOff.Capacity)
+// 			totalRevenue += pointRevenue
+
+// 			// Store the fee rate for reference
+// 			trip.StepCompleteTime.DropOffPoints[i].FeeRate = fee
+// 		}
+
+// 		// Store flat rate fees as JSON
+// 		feesJSON, err := json.Marshal(trip.FlatRateFees)
+// 		if err != nil {
+// 			return 0, err
+// 		}
+// 		trip.FlatRateFeesDB = feesJSON
+
+// 	default:
+// 		return 0, fmt.Errorf("unsupported company type: %s", trip.Company)
+// 	}
+
+// 	return totalRevenue, nil
+// }
+
+// Helper function to get distance between terminal and location
+
+// Helper function to get fee maps by company
+
+// Updated CreateCarTrip function
+
+// Updated EditCarTrip function
 
 func GetVehicleMapPoints(c *fiber.Ctx) error {
 	Controllers.User(c)
@@ -1874,6 +1530,7 @@ func EditServiceEvent(c *fiber.Ctx) error {
 			}
 			serviceEvent.CarID = input.CarID
 			serviceEvent.CarNoPlate = input.CarNoPlate
+			serviceEvent.DriverName = input.DriverName
 			serviceEvent.ServiceType = input.ServiceType
 			serviceEvent.DateOfService = input.DateOfService
 			serviceEvent.OdometerReading = input.OdometerReading
@@ -1913,7 +1570,8 @@ func DeleteServiceEvent(c *fiber.Ctx) error {
 				log.Println(err.Error())
 				return err
 			}
-			if err := Models.DB.Delete(&Models.Service{}, serviceEvent).Error; err != nil {
+			_, err := serviceEvent.Delete()
+			if err != nil {
 				log.Println(err.Error())
 				return err
 			}
@@ -1946,6 +1604,7 @@ func GetAllServiceEvents(c *fiber.Ctx) error {
 					return err
 				}
 			}
+			fmt.Println(serviceEvents)
 			return c.JSON(fiber.Map{
 				"ServiceEvents": serviceEvents,
 			})
@@ -2066,3 +1725,81 @@ func GetPhotoAlbum(c *fiber.Ctx) error {
 	}
 	return c.JSON("Failed")
 }
+
+// func GetCarExpenses(c *fiber.Ctx) error {
+
+// 	var input struct {
+// 		CarID    uint   `json:"car_id"`
+// 		DateFrom string `json:"date_from"`
+// 		DateTo   string `json:"date_to"`
+// 	}
+
+// 	if err := c.BodyParser(&input); err != nil {
+// 		log.Println(err.Error())
+// 		return err
+// 	}
+
+// 	var TotalExpenses float64
+// 	var TotalRevenue float64
+// 	var FuelEvents []Models.FuelEvent
+// 	var OilChanges []Models.OilChange
+// 	var ServiceEvents []Models.Service
+// 	var Trips []Models.TripStruct
+
+// 	DateFrom, err := AbstractFunctions.ParseDate(input.DateFrom)
+
+// 	if err != nil {
+// 		log.Println(err.Error())
+// 		return err
+// 	}
+
+// 	DateTo, err := AbstractFunctions.ParseDate(input.DateTo)
+// 	if err != nil {
+// 		log.Println(err.Error())
+// 		return err
+// 	}
+
+// 	if err := Models.DB.Model(&Models.FuelEvent{}).Where("car_id = ?", input.CarID).Where("date BETWEEN ? AND ?", DateFrom, DateTo).Find(&FuelEvents).Error; err != nil {
+// 		log.Println(err.Error())
+// 		return err
+// 	}
+
+// 	if err := Models.DB.Model(&Models.OilChange{}).Where("car_id = ?", input.CarID).Where("date BETWEEN ? AND ?", DateFrom, DateTo).Find(&OilChanges).Error; err != nil {
+// 		log.Println(err.Error())
+// 		return err
+// 	}
+
+// 	if err := Models.DB.Model(&Models.Service{}).Where("car_id = ?", input.CarID).Where("date_of_service BETWEEN ? AND ?", DateFrom, DateTo).Find(&ServiceEvents).Error; err != nil {
+// 		log.Println(err.Error())
+// 		return err
+// 	}
+
+// 	if err := Models.DB.Model(&Models.TripStruct{}).Where("car_id = ?", input.CarID).Where("date BETWEEN ? AND ?", DateFrom, DateTo).Find(&Trips).Error; err != nil {
+// 		log.Println(err.Error())
+// 		return err
+// 	}
+
+// 	for _, fuelEvent := range FuelEvents {
+// 		TotalExpenses += fuelEvent.Price
+// 	}
+
+// 	for _, oilChange := range OilChanges {
+// 		TotalExpenses += oilChange.Cost
+// 	}
+
+// 	for _, serviceEvent := range ServiceEvents {
+// 		TotalExpenses += serviceEvent.Cost
+// 	}
+
+// 	for _, trip := range Trips {
+// 		TotalRevenue += trip.Revenue
+// 	}
+
+// 	file := GenerateExpensesExcelFile(TotalCarExpenses{TotalExpenses: TotalExpenses, TotalRevenue: TotalRevenue, FuelEvents: FuelEvents, ServiceEvents: ServiceEvents, OilChanges: OilChanges, Trips: Trips})
+// 	var filename string = fmt.Sprintf("./Expenses %v %s:%s.xlsx", input.CarID, input.DateFrom, input.DateTo)
+// 	err = file.SaveAs(filename)
+// 	if err != nil {
+// 		fmt.Println(err)
+// 	}
+// 	return c.SendFile(filename, true)
+// }

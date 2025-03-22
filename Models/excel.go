@@ -16,7 +16,6 @@ type ExcelTrip struct {
 	Mazoot     float64 `json:"Mazoot"`
 	Total      float64 `json:"Total"`
 	DriverName string  `json:"DriverName"`
-	FeeRate    float64 `json:"FeeRate"`
+	Revenue    float64 `json:"Revenue"`
 	Mileage    float64 `json:"Mileage"`
-	TotalFees  float64 `json:"TotalFees"`
 }

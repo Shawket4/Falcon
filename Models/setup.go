@@ -8,7 +8,6 @@ import (
 	"strconv"
 
 	"github.com/360EntSecGroup-Skylar/excelize"
-	"golang.org/x/crypto/bcrypt"
 
 	// "github.com/joho/godotenv"
 
@@ -34,32 +33,86 @@ func Connect() {
 	// connection, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	connection, err := gorm.Open(sqlite.Open("database.db"))
 	DB = connection
-	connection.AutoMigrate(&User{}, &FuelEvent{}, &Driver{}, &Service{}, Car{}, &TripStruct{}, &RoutePoint{}, &FinalStructResponse{}, &TripSummary{}, &Location{}, &Terminal{})
+	connection.AutoMigrate(&Truck{}, &Tire{}, &TirePosition{})
+	connection.AutoMigrate(&User{}, &FuelEvent{}, &Driver{}, &Service{}, &TripStruct{}, &Location{}, &Terminal{}, &OilChange{})
 	connection.AutoMigrate(&Expense{}, &Loan{})
-	var admin User
-	admin.Email = "Apex"
-	passwordByte, _ := bcrypt.GenerateFromPassword([]byte("123456"), bcrypt.DefaultCost)
-	admin.Password = passwordByte
-	admin.Permission = 2
-	admin.Name = "Apex"
-	admin.IsApproved = 1
+	connection.AutoMigrate(&LandMark{})
+	connection.AutoMigrate(&FeeMapping{})
+	// var admin User
+	// admin.Email = "Apex"
+	// passwordByte, _ := bcrypt.GenerateFromPassword([]byte("123456"), bcrypt.DefaultCost)
+	// admin.Password = passwordByte
+	// admin.Permission = 2
+	// admin.Name = "Apex"
+	// admin.IsApproved = 1
 	if err != nil {
 		log.Println(err)
 	}
-	connection.Save(&admin)
-	var location Location
-	location.Name = "جحدم"
-	connection.Save(&location)
-	var terminal Terminal
-	terminal.Name = "قنا"
-	connection.Save(&terminal)
-	DB = connection
+	// connection.Save(&admin)
+	// var location Location
+	// location.Name = "جحدم"
+	// connection.Save(&location)
+	// var terminal Terminal
+	// terminal.Name = "قنا"
+	// connection.Save(&terminal)
+	// DB = connection
 	// if isAdmin {
 	// 	connection.AutoMigrate(&AdminUser{})
 	// } else {
 
 	// }
-	SetupCars()
+	// SetupCars()
+}
+
+func CreateDefaultPositions(db *gorm.DB, truckID uint) error {
+	positions := []TirePosition{
+		// Steering positions (2)
+		{TruckID: truckID, PositionType: "steering", PositionIndex: 1, Side: "left"},
+		{TruckID: truckID, PositionType: "steering", PositionIndex: 2, Side: "right"},
+
+		// Head axle 1 positions (4) - Properly ordered
+		{TruckID: truckID, PositionType: "head_axle_1", PositionIndex: 1, Side: "left"},        // Outer Left
+		{TruckID: truckID, PositionType: "head_axle_1", PositionIndex: 2, Side: "inner_left"},  // Inner Left
+		{TruckID: truckID, PositionType: "head_axle_1", PositionIndex: 3, Side: "inner_right"}, // Inner Right
+		{TruckID: truckID, PositionType: "head_axle_1", PositionIndex: 4, Side: "right"},       // Outer Right
+
+		// Head axle 2 positions (4) - Properly ordered
+		{TruckID: truckID, PositionType: "head_axle_2", PositionIndex: 1, Side: "left"},        // Outer Left
+		{TruckID: truckID, PositionType: "head_axle_2", PositionIndex: 2, Side: "inner_left"},  // Inner Left
+		{TruckID: truckID, PositionType: "head_axle_2", PositionIndex: 3, Side: "inner_right"}, // Inner Right
+		{TruckID: truckID, PositionType: "head_axle_2", PositionIndex: 4, Side: "right"},       // Outer Right
+
+		// Trailer axle 1 positions - Properly ordered
+		{TruckID: truckID, PositionType: "trailer_axle_1", PositionIndex: 1, Side: "left"},        // Outer Left
+		{TruckID: truckID, PositionType: "trailer_axle_1", PositionIndex: 2, Side: "inner_left"},  // Inner Left
+		{TruckID: truckID, PositionType: "trailer_axle_1", PositionIndex: 3, Side: "inner_right"}, // Inner Right
+		{TruckID: truckID, PositionType: "trailer_axle_1", PositionIndex: 4, Side: "right"},       // Outer Right
+
+		// Trailer axle 2 positions - Properly ordered
+		{TruckID: truckID, PositionType: "trailer_axle_2", PositionIndex: 1, Side: "left"},        // Outer Left
+		{TruckID: truckID, PositionType: "trailer_axle_2", PositionIndex: 2, Side: "inner_left"},  // Inner Left
+		{TruckID: truckID, PositionType: "trailer_axle_2", PositionIndex: 3, Side: "inner_right"}, // Inner Right
+		{TruckID: truckID, PositionType: "trailer_axle_2", PositionIndex: 4, Side: "right"},       // Outer Right
+
+		// Trailer axle 3 positions - Properly ordered
+		{TruckID: truckID, PositionType: "trailer_axle_3", PositionIndex: 1, Side: "left"},        // Outer Left
+		{TruckID: truckID, PositionType: "trailer_axle_3", PositionIndex: 2, Side: "inner_left"},  // Inner Left
+		{TruckID: truckID, PositionType: "trailer_axle_3", PositionIndex: 3, Side: "inner_right"}, // Inner Right
+		{TruckID: truckID, PositionType: "trailer_axle_3", PositionIndex: 4, Side: "right"},       // Outer Right
+
+		// Trailer axle 4 positions - Properly ordered
+		{TruckID: truckID, PositionType: "trailer_axle_4", PositionIndex: 1, Side: "left"},        // Outer Left
+		{TruckID: truckID, PositionType: "trailer_axle_4", PositionIndex: 2, Side: "inner_left"},  // Inner Left
+		{TruckID: truckID, PositionType: "trailer_axle_4", PositionIndex: 3, Side: "inner_right"}, // Inner Right
+		{TruckID: truckID, PositionType: "trailer_axle_4", PositionIndex: 4, Side: "right"},       // Outer Right
+
+		// Spare positions (2)
+		{TruckID: truckID, PositionType: "spare", PositionIndex: 1, Side: "none"},
+		{TruckID: truckID, PositionType: "spare", PositionIndex: 2, Side: "none"},
+	}
+
+	result := db.Create(&positions)
+	return result.Error
 }
 
 func SetupCars() {
@@ -117,7 +170,7 @@ func SetupCars() {
 		}
 		Cars = append(Cars, car)
 	}
-	if err := DB.Save(&Cars).Error; err != nil {
+	if err := DB.Create(&Cars).Error; err != nil {
 		panic(err)
 	}
 }

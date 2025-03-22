@@ -1,102 +1,62 @@
 package Models
 
 import (
-	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
-type RoutePoint struct {
-	gorm.Model
-	FinalStructResponseID uint
-	Latitude              string `json:"latitude"`
-	Longitude             string `json:"longitude"`
-	TimeStamp             string `json:"time_stamp"`
-}
-
-type RouteResponse struct {
-	History []struct {
-		Point []struct {
-			Latitude  string `yaml:"a"`
-			Longitude string `yaml:"o"`
-		} `yaml:"p"`
-		DateTime string `yaml:"d"`
-	} `yaml:"history"`
-}
-
-type FinalStructResponse struct {
-	gorm.Model
-	TripStructID uint
-	Points       []RoutePoint
-	TripSummary  TripSummary `json:"trip_summary"`
-	Mileage      float64     `json:"mileage"`
-	DriverFees   float64     `json:"driver_fees"`
-}
-
-type TripSummary struct {
-	gorm.Model
-	FinalStructResponseID uint
-	TotalMileage          string `yaml:"TotalMileage"`
-	TotalActiveTime       string `yaml:"TotalActiveTime"`
-	TotalPassiveTime      string `yaml:"TotalPassiveTime"`
-	TotalIdleTime         string `yaml:"TotalIdleTime"`
-	NumberofStops         string `yaml:"NumberofStops"`
-	TotalDisConnectedTime string `yaml:"TotalDisConnectedTime"`
-	Sensor1               string `yaml:"Sensor1"`
-	Sensor2               string `yaml:"Sensor2"`
-}
-
-type Expense struct {
-	gorm.Model
-	TripStructID uint
-	Cost         float64 `json:"cost"`
-	Description  string  `json:"description"`
-	Date         string  `json:"date"`
-}
-
-type Loan struct {
-	gorm.Model
-	TripStructID uint
-	Amount       float64 `json:"amount"`
-	Method       string  `json:"method"`
-	Date         string  `json:"date"`
-}
-
+// TripStruct represents a trip record with additional fields for terminal and drop-off points
 type TripStruct struct {
 	gorm.Model
-	CarID            uint   `json:"car_id"`
-	DriverID         uint   `json:"driver_id"`
-	CarNoPlate       string `json:"car_no_plate"`
-	DriverName       string `json:"driver_name"`
-	Transporter      string `json:"transporter"`
-	TankCapacity     int    `json:"tank_capacity"`
-	PickUpPoint      string `json:"pick_up_point"`
-	ProgressIndex    int    `json:"progress_index"`
-	StepCompleteTime struct {
-		//{"TruckLoad": ["", "Exxon Mobile Mostrod", true], "DropOffPoints": [["", "هاي ميكس بدر", true], ["", "هاي ميكس بدر", true]]}
-		Terminal struct {
-			TimeStamp    string `json:"time_stamp"`
-			TerminalName string `json:"terminal_name"`
-			Status       bool   `json:"status"`
-		} `json:"terminal"`
-		DropOffPoints []struct {
-			TimeStamp    string `json:"time_stamp"`
-			LocationName string `json:"location_name"`
-			Capacity     int    `json:"capacity"`
-			GasType      string `json:"gas_type"`
-			Status       bool   `json:"status"`
-		} `json:"drop_off_points"`
-	} `gorm:"-" json:"step_complete_time"`
-	StepCompleteTimeDB datatypes.JSON      `json:"step_complete_time_db"`
-	NoOfDropOffPoints  int                 `json:"no_of_drop_off_points"`
-	Date               string              `json:"date"`
-	FeeRate            float64             `json:"fee_rate"`
-	StartTime          string              `json:"start_time"`
-	EndTime            string              `json:"end_time"`
-	Mileage            float64             `json:"mileage"`
-	DriverFees         float64             `json:"driver_fees"`
-	IsClosed           bool                `json:"is_closed"`
-	Route              FinalStructResponse `json:"route"`
-	Expenses           []Expense
-	Loans              []Loan
-	ReceiptNo          string `json:"receipt_no"`
+	CarID        uint   `json:"car_id"`
+	DriverID     uint   `json:"driver_id"`
+	CarNoPlate   string `json:"car_no_plate"`
+	DriverName   string `json:"driver_name"`
+	Transporter  string `json:"transporter"`
+	TankCapacity int    `json:"tank_capacity"`
+
+	// Company and related fields for dropdown selection
+	Company      string `json:"company"`
+	Terminal     string `json:"terminal"`       // Added Terminal field (was PickUpPoint)
+	DropOffPoint string `json:"drop_off_point"` // Added DropOffPoint field
+
+	// Location details
+	LocationName string `json:"location_name"`
+	Capacity     int    `json:"capacity"`
+	GasType      string `json:"gas_type"`
+
+	// Trip details
+	Date      string  `json:"date"`
+	Revenue   float64 `json:"revenue"`
+	Mileage   float64 `json:"mileage"`
+	ReceiptNo string  `json:"receipt_no"`
+
+	// Calculated fields
+	Distance float64 `json:"distance" gorm:"-"` // Distance from fee mapping, not stored
+	Fee      float64 `json:"fee" gorm:"-"`      // Fee from fee mapping, not stored
+}
+
+// TableName specifies the table name for the Trip model
+func (TripStruct) TableName() string {
+	return "trips"
+}
+
+// FeeMapping represents a mapping between terminals, drop-off points, distance, and fee
+type FeeMapping struct {
+	gorm.Model
+	Company      string  `json:"company"`        // Company associated with this mapping
+	Terminal     string  `json:"terminal"`       // Pickup terminal
+	DropOffPoint string  `json:"drop_off_point"` // Drop-off location
+	Distance     float64 `json:"distance"`       // Distance in kilometers
+	Fee          float64 `json:"fee"`            // Associated fee for this mapping
+}
+
+// Ensure uniqueness of company, terminal, and drop-off point combination
+func (FeeMapping) TableName() string {
+	return "fee_mappings"
+}
+
+// Setup indexes for FeeMapping
+func SetupFeeMappingIndexes(db *gorm.DB) error {
+	// Create unique index for company, terminal, and drop-off point
+	return db.Exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_company_terminal_dropoff ON fee_mappings (company, terminal, drop_off_point) WHERE deleted_at IS NULL").Error
 }

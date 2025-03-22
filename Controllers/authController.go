@@ -326,7 +326,7 @@ func UpdateDriver(c *fiber.Ctx) error {
 }
 
 func RegisterUser(c *fiber.Ctx) error {
-	User(c)
+	// User(c)
 	var data map[string]string
 
 	if err := c.BodyParser(&data); err != nil {

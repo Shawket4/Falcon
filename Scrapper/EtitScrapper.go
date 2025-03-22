@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	// "time"
 
@@ -291,6 +292,10 @@ func GetVehicleData() {
 		fmt.Println(isLoaded)
 		isLoaded = true
 	}
+	time.Sleep(time.Second * 20)
+	fmt.Println(VehicleStatusList)
+	// CheckMileageSinceOilChangeWorker(GlobalClient)
+	// UpdateVehiclePlace(VehicleStatusList)
 	//AllCoordinates := app.GetVehicleHistoryData(VehicleStatusList[0].ID, client)
 	//fmt.Println(AllCoordinates[0:6])
 }

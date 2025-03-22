@@ -1,6 +1,10 @@
 package Models
 
+import "gorm.io/gorm"
+
 type LandMark struct {
-	Name  string
-	Point RoutePoint
+	gorm.Model
+	Name      string
+	Latitude  string `json:"latitude"`
+	Longitude string `json:"longitude"`
 }
